@@ -94,9 +94,6 @@ class State:
     def player_can_charged(self, who: int) -> bool:
         return self._get_player_flag(who, ll.ATTR_STATE_PLAYER_CAN_CHARGED_0)
 
-    def player_can_plunging(self, who: int) -> bool:
-        return self._get_player_flag(who, ll.ATTR_STATE_PLAYER_CAN_PLUNGING_0)
-
     def player_legend_used(self, who: int) -> bool:
         return self._get_player_flag(who, ll.ATTR_STATE_PLAYER_LEGEND_USED_0)
 
