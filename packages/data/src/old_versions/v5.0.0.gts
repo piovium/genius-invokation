@@ -48,7 +48,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Electro, 1);
-  if (:skillInfo.charged) {
+  if (:isUsingChargedSkill(:skillInfo)) {
     :characterStatus(Conductive, $.opp.active);
   }
 };

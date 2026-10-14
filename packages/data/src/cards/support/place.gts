@@ -313,7 +313,7 @@ define card {
   cost DiceType.Aligned, 2;
   support place {
     on deductVoidDiceSkill {
-      when :( :e.isChargedAttack() );
+      when :( :isUsingChargedSkill(:e.action.skill) );
       usage 4;
       :e.deductVoidCost(1);
     };

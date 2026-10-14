@@ -46,6 +46,7 @@ import {
   type SkillContextOptions,
   type SkillDescription,
   DisposeEventArg,
+  type SkillDefinition,
 } from "../base/skill";
 import {
   type CharacterState as CharacterStateO,
@@ -56,6 +57,7 @@ import {
   type PhaseType,
   type PlayerState,
   stringifyState,
+  PlungingStatus,
 } from "../base/state";
 import {
   getEntityArea,
@@ -111,7 +113,11 @@ import type {
   RegularTypingInfo,
   TypeAreaTypeMap,
 } from "../utils";
-import { computeConvertDice, type CreateEntityOptions } from "../utils";
+import {
+  computeConvertDice,
+  isChargedPlunging,
+  type CreateEntityOptions,
+} from "../utils";
 import type { LunarReaction } from "@gi-tcg/typings";
 import {
   $,
@@ -220,6 +226,11 @@ type QueryState<Meta extends ContextMetaBase, Q extends IQuery> = RxEntityState<
   Meta,
   InferResult<Q>
 >;
+
+interface PlainSkillInfo {
+  readonly definition: SkillDefinition;
+  readonly caller: PlainAnyState;
+}
 
 /**
  * GTS 中，用于描述技能的上下文对象。
@@ -757,6 +768,29 @@ export class SkillContext<Meta extends ContextMetaBase> {
             ...this.getRawPlayer("opp").phaseReactionLog,
           ];
     return reactions.some((r) => r instanceof ReactionEventArg && filter(r));
+  }
+
+  isUsingChargedSkill(skillInfo: PlainSkillInfo) {
+    const { who } = this.get(skillInfo.caller);
+    const player = this.rawState.players[who];
+    return isChargedPlunging(skillInfo.definition, player).charged;
+  }
+  isUsedChargedSkill(skillInfo: PlainSkillInfo) {
+    return this.isUsingChargedSkill(skillInfo);
+  }
+  isUsingPlungingSkill(skillInfo: PlainSkillInfo) {
+    const { who } = this.get(skillInfo.caller);
+    const player = this.rawState.players[who];
+    return isChargedPlunging(skillInfo.definition, player).plunging;
+  }
+  isUsedPlungingSkill(skillInfo: PlainSkillInfo) {
+    const { who } = this.get(skillInfo.caller);
+    const player = this.rawState.players[who];
+    return isChargedPlunging(
+      skillInfo.definition,
+      player,
+      PlungingStatus.CONSUMED,
+    ).plunging;
   }
 
   /**

@@ -1000,12 +1000,9 @@ export class Game {
     // Skills
     const skillDisabled = isSkillDisabled(activeCh);
     for (const { caller, skill } of initiativeSkillsOfPlayer(player)) {
-      const { charged, plunging } = isChargedPlunging(skill, player);
       const skillInfo = defineSkillInfo({
         caller,
         definition: skill,
-        charged,
-        plunging,
       });
       const actionInfoBase = {
         type: "useSkill" as const,

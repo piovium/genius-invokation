@@ -182,7 +182,7 @@ define card {
       :useSkill(SuannisGildedDance);
     };
     on increaseSkillDamage {
-      when :( :e.viaPlungingAttack() );
+      when :( :isUsingPlungingSkill(:e.via) );
       :e.increaseDamage(1);
     };
     on useSkill {

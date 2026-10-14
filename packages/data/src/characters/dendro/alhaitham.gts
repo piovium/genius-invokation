@@ -37,7 +37,7 @@ define status {
     :damage(DamageType.Dendro, 1);
   };
   on useSkill {
-    when :( :e.isChargedAttack() );
+    when :( :isUsedChargedSkill(:e.skill) );
     :variables.duration += 1;
   };
 };

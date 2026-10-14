@@ -180,7 +180,7 @@ define card {
       :switchActive(target);
     };
     on increaseSkillDamage {
-      when :( :e.viaPlungingAttack() );
+      when :( :isUsingPlungingSkill(:e.via) );
       listenTo samePlayer;
       usage perRound, 2;
       :e.increaseDamage(1);

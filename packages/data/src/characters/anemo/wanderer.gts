@@ -52,7 +52,7 @@ define status {
     when :( :e.viaSkillType("normal") );
     usage 2;
     :e.increaseDamage(2);
-    if (:self.master.hasEquipment(GalesOfReverie) && :e.via.charged) {
+    if (:self.master.hasEquipment(GalesOfReverie) && :isUsingChargedSkill(:e.via)) {
       :characterStatus(Descent, :self.master);
     }
   };

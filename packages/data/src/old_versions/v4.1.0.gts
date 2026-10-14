@@ -623,7 +623,7 @@ define status {
   id 113081 as private ScarletSeal;
   until "v4.1.0";
   on increaseSkillDamage {
-    when :( :e.viaChargedAttack() );
+    when :( :isUsingChargedSkill(:e.via) );
     usage 1;
     :e.increaseDamage(2);
   };
@@ -649,7 +649,7 @@ define card {
       :useSkill(SealOfApproval);
     };
     on increaseSkillDamage {
-      when :( :e.viaChargedAttack() && :e.target.health <= 6 );
+      when :( :isUsingChargedSkill(:e.via) && :e.target.health <= 6 );
       :e.increaseDamage(1);
     };
   };

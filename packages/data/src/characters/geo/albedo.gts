@@ -122,12 +122,12 @@ define card {
       :useSkill(AbiogenesisSolarIsotoma);
     };
     on deductVoidDiceSkill {
-      when :( :query($.my.summon.def(SolarIsotoma)) && :e.isPlungingAttack() );
+      when :( :query($.my.summon.def(SolarIsotoma)) && :isUsingPlungingSkill(:e.action.skill) );
       listenTo samePlayer;
       :e.deductVoidCost(1);
     };
     on increaseSkillDamage {
-      when :( :query($.my.summon.def(SolarIsotoma)) && :e.viaPlungingAttack() );
+      when :( :query($.my.summon.def(SolarIsotoma)) && :isUsingPlungingSkill(:e.via) );
       listenTo samePlayer;
       :e.increaseDamage(1);
     };
@@ -147,7 +147,7 @@ define combatStatus {
     usage 2 { append; };
     when :(
       // 说是还会再检查一下出战
-      :e.isPlungingAttack() && :e.skillCaller.cast<"character">().isActive()
+      :isUsedPlungingSkill(:e.skill) && :e.skillCaller.cast<"character">().isActive()
     );
     :damage(DamageType.Piercing, 1, $.opp.standby);
   };

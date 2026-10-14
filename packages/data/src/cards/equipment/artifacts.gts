@@ -1627,12 +1627,12 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on increaseSkillDamage {
-      when :( :e.viaChargedAttack() );
+      when :( :isUsingChargedSkill(:e.via) );
       usage perRound, 1;
       :e.increaseDamage(1);
     };
     on useSkill {
-      when :( :e.isPlungingAttack() );
+      when :( :isUsedPlungingSkill(:e.skill) );
       usage perRound, 1;
       :combatStatus(EfficientSwitch);
     };

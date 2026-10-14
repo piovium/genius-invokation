@@ -26,11 +26,11 @@ define status {
   id 113062 as ExplosiveSpark01;
   conflictWith 113061;
   on deductElementDiceSkill {
-    when :( :e.isChargedAttack() && :e.canDeductCostOfType(DiceType.Pyro) );
+    when :( :isUsingChargedSkill(:e.action.skill) && :e.canDeductCostOfType(DiceType.Pyro) );
     :e.deductCost(DiceType.Pyro, 1);
   };
   on increaseSkillDamage {
-    when :( :e.viaChargedAttack() );
+    when :( :isUsingChargedSkill(:e.via) );
     usage 2;
     :e.increaseDamage(1);
   };
@@ -47,11 +47,11 @@ define status {
   id 113061 as ExplosiveSpark;
   conflictWith 113062;
   on deductElementDiceSkill {
-    when :( :e.isChargedAttack() && :e.canDeductCostOfType(DiceType.Pyro) );
+    when :( :isUsingChargedSkill(:e.action.skill) && :e.canDeductCostOfType(DiceType.Pyro) );
     :e.deductCost(DiceType.Pyro, 1);
   };
   on increaseSkillDamage {
-    when :( :e.viaChargedAttack() );
+    when :( :isUsingChargedSkill(:e.via) );
     usage 1;
     :e.increaseDamage(1);
   };
@@ -184,7 +184,7 @@ define card {
       }
     };
     on useSkill {
-      when :( :e.isChargedAttack() );
+      when :( :isUsedChargedSkill(:e.skill) );
       usage perRound, 2;
       :damage(DamageType.Pyro, 2, $.macros.oppActivePrioritized);
     };

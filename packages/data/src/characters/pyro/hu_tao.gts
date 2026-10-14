@@ -48,7 +48,7 @@ define status {
   on increaseSkillDamage {
     when :( :e.type === DamageType.Pyro );
     :e.increaseDamage(1);
-    if (:e.viaChargedAttack()) {
+    if (:isUsingChargedSkill(:e.via)) {
       :characterStatus(BloodBlossom, :e.target);
     }
   };

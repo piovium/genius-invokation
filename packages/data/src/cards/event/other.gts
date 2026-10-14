@@ -1177,7 +1177,7 @@ define status {
   once increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-    if (:e.viaChargedAttack()) {
+    if (:isUsingChargedSkill(:e.via)) {
       :e.increaseDamage(1);
     }
   };
@@ -2828,7 +2828,7 @@ define card {
 define status {
   id 301040 as ReforgeTheHolyBladeInEffect;
   on useSkill {
-    when :( :e.isChargedAttack() );
+    when :( :isUsedChargedSkill(:e.skill) );
     const element = :self.master.element() as number as DamageType;
     :damage(element, 5);
   };

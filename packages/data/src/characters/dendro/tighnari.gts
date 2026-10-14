@@ -43,11 +43,11 @@ define summon {
 define status {
   id 117021 as VijnanaSuffusion;
   on modifySkillDamageType {
-    when :( :e.viaChargedAttack() && :e.type === DamageType.Physical );
+    when :( :isUsingChargedSkill(:e.via) && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Dendro);
   };
   on useSkill {
-    when :( :e.isChargedAttack() );
+    when :( :isUsedChargedSkill(:e.skill) );
     usage 2;
     :summon(ClusterbloomArrow);
   };
@@ -136,7 +136,7 @@ define card {
     };
     on deductVoidDiceSkill {
       when :(
-        :self.master.hasStatus(VijnanaSuffusion) && :e.isChargedAttack()
+        :self.master.hasStatus(VijnanaSuffusion) && :isUsingChargedSkill(:e.action.skill)
       );
       :e.deductVoidCost(1);
     };

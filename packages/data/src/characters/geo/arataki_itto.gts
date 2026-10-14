@@ -25,7 +25,7 @@ import { $, DamageType, DiceType, type SummonHandle } from "@gi-tcg/core/data";
 define status {
   id 116054 as SuperlativeSuperstrength;
   on increaseSkillDamage {
-    when :( :e.viaChargedAttack() );
+    when :( :isUsingChargedSkill(:e.via) );
     usage 1 {
       append 3;
     };
@@ -39,7 +39,7 @@ define status {
     }
   };
   on deductVoidDiceSkill {
-    when :( :e.isChargedAttack() && :variables.usage >= 2 );
+    when :( :isUsingChargedSkill(:e.action.skill) && :variables.usage >= 2 );
     :e.deductVoidCost(1);
   };
 };

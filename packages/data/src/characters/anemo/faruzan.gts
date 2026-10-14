@@ -86,11 +86,11 @@ define summon {
 define status {
   id 115091 as ManifestGale;
   on deductVoidDiceSkill {
-    when :( :e.isChargedAttack() );
+    when :( :isUsingChargedSkill(:e.action.skill) );
     :e.deductVoidCost(1);
   };
   on modifySkillDamageType {
-    when :( :e.viaChargedAttack() );
+    when :( :isUsingChargedSkill(:e.via) );
     usage 1;
     if (:e.type === DamageType.Physical) {
       :e.changeDamageType(DamageType.Anemo);

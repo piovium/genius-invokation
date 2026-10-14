@@ -105,7 +105,7 @@ define skill {
   skillType normal;
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
-  if (:skillInfo.plunging) {
+  if (:isUsingPlungingSkill(:skillInfo)) {
     :damage(DamageType.Electro, 2);
     :gainNightsoul(:self, 1);
   } else {

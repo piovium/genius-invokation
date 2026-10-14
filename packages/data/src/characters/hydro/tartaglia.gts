@@ -98,7 +98,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-  if (:skillInfo.charged) {
+  if (:isUsingChargedSkill(:skillInfo)) {
     :characterStatus(Riptide, $.opp.active);
   }
 };

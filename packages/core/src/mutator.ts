@@ -702,8 +702,6 @@ export class StateMutator {
             caller: opt.via.caller,
             definition: reactionDescription,
             requestBy: null,
-            charged: false,
-            plunging: false,
             prepared: false,
             environment: opt.via.environment,
             finalizeMode: "simple",

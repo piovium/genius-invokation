@@ -176,7 +176,7 @@ define card {
       :e.increaseDamage(1);
     };
     on deductVoidDiceSkill {
-      when :( :e.isChargedAttack() );
+      when :( :isUsingChargedSkill(:e.action.skill) );
       usage perRound, 2;
       :e.deductVoidCost(1);
     };

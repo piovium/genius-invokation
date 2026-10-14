@@ -183,11 +183,11 @@ define status {
   until "v4.7.0";
   conflictWith 115053, 115054, 115055, 115056;
   on modifySkillDamageType {
-    when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
+    when :( :isUsingPlungingSkill(:e.via) && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Anemo);
   };
   on increaseSkillDamage {
-    when :( :e.viaPlungingAttack() );
+    when :( :isUsingPlungingSkill(:e.via) );
     :e.increaseDamage(1);
   };
   on useSkill {
@@ -208,11 +208,11 @@ define status {
   until "v4.7.0";
   conflictWith 115051, 115054, 115055, 115056;
   on modifySkillDamageType {
-    when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
+    when :( :isUsingPlungingSkill(:e.via) && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Cryo);
   };
   on increaseSkillDamage {
-    when :( :e.viaPlungingAttack() );
+    when :( :isUsingPlungingSkill(:e.via) );
     :e.increaseDamage(1);
   };
   on useSkill {
@@ -233,11 +233,11 @@ define status {
   until "v4.7.0";
   conflictWith 115053, 115051, 115055, 115056;
   on modifySkillDamageType {
-    when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
+    when :( :isUsingPlungingSkill(:e.via) && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Hydro);
   };
   on increaseSkillDamage {
-    when :( :e.viaPlungingAttack() );
+    when :( :isUsingPlungingSkill(:e.via) );
     :e.increaseDamage(1);
   };
   on useSkill {
@@ -258,11 +258,11 @@ define status {
   until "v4.7.0";
   conflictWith 115053, 115054, 115051, 115056;
   on modifySkillDamageType {
-    when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
+    when :( :isUsingPlungingSkill(:e.via) && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Pyro);
   };
   on increaseSkillDamage {
-    when :( :e.viaPlungingAttack() );
+    when :( :isUsingPlungingSkill(:e.via) );
     :e.increaseDamage(1);
   };
   on useSkill {
@@ -283,11 +283,11 @@ define status {
   until "v4.7.0";
   conflictWith 115053, 115054, 115055, 115051;
   on modifySkillDamageType {
-    when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
+    when :( :isUsingPlungingSkill(:e.via) && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Electro);
   };
   on increaseSkillDamage {
-    when :( :e.viaPlungingAttack() );
+    when :( :isUsingPlungingSkill(:e.via) );
     :e.increaseDamage(1);
   };
   on useSkill {
@@ -366,7 +366,7 @@ define summon {
     :damage(DamageType.Geo, 1);
   };
   on deductVoidDiceSkill {
-    when :( :e.isPlungingAttack() );
+    when :( :isUsingPlungingSkill(:e.action.skill) );
     usage perRound, 1;
     :e.deductVoidCost(1);
   };
@@ -390,7 +390,7 @@ define card {
       :useSkill(AbiogenesisSolarIsotoma);
     };
     on increaseSkillDamage {
-      when :( :query($.my.summon.def(SolarIsotoma)) && :e.viaPlungingAttack() );
+      when :( :query($.my.summon.def(SolarIsotoma)) && :isUsingPlungingSkill(:e.via) );
       listenTo samePlayer;
       :e.increaseDamage(1);
     };

@@ -25,7 +25,7 @@ define card {
     };
     on deductVoidDiceSkill {
       when :(
-        :self.master.hasStatus(VijnanaSuffusion) && :e.isChargedAttack()
+        :self.master.hasStatus(VijnanaSuffusion) && :isUsingChargedSkill(:e.action.skill)
       );
       :e.deductVoidCost(1);
     };

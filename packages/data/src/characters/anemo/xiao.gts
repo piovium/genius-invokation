@@ -60,7 +60,7 @@ define status {
     :e.increaseDamage(1);
   };
   on increaseSkillDamage {
-    when :( :e.viaPlungingAttack() );
+    when :( :isUsingPlungingSkill(:e.via) );
     :e.increaseDamage(2);
   };
   on deductOmniDiceSwitch {

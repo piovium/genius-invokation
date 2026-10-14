@@ -26,7 +26,7 @@ define status {
   id 113081 as ScarletSeal;
   variable triggerSeal, 0;
   on increaseSkillDamage {
-    when :( :e.viaChargedAttack() );
+    when :( :isUsingChargedSkill(:e.via) );
     usage 1 {
       append 2;
       autoDispose false;
@@ -58,7 +58,7 @@ define status {
   id 113082 as Brilliance;
   duration 2;
   on deductElementDiceSkill {
-    when :( :e.isChargedAttack() && :e.canDeductCostOfType(DiceType.Pyro) );
+    when :( :isUsingChargedSkill(:e.action.skill) && :e.canDeductCostOfType(DiceType.Pyro) );
     usage perRound, 1;
     :e.deductCost(DiceType.Pyro, 1);
   };
@@ -151,7 +151,7 @@ define card {
       :useSkill(SealOfApproval);
     };
     on increaseSkillDamage {
-      when :( :e.viaChargedAttack() && :e.target.health <= 6 );
+      when :( :isUsingChargedSkill(:e.via) && :e.target.health <= 6 );
       :e.increaseDamage(1);
     };
   };
