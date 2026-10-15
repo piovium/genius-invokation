@@ -97,7 +97,7 @@ export const getDefaultGameConfig = (): GameConfig => ({
   maxRoundsCount: 15,
   maxSummonsCount: 4,
   maxSupportsCount: 4,
-  adventureSpotCandidatesCount: 4,
+  adventureSpotCandidatesCount: 5,
   randomSeed: randomSeed(),
   unexpectedInsufficientDice: "skipConsume",
   hostWho: 0,

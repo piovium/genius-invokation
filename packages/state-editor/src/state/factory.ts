@@ -132,7 +132,7 @@ export function createDefaultGameState(): GameState {
     maxRoundsCount: 15,
     maxSummonsCount: 4,
     maxSupportsCount: 4,
-    adventureSpotCandidatesCount: 4,
+    adventureSpotCandidatesCount: 5,
     randomSeed,
     unexpectedInsufficientDice: "skipConsume",
     hostWho: 0,
