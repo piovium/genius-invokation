@@ -13,83 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { glob, readFile, rm } from "node:fs/promises";
+import { cp, rm } from "node:fs/promises";
 import path from "node:path";
-import { build, type Plugin } from "rolldown";
-import { replacePlugin } from "rolldown/plugins";
-import gts from "@gi-tcg/unplugin-gts/rolldown";
 
-const frontendDir = path.join(import.meta.dirname, "../../web-client/dist");
+const frontendDir = path.resolve(import.meta.dirname, "../../web-client/dist");
+const publicDir = path.resolve(import.meta.dirname, "../public");
 
-const virtualFrontendId = "\0inline-frontend";
-
-const inlineFrontendPlugin: Plugin = {
-  name: "inline-frontend",
-  resolveId(source) {
-    if (source === "@gi-tcg/web-client") {
-      return virtualFrontendId;
-    }
-    return null;
-  },
-  async load(id) {
-    if (id !== virtualFrontendId) return null;
-    const contents: Record<string, string> = {};
-    for await (const dirent of glob(`${frontendDir}/**/*`, {
-      cwd: frontendDir,
-      withFileTypes: true,
-    })) {
-      if (dirent.isFile()) {
-        const filepath = path.resolve(dirent.parentPath, dirent.name);
-        const relativePath = path
-          .relative(frontendDir, filepath)
-          .replaceAll(path.sep, "/");
-        contents[relativePath] = (await readFile(filepath)).toString("base64");
-      }
-    }
-    return {
-      code: JSON.stringify(contents),
-      moduleType: "json",
-    };
-  },
-};
-
-await rm(path.resolve(import.meta.dirname, "../dist"), {
-  recursive: true,
-  force: true,
-});
-
-await build({
-  input: {
-    main: `${import.meta.dirname}/../src/main.ts`,
-    migrate: `${import.meta.dirname}/migrate.ts`,
-  },
-  output: {
-    dir: `${import.meta.dirname}/../dist`,
-    format: "esm",
-    minify: true,
-    sourcemap: true,
-    assetFileNames: "[name].[ext]",
-  },
-  external: [
-    "@electric-sql/pglite",
-    "pg-native",
-    "@nestjs/platform-express",
-    /^@nestjs\/microservices/,
-    /^@nestjs\/websockets/,
-    "@fastify/view",
-    "@fastify/static",
-  ],
-  plugins: [
-    inlineFrontendPlugin,
-    replacePlugin({
-      "process.env.NODE_ENV": '"production"',
-    }),
-    !!process.env.FROM_SOURCE && gts(),
-  ],
-  platform: "node",
-  resolve: {
-    conditionNames: process.env.FROM_SOURCE
-      ? ["development", "es2015", "module"]
-      : ["production", "es2015", "module"],
-  },
-});
+await rm(publicDir, { recursive: true, force: true });
+await cp(frontendDir, publicDir, { recursive: true });

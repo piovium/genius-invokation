@@ -3,13 +3,15 @@ RUN pnpm runtime set node 26 -g
 WORKDIR /app
 ARG DEFAULT_STATIC_DATA_API_BASE_URL
 COPY . .
-ENV FROM_SOURCE=1
-RUN pnpm install --frozen-lockfile && pnpm build:no-typing server...
+# Browser downloads are unnecessary for the server/frontend build.
+RUN PUPPETEER_SKIP_DOWNLOAD=true pnpm install --frozen-lockfile && pnpm build:no-typing server...
+# The server subset does not use the workspace Puppeteer patch or optional dev peers.
+RUN pnpm --filter @gi-tcg/server deploy --legacy --prod \
+    --config.allowUnusedPatches=true --config.autoInstallPeers=false /deploy
 
 FROM node:26 AS deploy
-WORKDIR /app/dist
+WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=build /app/packages/server/dist/ ./
-COPY --from=build /app/packages/server/drizzle/ /app/drizzle/
+COPY --from=build /deploy/ ./
 
-CMD ["node", "--experimental-vm-modules", "--enable-source-maps", "main.js"]
+CMD ["node", "--experimental-vm-modules", "--enable-source-maps", "--import", "./scripts/ts_preload.js", "src/main.ts"]

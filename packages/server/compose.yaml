@@ -17,7 +17,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: ["node", "migrate.js"]
+    command: ["node", "--import", "./scripts/ts_preload.js", "scripts/migrate.ts"]
     build:
       context: ../..
       dockerfile: packages/server/Dockerfile

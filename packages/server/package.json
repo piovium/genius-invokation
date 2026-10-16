@@ -6,11 +6,11 @@
   "scripts": {
     "dev": "gnx ./src/dev.ts",
     "build": "gnx scripts/build.ts",
-    "start": "gnx dist/main.js",
+    "start": "node --experimental-vm-modules --enable-source-maps --import ./scripts/ts_preload.js src/main.ts",
     "check": "tsc --noEmit",
     "debug": "gnx ./src/dev.ts --inspect",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "gnx scripts/migrate.ts",
+    "db:migrate": "node --import ./scripts/ts_preload.js scripts/migrate.ts",
     "test:db": "node --import ./scripts/ts_preload.js --test test/db.test.ts"
   },
   "dependencies": {
@@ -40,19 +40,25 @@
     "semver": "^7.8.0",
     "simple-git": "^3.36.0",
     "drizzle-orm": "1.0.0-rc.4",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "ts-node": "^10.9.2",
+    "@swc/core": "^1.15.33",
+    "dotenv": "^17.4.2",
+    "typescript": "catalog:"
   },
   "devDependencies": {
     "@gi-tcg/web-client": "workspace:*",
-    "@gi-tcg/unplugin-gts": "catalog:",
-    "@swc/core": "^1.15.33",
     "@types/semver": "^7.7.1",
-    "dotenv": "^17.4.2",
     "fastify": "^5.8.2",
-    "rolldown": "^1.2.11",
-    "ts-node": "^10.9.2",
     "drizzle-kit": "1.0.0-rc.4",
     "@types/pg": "^8.15.6",
     "@electric-sql/pglite": "^0.3.14"
-  }
+  },
+  "files": [
+    "src",
+    "scripts",
+    "tsconfig.json",
+    "drizzle",
+    "public"
+  ]
 }
