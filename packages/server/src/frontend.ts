@@ -62,10 +62,14 @@ export async function frontend(app: FastifyInstance) {
       cwd: publicDir,
       withFileTypes: true,
     })) {
-      if (!entry.isFile()) continue;
+      if (!entry.isFile()) {
+        continue;
+      }
       const filepath = path.join(entry.parentPath, entry.name);
       const name = path.relative(publicDir, filepath).replaceAll(path.sep, "/");
-      if (name === "index.html") continue;
+      if (name === "index.html") {
+        continue;
+      }
       const buffer = await readFile(filepath);
       const type = mime.getType(name) ?? "application/octet-stream";
       app.get(`${WEB_CLIENT_BASE_PATH}${name}`, (_req, reply) => {

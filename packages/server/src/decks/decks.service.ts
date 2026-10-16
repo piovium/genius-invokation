@@ -118,7 +118,9 @@ export class DecksService {
       .from(decks)
       .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
       .limit(1);
-    if (!model) return null;
+    if (!model) {
+      return null;
+    }
     const { characters, cards } = this.codeToDeck(model.code);
     return {
       ...model,
@@ -149,7 +151,9 @@ export class DecksService {
       .set({ name: deck.name, code, requiredVersion, updatedAt: new Date() })
       .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
       .returning();
-    if (!model) throw new NotFoundException("Deck not found");
+    if (!model) {
+      throw new NotFoundException("Deck not found");
+    }
     return model;
   }
 
@@ -158,6 +162,8 @@ export class DecksService {
       .delete(decks)
       .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
       .returning({ id: decks.id });
-    if (!model) throw new NotFoundException("Deck not found");
+    if (!model) {
+      throw new NotFoundException("Deck not found");
+    }
   }
 }

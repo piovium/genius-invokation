@@ -87,7 +87,9 @@ export class UsersService implements OnModuleInit {
         .select({ id: users.id })
         .from(users)
         .where(eq(users.id, id));
-      if (!user) throw new NotFoundException("User not found");
+      if (!user) {
+        throw new NotFoundException("User not found");
+      }
       return;
     }
     const [user] = await this.database.db
@@ -95,6 +97,8 @@ export class UsersService implements OnModuleInit {
       .set(dto)
       .where(eq(users.id, id))
       .returning({ id: users.id });
-    if (!user) throw new NotFoundException("User not found");
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
   }
 }

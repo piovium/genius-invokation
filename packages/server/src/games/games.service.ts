@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Injectable } from "@nestjs/common";
-import { count, desc, eq, getTableColumns, inArray } from "drizzle-orm";
+import { count, desc, eq, getColumns, inArray } from "drizzle-orm";
 import { DbService } from "../db/db.service";
 import {
   games,
@@ -122,7 +122,7 @@ export class GamesService {
   ): Promise<PaginationResult<PlayerOnGames & { game: GameNoData }>> {
     return this.database.db.transaction(async (tx) => {
       const data = await tx
-        .select({ ...getTableColumns(playersOnGames), game: summaryColumns })
+        .select({ ...getColumns(playersOnGames), game: summaryColumns })
         .from(playersOnGames)
         .innerJoin(games, eq(games.id, playersOnGames.gameId))
         .where(eq(playersOnGames.playerId, userId))
