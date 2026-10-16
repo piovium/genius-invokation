@@ -11,3 +11,6 @@ generated
 
 # vscode
 .vscode/*
+
+# Persistent Drizzle development database
+.pglite/

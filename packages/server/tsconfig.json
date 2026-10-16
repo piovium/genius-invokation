@@ -3,12 +3,8 @@
     "target": "ESNext",
     "module": "ES2022",
     "moduleResolution": "Bundler",
-    "lib": [
-      "ESNext"
-    ],
-    "types": [
-      "node"
-    ],
+    "lib": ["ESNext"],
+    "types": ["node"],
     "allowJs": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
@@ -22,14 +18,10 @@
     "strict": true,
     "noUncheckedIndexedAccess": true
   },
-  "include": [
-    "src",
-    "scripts",
-    "prisma.config.ts"
-  ],
+  "include": ["src", "scripts", "test", "drizzle.config.ts"],
   "ts-node": {
     "esm": true,
     "swc": true,
-    "experimentalSpecifierResolution": "node",
+    "experimentalSpecifierResolution": "node"
   }
 }

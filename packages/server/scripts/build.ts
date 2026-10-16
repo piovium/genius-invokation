@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { glob, readFile } from "node:fs/promises";
+import { glob, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { build, type Plugin } from "rolldown";
 import { replacePlugin } from "rolldown/plugins";
@@ -53,8 +53,16 @@ const inlineFrontendPlugin: Plugin = {
   },
 };
 
+await rm(path.resolve(import.meta.dirname, "../dist"), {
+  recursive: true,
+  force: true,
+});
+
 await build({
-  input: `${import.meta.dirname}/../src/main.ts`,
+  input: {
+    main: `${import.meta.dirname}/../src/main.ts`,
+    migrate: `${import.meta.dirname}/migrate.ts`,
+  },
   output: {
     dir: `${import.meta.dirname}/../dist`,
     format: "esm",
@@ -63,6 +71,8 @@ await build({
     assetFileNames: "[name].[ext]",
   },
   external: [
+    "@electric-sql/pglite",
+    "pg-native",
     "@nestjs/platform-express",
     /^@nestjs\/microservices/,
     /^@nestjs\/websockets/,

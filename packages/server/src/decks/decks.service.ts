@@ -13,20 +13,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { BadRequestException, Injectable } from "@nestjs/common";
-import { PrismaService } from "../db/prisma.service";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { DbService } from "../db/db.service";
 import type {
   CreateDeckDto,
   QueryDeckDto,
   UpdateDeckDto,
 } from "./decks.controller";
 import { type Deck } from "@gi-tcg/typings";
-import { type Deck as DeckModel } from "#prisma/client";
-import {
-  ASSETS_MANAGER,
-  verifyDeck,
-  type PaginationResult,
-} from "../utils";
+import { decks, type Deck as DeckModel } from "../db/schema";
+import { and, eq, lte, desc, count } from "drizzle-orm";
+import { ASSETS_MANAGER, verifyDeck, type PaginationResult } from "../utils";
 import { VERSIONS } from "@gi-tcg/core";
 
 interface DeckWithVersion extends Deck {
@@ -38,7 +39,7 @@ export interface DeckWithDeckModel extends DeckWithVersion, DeckModel {}
 
 @Injectable()
 export class DecksService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private database: DbService) {}
 
   async deckToCode(deck: Deck): Promise<DeckWithVersion> {
     try {
@@ -68,33 +69,35 @@ export class DecksService {
 
   async createDeck(userId: number, deck: CreateDeckDto): Promise<DeckModel> {
     const { code, requiredVersion } = await this.deckToCode(deck);
-    return await this.prisma.deck.create({
-      data: {
-        name: deck.name,
-        code,
-        ownerUserId: userId,
-        requiredVersion,
-      },
-    });
+    const [model] = await this.database.db
+      .insert(decks)
+      .values({ name: deck.name, code, ownerUserId: userId, requiredVersion })
+      .returning();
+    return model!;
   }
 
   async getAllDecks(
     userId: number,
     { skip = 0, take = 100, requiredVersion }: QueryDeckDto,
   ): Promise<PaginationResult<DeckWithDeckModel>> {
-    const [models, count] = await this.prisma.deck.findManyAndCount({
-      skip,
-      take,
-      where: {
-        ownerUserId: userId,
-        requiredVersion: {
-          lte: requiredVersion,
-        }
-      },
-      orderBy: {
-        updatedAt: "desc",
-      },
-    });
+    const where = and(
+      eq(decks.ownerUserId, userId),
+      requiredVersion === undefined
+        ? undefined
+        : lte(decks.requiredVersion, requiredVersion),
+    );
+    const [models, total] = await this.database.db.transaction(async (tx) =>
+      Promise.all([
+        tx
+          .select()
+          .from(decks)
+          .where(where)
+          .offset(skip)
+          .limit(take)
+          .orderBy(desc(decks.updatedAt)),
+        tx.select({ count: count() }).from(decks).where(where),
+      ]),
+    );
     const data = models.map((model) => {
       const { characters, cards } = this.codeToDeck(model.code);
       return {
@@ -103,22 +106,19 @@ export class DecksService {
         cards,
       };
     });
-    return { data, count };
+    return { data, count: total[0]!.count };
   }
 
   async getDeck(
     userId: number,
     deckId: number,
   ): Promise<DeckWithDeckModel | null> {
-    const model = await this.prisma.deck.findFirst({
-      where: {
-        id: deckId,
-        ownerUserId: userId,
-      },
-    });
-    if (model === null) {
-      return null;
-    }
+    const [model] = await this.database.db
+      .select()
+      .from(decks)
+      .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
+      .limit(1);
+    if (!model) return null;
     const { characters, cards } = this.codeToDeck(model.code);
     return {
       ...model,
@@ -127,11 +127,7 @@ export class DecksService {
     };
   }
 
-  async updateDeck(
-    userId: number,
-    deckId: number,
-    deck: UpdateDeckDto,
-  ) {
+  async updateDeck(userId: number, deckId: number, deck: UpdateDeckDto) {
     let code: string | undefined;
     let requiredVersion: number | undefined;
     if (!deck.characters || !deck.cards) {
@@ -148,26 +144,20 @@ export class DecksService {
         cards: deck.cards,
       }));
     }
-    const model = await this.prisma.deck.update({
-      where: {
-        id: deckId,
-        ownerUserId: userId,
-      },
-      data: {
-        name: deck.name,
-        code,
-        requiredVersion,
-      },
-    });
+    const [model] = await this.database.db
+      .update(decks)
+      .set({ name: deck.name, code, requiredVersion, updatedAt: new Date() })
+      .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
+      .returning();
+    if (!model) throw new NotFoundException("Deck not found");
     return model;
   }
 
   async deleteDeck(userId: number, deckId: number) {
-    await this.prisma.deck.delete({
-      where: {
-        id: deckId,
-        ownerUserId: userId,
-      },
-    });
+    const [model] = await this.database.db
+      .delete(decks)
+      .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
+      .returning({ id: decks.id });
+    if (!model) throw new NotFoundException("Deck not found");
   }
 }
