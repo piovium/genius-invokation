@@ -3,6 +3,11 @@ services:
     image: postgres:17-alpine
     environment:
       POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
 
   migrate:
     image: genius-invokation-server
@@ -10,8 +15,9 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/postgres
     depends_on:
-      - db
-    command: ["npx", "prisma", "migrate", "deploy"]
+      db:
+        condition: service_healthy
+    command: ["node", "scripts/migrate.ts"]
     build:
       context: ../..
       dockerfile: packages/server/Dockerfile

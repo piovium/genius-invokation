@@ -25,11 +25,11 @@
   "include": [
     "src",
     "scripts",
-    "prisma.config.ts"
+    "drizzle.config.ts"
   ],
   "ts-node": {
     "esm": true,
     "swc": true,
-    "experimentalSpecifierResolution": "node",
+    "experimentalSpecifierResolution": "node"
   }
 }

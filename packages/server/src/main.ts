@@ -20,7 +20,7 @@ import {
 } from "@nestjs/platform-fastify";
 import { AppModule } from "./app.module";
 import { RequestMethod, ValidationPipe } from "@nestjs/common";
-import { PrismaClientExceptionFilter } from "./db/prisma-exception.filter";
+import { DatabaseExceptionFilter } from "./db/database-exception.filter";
 import { WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
 import { frontend } from "./frontend";
 
@@ -32,8 +32,9 @@ const app = await NestFactory.create<NestFastifyApplication>(
     requestTimeout: 0, // Disable request timeout for SSE
   }),
 );
+app.enableShutdownHooks();
 app.useGlobalPipes(new ValidationPipe({ transform: true }));
-app.useGlobalFilters(new PrismaClientExceptionFilter(app.getHttpAdapter()));
+app.useGlobalFilters(new DatabaseExceptionFilter(app.getHttpAdapter()));
 app.setGlobalPrefix(`${WEB_CLIENT_BASE_PATH}api`, {
   exclude: [{ path: "metrics", method: RequestMethod.GET }],
 });

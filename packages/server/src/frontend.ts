@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { glob, readFile } from "node:fs/promises";
+import path from "node:path";
 import mime from "mime";
 import type { FastifyInstance, RouteHandlerMethod } from "fastify";
 import fastifyEtag from "@fastify/etag";
@@ -27,9 +29,11 @@ export function injectHtml(
   html: string,
   injections: Partial<Record<keyof typeof HTML_INJECTION_PLACEHOLDERS, string>>,
 ) {
-  return (Object.keys(HTML_INJECTION_PLACEHOLDERS) as Array<
-    keyof typeof HTML_INJECTION_PLACEHOLDERS
-  >).reduce(
+  return (
+    Object.keys(HTML_INJECTION_PLACEHOLDERS) as Array<
+      keyof typeof HTML_INJECTION_PLACEHOLDERS
+    >
+  ).reduce(
     (result, position) =>
       result.replace(
         HTML_INJECTION_PLACEHOLDERS[position],
@@ -43,12 +47,30 @@ export async function frontend(app: FastifyInstance) {
   await app.register(fastifyEtag);
 
   if (process.env.NODE_ENV === "production") {
-    const {
-      default: { "index.html": indexHtml, ...rest },
-    } = await import("@gi-tcg/web-client");
+    const publicDir = path.resolve(import.meta.dirname, "../public");
+    const indexHtml = await readFile(
+      path.join(publicDir, "index.html"),
+      "utf8",
+    ).catch((cause) => {
+      throw new Error(
+        `Cannot read frontend index.html in ${publicDir}; build server and its dependencies before starting production.`,
+        { cause },
+      );
+    });
 
-    for (const [name, content] of Object.entries(rest)) {
-      const buffer = Buffer.from(content, "base64");
+    for await (const entry of glob("**/*", {
+      cwd: publicDir,
+      withFileTypes: true,
+    })) {
+      if (!entry.isFile()) {
+        continue;
+      }
+      const filepath = path.join(entry.parentPath, entry.name);
+      const name = path.relative(publicDir, filepath).replaceAll(path.sep, "/");
+      if (name === "index.html") {
+        continue;
+      }
+      const buffer = await readFile(filepath);
       const type = mime.getType(name) ?? "application/octet-stream";
       app.get(`${WEB_CLIENT_BASE_PATH}${name}`, (_req, reply) => {
         reply
@@ -63,12 +85,9 @@ export async function frontend(app: FastifyInstance) {
       });
     }
 
-    const indexHtmlContent = injectHtml(
-      Buffer.from(indexHtml!, "base64").toString(),
-      {
-        head: IS_BETA ? '<meta name="robots" content="noindex">' : "",
-      },
-    );
+    const indexHtmlContent = injectHtml(indexHtml, {
+      head: IS_BETA ? '<meta name="robots" content="noindex">' : "",
+    });
     const indexHtmlBuffer = Buffer.from(indexHtmlContent);
     const indexHtmlHandler: RouteHandlerMethod = (_req, reply) => {
       return reply

@@ -1,18 +1,20 @@
 # `@gi-tcg/server` 对战平台后端
 
-对战平台后端可配合 Web 前端 `@gi-tcg/web-client` 使用。
 
-## 本地开发
+## 本地开发与调试
 
-1. 安装依赖且构建所有依赖 packages（`core` `data` 等，可在根目录下执行 `pnpm build server` 以自动构建依赖）
-2. 在 `packages/server` 下创建 `.env` 文件，存储 `JWT_SECRET=任意字符串`。
+1. 安装构建依赖：根目录执行 `pnpm build server...`）。
+2. 在 `packages/server/.env` 设置 `JWT_SECRET=任意字符串`。
+  - 可选： `GH_CLIENT_ID`、`GH_CLIENT_SECRET` 启用 GitHub OAuth
+3. 在 `packages/server` 执行 `pnpm dev`
 
-   - 也可创建 `GH_CLIENT_ID` 与 `GH_CLIENT_SECRET` 以启用 GitHub OAuth 登录。此功能需要[新建 GitHub Apps](https://docs.github.com/en/apps/creating-github-apps)。
+未设置 `DATABASE_URL` 时，本地数据保存于 `packages/server/.pglite`；设置 `DATABASE_URL` 时使用指定 Postgres 数据库。
 
-3. 执行 `pnpm dev` 命令：这将尝试启动本地的 PGLite 模拟数据库并使用 `--watch` 运行服务器以支持本地调试。本地数据库数据持久化存储，如需删除可执行 `pnpm prisma dev rm gi-tcg-server-dev`。
-   - 如果修改了 `prisma/schema.prisma`，则会在启动数据库前进行 Schema 迁移，请按提示输入迁移名称。
+## ORM 迁移
 
-## 部署对战平台
+修改 `src/db/schema.ts` 后执行 `pnpm db:generate` 和 `pnpm db:migrate`。
+
+## 部署
 
 - 使用 Docker。在 Monorepo 根目录下执行 `docker build -f packages/server/Dockerfile .` 构建 Docker 镜像。运行时，设置 `JWT_SECRET` 等环境变量并将 `DATABASE_URL` 指向 Postgres 数据库链接串。
 

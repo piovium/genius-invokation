@@ -14,8 +14,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../db/prisma.service";
-import type { Game as GameModel, PlayerOnGames } from "#prisma/client";
+import { count, desc, eq, getColumns, inArray } from "drizzle-orm";
+import { DbService } from "../db/db.service";
+import {
+  games,
+  playersOnGames,
+  type Game as GameModel,
+  type PlayerOnGames,
+} from "../db/schema";
 import type { PaginationDto, PaginationResult } from "../utils";
 import { MetricsService } from "../metrics/metrics.service";
 
@@ -26,28 +32,31 @@ export interface AddGameOption {
   data: string;
   winnerId: number | null;
 }
-
-interface GameNoData extends Omit<GameModel, "data"> {}
+type GameNoData = Omit<GameModel, "data">;
+const { data: logData, ...summaryColumns } = getColumns(games);
 
 @Injectable()
 export class GamesService {
   constructor(
-    private prisma: PrismaService,
+    private database: DbService,
     private metrics: MetricsService,
   ) {}
 
   async addGame({ playerIds, ...data }: AddGameOption): Promise<GameModel> {
-    const playerOnGames = playerIds.map((id, who) => ({
-      playerId: id,
-      who,
-    }));
-    const game = await this.prisma.game.create({
-      data: {
-        ...data,
-        players: {
-          create: playerOnGames,
-        },
-      },
+    const game = await this.database.db.transaction(async (tx) => {
+      const [game] = await tx.insert(games).values(data).returning();
+      if (playerIds.length) {
+        await tx
+          .insert(playersOnGames)
+          .values(
+            playerIds.map((playerId, who) => ({
+              playerId,
+              who,
+              gameId: game!.id,
+            })),
+          );
+      }
+      return game!;
     });
     this.metrics.incrementStoredGames();
     return game;
@@ -57,46 +66,53 @@ export class GamesService {
     skip = 0,
     take = 10,
   }: PaginationDto): Promise<PaginationResult<GameNoData>> {
-    const [data, count] = await this.prisma.game.findManyAndCount({
-      skip,
-      take,
-      omit: { data: true },
-      include: {
-        players: {
-          select: {
-            player: {
-              select: {
-                id: true,
-              },
-            },
-            who: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+    return this.database.db.transaction(async (tx) => {
+      const data = await tx
+        .select(summaryColumns)
+        .from(games)
+        .offset(skip)
+        .limit(take)
+        .orderBy(desc(games.createdAt));
+      const [total] = await tx.select({ count: count() }).from(games);
+      const players = data.length
+        ? await tx
+            .select()
+            .from(playersOnGames)
+            .where(
+              inArray(
+                playersOnGames.gameId,
+                data.map((g) => g.id),
+              ),
+            )
+        : [];
+      return {
+        count: total!.count,
+        data: data.map((game) => ({
+          ...game,
+          players: players
+            .filter((p) => p.gameId === game.id)
+            .map((p) => ({ player: { id: p.playerId }, who: p.who })),
+        })),
+      };
     });
-    return { count, data };
   }
 
   async getGame(gameId: number) {
-    return await this.prisma.game.findFirst({
-      where: {
-        id: gameId,
-      },
-      include: {
-        players: {
-          select: {
-            player: {
-              select: {
-                id: true,
-              },
-            },
-            who: true,
-          },
-        },
-      },
+    return this.database.db.transaction(async (tx) => {
+      const [game] = await tx
+        .select()
+        .from(games)
+        .where(eq(games.id, gameId))
+        .limit(1);
+      if (!game) return null;
+      const players = await tx
+        .select({
+          player: { id: playersOnGames.playerId },
+          who: playersOnGames.who,
+        })
+        .from(playersOnGames)
+        .where(eq(playersOnGames.gameId, gameId));
+      return { ...game, players };
     });
   }
 
@@ -104,25 +120,20 @@ export class GamesService {
     userId: number,
     { skip = 0, take = 10 }: PaginationDto,
   ): Promise<PaginationResult<PlayerOnGames & { game: GameNoData }>> {
-    const [data, count] = await this.prisma.playerOnGames.findManyAndCount({
-      skip,
-      take,
-      where: {
-        playerId: userId,
-      },
-      include: {
-        game: {
-          omit: {
-            data: true,
-          },
-        },
-      },
-      orderBy: {
-        game: {
-          createdAt: "desc",
-        },
-      },
+    return this.database.db.transaction(async (tx) => {
+      const data = await tx
+        .select({ ...getColumns(playersOnGames), game: summaryColumns })
+        .from(playersOnGames)
+        .innerJoin(games, eq(games.id, playersOnGames.gameId))
+        .where(eq(playersOnGames.playerId, userId))
+        .offset(skip)
+        .limit(take)
+        .orderBy(desc(games.createdAt));
+      const [total] = await tx
+        .select({ count: count() })
+        .from(playersOnGames)
+        .where(eq(playersOnGames.playerId, userId));
+      return { data, count: total!.count };
     });
-    return { data, count };
   }
 }
