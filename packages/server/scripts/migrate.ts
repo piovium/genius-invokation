@@ -15,10 +15,11 @@ if (process.env.DATABASE_URL) {
   } finally {
     await pool.end();
   }
-} else if (
-  process.env.NODE_ENV !== "production" &&
-  process.env.PGLITE_DATA_DIR
-) {
+} else if (process.env.NODE_ENV !== "production") {
+  process.env.PGLITE_DATA_DIR ??= path.resolve(
+    import.meta.dirname,
+    "../.pglite",
+  );
   const { PGlite } = await import("@electric-sql/pglite");
   const { drizzle } = await import("drizzle-orm/pglite");
   const { migrate } = await import("drizzle-orm/pglite/migrator");

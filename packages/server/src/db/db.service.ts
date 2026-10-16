@@ -22,10 +22,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       });
       this.db = drizzle({ client: pool });
       this.close = () => pool.end();
-    } else if (
-      process.env.NODE_ENV !== "production" &&
-      process.env.PGLITE_DATA_DIR
-    ) {
+    } else if (process.env.NODE_ENV !== "production") {
       const { PGlite } = await import("@electric-sql/pglite");
       const { drizzle } = await import("drizzle-orm/pglite");
       const client = new PGlite(process.env.PGLITE_DATA_DIR);

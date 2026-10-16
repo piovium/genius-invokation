@@ -9,8 +9,7 @@
     "check": "tsc --noEmit",
     "debug": "gnx ./src/dev.ts --inspect",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "node --import ./scripts/ts_preload.js scripts/migrate.ts",
-    "test:db": "node --import ./scripts/ts_preload.js --test test/db.test.ts"
+    "db:migrate": "node scripts/migrate.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",
