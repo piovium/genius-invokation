@@ -29,8 +29,8 @@ Nest.js 模块、Controller、依赖注入与 Fastify 结构保持不变。数�
 
 ## 部署
 
-- 根目录执行 `docker build -f packages/server/Dockerfile .`。镜像通过 `pnpm deploy --legacy --prod --config.allowUnusedPatches=true --config.autoInstallPeers=false` 仅携带生产依赖、服务源码、迁移入口、SQL 和 `public/` 前端产物，不需要在启动时下载 CLI。
+- 根目录执行 `docker build -f packages/server/Dockerfile .`。镜像通过 `pnpm deploy --legacy --prod --config.allowUnusedPatches=true --config.autoInstallPeers=false` 打包生产依赖、服务源码、迁移入口和 SQL，再直接从 web-client 构建目录复制前端产物至 `/app/public/`，不需要在启动时下载 CLI。
 - Docker Compose：在 `packages/server/.env` 设置 `JWT_SECRET` 等变量，执行 `docker compose up --build`；数据库健康后运行迁移，成功后启动服务。现有 Compose 数据目录配置应原样保留，不要通过删卷重建数据库来升级。
 - 独立 PostgreSQL / Railway：配置 `DATABASE_URL`、`JWT_SECRET` 等环境变量，在部署前运行上述迁移入口，再在 server 包目录执行 `NODE_ENV=production pnpm start`。
 
-Server 不再生成 bundle，旧的 `dist/main.js`、`dist/migrate.js` 入口已移除。构建仅将 web-client 产物复制到 `public/`；生产启动通过 ts-node/SWC 执行源码并保留 Nest 装饰器元数据。独立部署需携带 `src/`、`scripts/ts_preload.js`、`scripts/migrate.ts`、`tsconfig.json`、`drizzle/`、`public/`、`package.json` 及生产依赖（包括已构建的 workspace 包）。生产启动必须设置 `NODE_ENV=production`，迁移仍由独立部署任务执行。
+Server 不再生成 bundle，旧的 `dist/main.js`、`dist/migrate.js` 入口已移除。server 不再需要构建步骤；仓库中的 `public` 是指向 `../web-client/dist` 的符号链接，根目录执行 `pnpm build server...` 仍会构建前端及 workspace 依赖。生产启动通过 ts-node/SWC 执行源码并保留 Nest 装饰器元数据。独立部署需携带 `src/`、`scripts/ts_preload.js`、`scripts/migrate.ts`、`tsconfig.json`、`drizzle/`、`public/`、`package.json` 及生产依赖（包括已构建的 workspace 包）。独立部署时需将 `web-client/dist/` 的实际内容复制到部署目录的 `public/`，不能仅复制指向仓库外部的符号链接。生产启动必须设置 `NODE_ENV=production`，迁移仍由独立部署任务执行。

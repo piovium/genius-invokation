@@ -1,8 +1,5 @@
 # Keep environment variables out of version control
 .env
 
-# Generated files
-public/
-
 # Persistent Drizzle development database
 .pglite/

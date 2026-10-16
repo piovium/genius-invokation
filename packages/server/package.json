@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "gnx ./src/dev.ts",
-    "build": "gnx scripts/build.ts",
     "start": "node --experimental-vm-modules --enable-source-maps --import ./scripts/ts_preload.js src/main.ts",
     "check": "tsc --noEmit",
     "debug": "gnx ./src/dev.ts --inspect",
@@ -58,7 +57,6 @@
     "src",
     "scripts",
     "tsconfig.json",
-    "drizzle",
-    "public"
+    "drizzle"
   ]
 }
