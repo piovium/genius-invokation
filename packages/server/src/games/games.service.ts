@@ -33,7 +33,7 @@ export interface AddGameOption {
   winnerId: number | null;
 }
 type GameNoData = Omit<GameModel, "data">;
-const { data: logData, ...summaryColumns } = getTableColumns(games);
+const { data: logData, ...summaryColumns } = getColumns(games);
 
 @Injectable()
 export class GamesService {
