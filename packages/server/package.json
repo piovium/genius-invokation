@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "gnx ./src/dev.ts",
-    "start": "node --experimental-vm-modules --enable-source-maps --import ./scripts/ts_preload.js src/main.ts",
+    "start": "NODE_ENV=production node --experimental-vm-modules --enable-source-maps --import ./scripts/ts_preload.js src/main.ts",
     "check": "tsc --noEmit",
     "debug": "gnx ./src/dev.ts --inspect",
     "db:generate": "drizzle-kit generate",
