@@ -1,23 +1,14 @@
 # `@gi-tcg/server` 对战平台后端
 
+
 ## 本地开发与调试
 
 1. 安装构建依赖：根目录执行 `pnpm build server...`）。
 2. 在 `packages/server/.env` 设置 `JWT_SECRET=任意字符串`。
-
-- 可选： `GH_CLIENT_ID`、`GH_CLIENT_SECRET` 启用 GitHub OAuth
-
+  - 可选： `GH_CLIENT_ID`、`GH_CLIENT_SECRET` 启用 GitHub OAuth
 3. 在 `packages/server` 执行 `pnpm dev`
 
 未设置 `DATABASE_URL` 时，本地数据保存于 `packages/server/.pglite`；设置 `DATABASE_URL` 时使用指定 Postgres 数据库。
-
-## HTTP 服务与测试
-
-HTTP 层使用 Hono，各 `*.controller.ts` 导出子应用，由 `*.module.ts` 装配。`src/services.ts` 统一创建 Service 单例，入口显式初始化并在房间结束后关闭连接。DTO 使用 ArkType，通过 Hono Standard Schema validator 校验和转换。
-
-在当前目录运行 `pnpm check` 和 `pnpm test`，检查类型及路由、鉴权、验证、SSE、数据库生命周期和静态资源行为。测试使用内存 PGlite，并隔离 GitHub、Redis 和远程静态数据依赖。
-
-错误响应采用 Hono 和 Standard Schema validator 的默认格式。前端现有的 `data.message` 读取尚未适配。可选字段允许省略，只有 `chessboardColor` 明确允许 `null`。
 
 ## ORM 迁移
 
