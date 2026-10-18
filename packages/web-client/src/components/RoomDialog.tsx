@@ -25,12 +25,11 @@ import { makePersisted } from "@solid-primitives/storage";
 import axios, { AxiosError } from "axios";
 import { ToggleSwitch } from "./ToggleSwitch";
 import { DeckInfoProps } from "./DeckBriefInfo";
-import { roomIdToCode } from "../utils";
+import { getErrorMessage, roomIdToCode } from "../utils";
 import { useNavigate } from "@solidjs/router";
 import { useAuth } from "../auth";
 import { useVersionContext } from "../App";
 import { useGuestDecks, useGuestInfo } from "../guest";
-import type { AssetsManager } from "@gi-tcg/assets-manager";
 import { useI18n } from "../i18n";
 
 function SelectableDeckInfo(
@@ -195,7 +194,7 @@ export function RoomDialog(props: RoomDialogProps) {
     } catch (e) {
       setAvailableDecks([]);
       if (e instanceof AxiosError) {
-        alert(e.response?.data.message);
+        alert(getErrorMessage(e));
       }
       console.error(e);
     }
@@ -272,10 +271,8 @@ export function RoomDialog(props: RoomDialogProps) {
       const roomCode = roomIdToCode(roomId);
       navigate(`/rooms/${roomCode}?player=${playerId}&action=1`);
     } catch (e) {
-      if (e instanceof AxiosError) {
-        alert(e.response?.data.message);
-      } else if (e instanceof Error) {
-        alert(e.message);
+      if (e instanceof Error) {
+        alert(getErrorMessage(e));
       }
       console.error(e);
     } finally {

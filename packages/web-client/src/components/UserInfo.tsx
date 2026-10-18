@@ -15,7 +15,7 @@
 
 import { createResource, For, Match, Show, Switch } from "solid-js";
 import { A } from "@solidjs/router";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { GameInfo } from "./GameInfo";
 import { ChessboardColor } from "./ChessboardColor";
 import { useI18n } from "../i18n";
@@ -23,6 +23,7 @@ import { Portal } from "solid-js/web";
 import { AvatarSelector } from "./AvatarSelector";
 import { useAuth } from "../auth";
 import { TextFieldEdit } from "./TextFieldEdit";
+import { getErrorMessage } from "../utils";
 
 export interface UserInfoProps {
   type: "user" | "guest";
@@ -128,10 +129,7 @@ export function UserInfo(props: UserInfoProps) {
                 <Match when={games.loading}>{t("loading")}</Match>
                 <Match when={games.error}>
                   {t("loadFailed", {
-                    message:
-                      games.error instanceof AxiosError
-                        ? games.error.response?.data.message
-                        : String(games.error),
+                    message: getErrorMessage(games.error),
                   })}
                 </Match>
                 <Match when={!games()?.data.length}>{t("noGameRecords")}</Match>

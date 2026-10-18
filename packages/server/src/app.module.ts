@@ -23,8 +23,7 @@ import { GamesModule } from "./games/games.module";
 import { DecksModule } from "./decks/decks.module";
 import { RoomsModule } from "./rooms/rooms.module";
 import { MetricsModule } from "./metrics/metrics.module";
-import { DatabaseExceptionFilter } from "./db/db.module";
-
+import { handleError, NotFoundException } from "./errors";
 
 const api = new Hono()
   .route("/", AppController)
@@ -33,9 +32,11 @@ const api = new Hono()
   .route("/games", GamesModule)
   .route("/decks", DecksModule)
   .route("/rooms", RoomsModule)
-  .all("*", (c) => c.notFound());
+  .all("*", () => {
+    throw new NotFoundException();
+  });
 
-export const root = new Hono();
+export const root = new Hono().onError(handleError);
 if (process.env.NODE_ENV !== "production") {
   root.use(
     cors({
@@ -44,6 +45,4 @@ if (process.env.NODE_ENV !== "production") {
     }),
   );
 }
-root.use(DatabaseExceptionFilter)
-  .route(`${WEB_CLIENT_BASE_PATH}api`, api)
-  .route("/", MetricsModule);
+root.route(`${WEB_CLIENT_BASE_PATH}api`, api).route("/", MetricsModule);

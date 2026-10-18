@@ -19,6 +19,7 @@ import { onMount, Show } from "solid-js";
 import axios from "axios";
 import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
+import { getErrorMessage } from "../utils";
 
 dayjs.extend(relativeTime);
 
@@ -49,7 +50,7 @@ export function GameInfo(props: GameInfoProps) {
       console.error(e);
       alert(
         t("downloadFailed", {
-          message: e instanceof Error ? e.message : String(e),
+          message: getErrorMessage(e),
         }),
       );
     }

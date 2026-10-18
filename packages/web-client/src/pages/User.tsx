@@ -16,11 +16,11 @@
 import { useParams } from "@solidjs/router";
 import { createResource, Switch, Match } from "solid-js";
 import { Layout } from "../layouts/Layout";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { useAuth, UserInfo as UserInfoT } from "../auth";
 import { useI18n } from "../i18n";
 import { UserInfo } from "../components/UserInfo";
-import { getGithubAvatarUrl } from "../utils";
+import { getErrorMessage, getGithubAvatarUrl } from "../utils";
 
 export default function User() {
   const { t } = useI18n();
@@ -57,10 +57,7 @@ export default function User() {
         <Match when={userInfo.loading}>{t("loading")}</Match>
         <Match when={userInfo.error}>
           {t("loadFailed", {
-            message:
-              userInfo.error instanceof AxiosError
-                ? userInfo.error.response?.data.message
-                : userInfo.error,
+            message: getErrorMessage(userInfo.error),
           })}
         </Match>
         <Match when={userInfo()}>

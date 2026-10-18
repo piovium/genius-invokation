@@ -128,7 +128,7 @@ type PlayerInfo = (
 ) & {
   name: string;
   deck: Deck;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
 };
 
 export type PlayerId = PlayerInfo["id"];

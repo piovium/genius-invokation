@@ -22,6 +22,7 @@ import type { Deck } from "@gi-tcg/typings";
 import { useGuestDecks } from "../guest";
 import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
+import { getErrorMessage } from "../utils";
 
 export interface DeckInfo extends Deck {
   id: number;
@@ -92,7 +93,7 @@ export default function Decks() {
       refetch();
     } catch (e) {
       if (e instanceof AxiosError) {
-        alert(e.response?.data?.message || t("pinFailed"));
+        alert(getErrorMessage(e) || t("pinFailed"));
       }
       console.error(e);
     }
@@ -110,7 +111,7 @@ export default function Decks() {
         <Switch>
           <Match when={loading()}>{t("loading")}</Match>
           <Match when={error()}>
-            {t("loadFailed", { message: error()?.message ?? String(error()) })}
+            {t("loadFailed", { message: getErrorMessage(error()) })}
           </Match>
           <Match when={true}>
             <ul class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2 md:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] md:gap-3 md:overflow-y-auto scrollbar-thin-hover">

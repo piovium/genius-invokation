@@ -14,8 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ErrorBoundary, JSX } from "solid-js";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
+import { getErrorMessage } from "../utils";
 
 export interface LayoutProps {
   mainFlex?: boolean;
@@ -24,16 +23,14 @@ export interface LayoutProps {
 
 export function MobileChessboardLayout(props: LayoutProps) {
   return (
-      <main
-        class="flex w-full h-full flex-col touch-none"
+    <main class="flex w-full h-full flex-col touch-none">
+      <ErrorBoundary
+        fallback={(err) => (
+          <div class="text-red-500">{getErrorMessage(err)}</div>
+        )}
       >
-        <ErrorBoundary
-          fallback={(err) => (
-            <div class="text-red-500">{err?.message ?? String(err)}</div>
-          )}
-        >
-          {props.children}
-        </ErrorBoundary>
-      </main>
+        {props.children}
+      </ErrorBoundary>
+    </main>
   );
 }

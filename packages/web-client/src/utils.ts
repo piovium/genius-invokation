@@ -14,7 +14,22 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import type { Deck } from "@gi-tcg/typings";
-import { Translator } from "./i18n";
+import type { Translator } from "./i18n";
+import { isAxiosError } from "axios";
+
+export function getErrorMessage(error: unknown): string {
+  if (isAxiosError<{ error?: { message?: unknown } }>(error)) {
+    const errorField = error.response?.data?.error;
+    if (errorField) {
+      if (typeof errorField === "string") {
+        return errorField;
+      } else {
+        return JSON.stringify(errorField);
+      }
+    }
+  }
+  return error instanceof Error ? error.message : String(error);
+}
 
 export interface PlayerInfo {
   isGuest: boolean;

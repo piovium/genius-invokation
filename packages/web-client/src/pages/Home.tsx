@@ -28,7 +28,7 @@ import { A, useNavigate } from "@solidjs/router";
 import axios, { AxiosError } from "axios";
 import { DeckBriefInfo } from "../components/DeckBriefInfo";
 import { RoomDialog } from "../components/RoomDialog";
-import { roomCodeToId } from "../utils";
+import { getErrorMessage, roomCodeToId } from "../utils";
 import { RoomInfo } from "../components/RoomInfo";
 import { useDecks } from "./Decks";
 import { Login } from "../components/Login";
@@ -104,7 +104,7 @@ export default function Home() {
       joinRoomDialogEl.showModal();
     } catch (e) {
       if (e instanceof AxiosError) {
-        alert(e.response?.data.message);
+        alert(getErrorMessage(e));
       }
       console.error(e);
       setJoiningRoomInfo();
@@ -131,7 +131,7 @@ export default function Home() {
             <div class="text-red-500">
               <p>
                 {t("userInfoLoadFailed", {
-                  message: userError()?.message ?? String(userError()),
+                  message: getErrorMessage(userError()),
                 })}
               </p>
               <p>
@@ -160,7 +160,10 @@ export default function Home() {
                       {t("myDecks")}
                     </A>
                     <div class="flex flex-row gap-2">
-                      <A href="/decks/new" class="btn btn-outline-green h-6 py-0">
+                      <A
+                        href="/decks/new"
+                        class="btn btn-outline-green h-6 py-0"
+                      >
                         {t("add")}
                       </A>
                       <A href="/decks" class="btn btn-outline-blue h-6 py-0">
@@ -175,8 +178,7 @@ export default function Home() {
                     <Match when={decksError()}>
                       <div class="text-gray-500">
                         {t("deckInfoLoadFailed", {
-                          message:
-                            decksError()?.message ?? String(decksError()),
+                          message: getErrorMessage(decksError()),
                         })}
                       </div>
                     </Match>
@@ -259,10 +261,7 @@ export default function Home() {
                       <Match when={allRooms.error}>
                         <div class="text-red-500">
                           {t("roomInfoLoadFailed", {
-                            message:
-                              allRooms.error instanceof AxiosError
-                                ? allRooms.error.response?.data.message
-                                : allRooms.error,
+                            message: getErrorMessage(allRooms.error),
                           })}
                         </div>
                       </Match>

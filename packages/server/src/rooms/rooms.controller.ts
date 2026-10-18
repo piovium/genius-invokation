@@ -49,7 +49,7 @@ export type UserCreateRoomDto = typeof UserCreateRoomDto.infer;
 export const GuestJoinRoomDto = type({
   name: stringLength(1, 64),
   deck: DeckDto,
-  "avatarUrl?": stringLength(1, 256),
+  "avatarUrl?": stringLength(1, 256).or("null"),
 });
 export type GuestJoinRoomDto = typeof GuestJoinRoomDto.infer;
 

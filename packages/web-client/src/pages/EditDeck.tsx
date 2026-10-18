@@ -32,7 +32,7 @@ import { useGuestDecks } from "../guest";
 import { DeckInfo } from "./Decks";
 import { useAuth } from "../auth";
 import { unwrap } from "solid-js/store";
-import { copyShareCode } from "../utils";
+import { copyShareCode, getErrorMessage } from "../utils";
 import { useI18n } from "../i18n";
 import { TextFieldEdit } from "../components/TextFieldEdit";
 import { AutoResizeText } from "@gi-tcg/web-ui-core";
@@ -147,7 +147,7 @@ export default function EditDeck() {
         return true;
       } catch (e) {
         if (e instanceof AxiosError) {
-          alert(e.response?.data.message);
+          alert(getErrorMessage(e));
           setDeckName(oldName);
         }
         console.error(e);
@@ -184,7 +184,7 @@ export default function EditDeck() {
       return true;
     } catch (e) {
       if (e instanceof AxiosError) {
-        alert(e.response?.data.message);
+        alert(getErrorMessage(e));
       }
       console.error(e);
       return false;
@@ -249,10 +249,7 @@ export default function EditDeck() {
           <Match when={userDeckData.loading}>{t("loading")}</Match>
           <Match when={status().type !== "guest" && userDeckData.error}>
             {t("loadFailed", {
-              message:
-                userDeckData.error instanceof AxiosError
-                  ? userDeckData.error.response?.data.message
-                  : userDeckData.error,
+              message: getErrorMessage(userDeckData.error),
             })}
           </Match>
           <Match when={status().type !== "notLogin"}>

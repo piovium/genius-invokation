@@ -19,7 +19,7 @@ import { createResource, For, Show } from "solid-js";
 import { DeckInfo } from "../pages/Decks";
 import { useGuestDecks } from "../guest";
 import { useAuth } from "../auth";
-import { copyShareCode } from "../utils";
+import { copyShareCode, getErrorMessage } from "../utils";
 import { useI18n } from "../i18n";
 
 export interface DeckInfoProps extends DeckInfo {
@@ -79,7 +79,7 @@ export function DeckBriefInfo(props: DeckInfoProps) {
         props.onDelete?.();
       } catch (e) {
         if (e instanceof AxiosError) {
-          alert(e.response?.data.message);
+          alert(getErrorMessage(e));
         }
         console.error(e);
       }

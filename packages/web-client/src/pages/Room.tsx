@@ -15,7 +15,12 @@
 
 import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { Layout } from "../layouts/Layout";
-import { PlayerInfo, roomCodeToId, getPlayerAvatarUrl } from "../utils";
+import {
+  PlayerInfo,
+  roomCodeToId,
+  getPlayerAvatarUrl,
+  getErrorMessage,
+} from "../utils";
 import {
   Show,
   createSignal,
@@ -190,21 +195,19 @@ export default function Room() {
 
   const reportStreamError = async (e: Error) => {
     if (e instanceof AxiosError) {
-      const data = e.response?.data as ReadableStream;
-      if (data && "pipeThrough" in data) {
-        const reader = data.pipeThrough(new TextDecoderStream()).getReader();
-        const { value, done } = await reader.read();
-        let message = `${value}`;
+      const response = e.response;
+      if (response?.data instanceof ReadableStream) {
         try {
-          message = JSON.parse(value ?? "{}").message;
+          response.data = await new Response(response.data).json();
         } catch {}
+        const message = getErrorMessage(e);
         if (initialized()) {
           alert(message);
         } else {
           setLoading(false);
           setFailed(message);
         }
-        console.error(value);
+        console.error(response.data);
       }
     }
     console.error(e);
@@ -218,7 +221,7 @@ export default function Room() {
         );
       } catch (e) {
         if (e instanceof AxiosError) {
-          alert(e.response?.data.message);
+          alert(getErrorMessage(e));
         }
         console.error(e);
       }
@@ -259,7 +262,7 @@ export default function Room() {
       await reply;
     } catch (e) {
       if (e instanceof AxiosError) {
-        alert(e.response?.data.message);
+        alert(getErrorMessage(e));
       }
       console.error(e);
     }
@@ -274,7 +277,7 @@ export default function Room() {
       history.back();
     } catch (e) {
       if (e instanceof AxiosError) {
-        alert(e.response?.data.message);
+        alert(getErrorMessage(e));
       }
       console.error(e);
     }
@@ -439,7 +442,7 @@ export default function Room() {
       a.remove();
     } catch (e) {
       if (e instanceof AxiosError) {
-        alert(e.response?.data.message);
+        alert(getErrorMessage(e));
       }
       console.error(e);
     }

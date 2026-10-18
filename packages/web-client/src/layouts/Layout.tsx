@@ -17,6 +17,7 @@ import { ErrorBoundary, JSX } from "solid-js";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { Dynamic } from "solid-js/web";
+import { getErrorMessage } from "../utils";
 
 export interface LayoutProps {
   children?: JSX.Element;
@@ -34,7 +35,7 @@ export function Layout(props: LayoutProps) {
         <Dynamic
           component={import.meta.env.DEV ? Passthrough : ErrorBoundary}
           fallback={(err: Error) => (
-            <div class="text-red-500">{err?.message ?? String(err)}</div>
+            <div class="text-red-500">{getErrorMessage(err)}</div>
           )}
         >
           {props.children}
