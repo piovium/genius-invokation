@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Hono, type Context } from "hono";
-import { HTTPException } from "hono/http-exception";
+import { UnauthorizedException } from "../errors";
 import { streamSSE } from "hono/streaming";
 import { type } from "arktype";
 import { sValidator } from "@hono/standard-validator";
@@ -153,22 +153,20 @@ export const RoomsController = new Hono<AuthEnv>()
   .get("/:roomId", sValidator("param", RoomParam), (c) => {
     const room = roomsService.getRoom(c.req.valid("param").roomId);
     if (User(c) === null && !room.config.allowGuest) {
-      throw new HTTPException(401, {
-        message: "This room does not allow guests",
-      });
+      throw new UnauthorizedException("This room does not allow guests");
     }
     return c.json(room);
   })
   .get("/:roomId/gameLog", sValidator("param", RoomParam), (c) => {
     const playerId = UserOrGuest(c);
-    if (playerId === null) throw new HTTPException(401);
+    if (playerId === null) throw new UnauthorizedException();
     return c.json(
       roomsService.getRoomGameLog(playerId, c.req.valid("param").roomId),
     );
   })
   .delete("/:roomId", sValidator("param", RoomParam), (c) => {
     const playerId = UserOrGuest(c);
-    if (playerId === null) throw new HTTPException(401);
+    if (playerId === null) throw new UnauthorizedException();
     roomsService.deleteRoom(playerId, c.req.valid("param").roomId);
     return c.body(null, 200);
   })
@@ -214,9 +212,9 @@ export const RoomsController = new Hono<AuthEnv>()
       const playerId = UserOrGuest(c);
       const { roomId, targetPlayerId } = c.req.valid("param");
       if (playerId !== targetPlayerId) {
-        throw new HTTPException(401, {
-          message: "You can only post your own action responses",
-        });
+        throw new UnauthorizedException(
+          "You can only post your own action responses",
+        );
       }
       roomsService.receivePlayerResponse(roomId, playerId, c.req.valid("json"));
       return c.json({ message: "response received" }, 201);
@@ -229,9 +227,7 @@ export const RoomsController = new Hono<AuthEnv>()
       const playerId = UserOrGuest(c);
       const { roomId, targetPlayerId } = c.req.valid("param");
       if (playerId !== targetPlayerId) {
-        throw new HTTPException(401, {
-          message: "You can only give up your own game",
-        });
+        throw new UnauthorizedException("You can only give up your own game");
       }
       roomsService.receivePlayerGiveUp(roomId, playerId);
       return c.json({ message: "given up" }, 201);

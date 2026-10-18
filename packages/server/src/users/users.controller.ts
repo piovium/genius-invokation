@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Hono } from "hono";
-import { HTTPException } from "hono/http-exception";
+import { NotFoundException } from "../errors";
 import { type } from "arktype";
 import { sValidator } from "@hono/standard-validator";
 import { usersService } from "../services";
@@ -36,7 +36,7 @@ export const UsersController = new Hono<AuthEnv>()
     }
     const user = await usersService.findById(userId);
     if (!user) {
-      throw new HTTPException(404);
+      throw new NotFoundException();
     }
     return c.json(user);
   })
@@ -49,7 +49,7 @@ export const UsersController = new Hono<AuthEnv>()
     const { id } = c.req.valid("param");
     const user = await usersService.findById(id);
     if (!user) {
-      throw new HTTPException(404);
+      throw new NotFoundException();
     }
     return c.json(user);
   });

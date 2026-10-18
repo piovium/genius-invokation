@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Hono } from "hono";
-import { HTTPException } from "hono/http-exception";
+import { ImATeapotException, ServiceUnavailableException } from "./errors";
 import { CORE_VERSION, CURRENT_VERSION, VERSIONS } from "@gi-tcg/core";
 import simpleGit, { type LogResult } from "simple-git";
 import { redis } from "./redis";
@@ -61,7 +61,7 @@ export const AppController = new Hono()
     return c.json(analyzeResult);
   })
   .get("/teapot", () => {
-    throw new HTTPException(418, { message: "I'm a teapot~" });
+    throw new ImATeapotException("I'm a teapot~");
   })
   .get("/hello", (c) => c.text("Hello World!"))
   .get("/healthz", async (c) => {
@@ -73,9 +73,9 @@ export const AppController = new Hono()
       if (activeRoomsCount) {
         await redis?.set("meta:deploying", Date.now());
         await redis?.expire("meta:deploying", 1 * 60 * 60);
-        throw new HTTPException(503, {
-          message: `There are still ${activeRoomsCount} active rooms.`,
-        });
+        throw new ServiceUnavailableException(
+          `There are still ${activeRoomsCount} active rooms.`,
+        );
       }
       await redis?.del("meta:deploying");
     }

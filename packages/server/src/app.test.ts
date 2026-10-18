@@ -6,7 +6,7 @@ import path from "node:path";
 import { once } from "node:events";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
-import { HTTPException } from "hono/http-exception";
+import { ConflictException, UnauthorizedException } from "./errors";
 import { sign } from "hono/jwt";
 import { serve } from "@hono/node-server";
 import { DrizzleQueryError } from "drizzle-orm";
@@ -279,7 +279,7 @@ describe("authentication", () => {
 
   it("does not swallow downstream errors on public routes", async () => {
     const app = new Hono<AuthEnv>().use(parseAuth).get("/", () => {
-      throw new HTTPException(409, { message: "conflict" });
+      throw new ConflictException("conflict");
     });
     const response = await app.request("/", {
       headers: { Authorization: `Bearer ${await token()}` },
@@ -664,7 +664,7 @@ describe("SSE transport", () => {
 
   it("returns permission errors before opening an SSE response", async () => {
     services.roomsService.playerNotification.mockImplementation(() => {
-      throw new HTTPException(401);
+      throw new UnauthorizedException();
     });
     const response = await AppModule.request(
       "/beta/api/rooms/0/players/123/notification",

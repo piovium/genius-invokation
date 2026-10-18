@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Hono } from "hono";
-import { HTTPException } from "hono/http-exception";
+import { NotFoundException } from "../errors";
 import { type } from "arktype";
 import { sValidator } from "@hono/standard-validator";
 import { User, type AuthEnv } from "../auth/user.decorator";
@@ -60,7 +60,7 @@ export const DecksController = new Hono<AuthEnv>()
     const { deckId } = c.req.valid("param");
     const deck = await decksService.getDeck(User(c)!, deckId);
     if (deck === null) {
-      throw new HTTPException(404);
+      throw new NotFoundException();
     }
     return c.json(deck);
   })

@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { dbService } from "../services";
-import { HTTPException } from "hono/http-exception";
+import { BadRequestException, NotFoundException } from "../errors";
 import type {
   CreateDeckDto,
   QueryDeckDto,
@@ -45,7 +45,7 @@ export class DecksService {
       };
     } catch (e) {
       if (e instanceof Error) {
-        throw new HTTPException(400, { message: e.message });
+        throw new BadRequestException(e.message);
       } else {
         throw e;
       }
@@ -129,9 +129,9 @@ export class DecksService {
       if (!deck.characters && !deck.cards) {
         code = void 0;
       } else {
-        throw new HTTPException(400, {
-          message: `characters and cards must be provided together`,
-        });
+        throw new BadRequestException(
+          `characters and cards must be provided together`,
+        );
       }
     } else {
       ({ code, requiredVersion } = await this.deckToCode({
@@ -145,7 +145,7 @@ export class DecksService {
       .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
       .returning();
     if (!model) {
-      throw new HTTPException(404, { message: "Deck not found" });
+      throw new NotFoundException("Deck not found");
     }
     return model;
   }
@@ -156,7 +156,7 @@ export class DecksService {
       .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
       .returning({ id: decks.id });
     if (!model) {
-      throw new HTTPException(404, { message: "Deck not found" });
+      throw new NotFoundException("Deck not found");
     }
   }
 }

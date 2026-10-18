@@ -15,6 +15,7 @@
 
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
+import { UnauthorizedException, ForbiddenException } from "../errors";
 import { jwt } from "hono/jwt";
 import { isUserJwtPayload, type AuthEnv } from "./user.decorator";
 
@@ -41,7 +42,7 @@ export const parseAuth = createMiddleware<AuthEnv>(async (c, next) => {
 // Register after public routes and before routes that require a login user.
 export const AuthGuard = createMiddleware<AuthEnv>(async (c, next) => {
   const payload = c.get("jwtPayload");
-  if (!payload) throw c.get("authError") ?? new HTTPException(401);
-  if (!isUserJwtPayload(payload)) throw new HTTPException(403);
+  if (!payload) throw c.get("authError") ?? new UnauthorizedException();
+  if (!isUserJwtPayload(payload)) throw new ForbiddenException();
   await next();
 });

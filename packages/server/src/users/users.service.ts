@@ -15,7 +15,7 @@
 
 import console from "node:console";
 import { dbService } from "../services";
-import { HTTPException } from "hono/http-exception";
+import { NotFoundException } from "../errors";
 import { eq } from "drizzle-orm";
 import { users } from "../db/schema";
 import axios from "axios";
@@ -79,7 +79,7 @@ export class UsersService {
         .from(users)
         .where(eq(users.id, id));
       if (!user) {
-        throw new HTTPException(404, { message: "User not found" });
+        throw new NotFoundException("User not found");
       }
       return;
     }
@@ -89,7 +89,7 @@ export class UsersService {
       .where(eq(users.id, id))
       .returning({ id: users.id });
     if (!user) {
-      throw new HTTPException(404, { message: "User not found" });
+      throw new NotFoundException("User not found");
     }
   }
 }

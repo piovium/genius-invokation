@@ -15,7 +15,7 @@
 
 import console from "node:console";
 import { usersService } from "../services";
-import { HTTPException } from "hono/http-exception";
+import { UnauthorizedException } from "../errors";
 import { sign } from "hono/jwt";
 import axios from "axios";
 
@@ -56,9 +56,9 @@ export class AuthService {
       this.logger.error("Code exchange failure");
       this.logger.error(code);
       this.logger.error(response.data);
-      throw new HTTPException(401, {
-        message: `code exchange failure: ${response.data?.error_description}`,
-      });
+      throw new UnauthorizedException(
+        `code exchange failure: ${response.data?.error_description}`,
+      );
     }
     const accessToken = response.data.access_token;
     const userResponse = await axios.get(GET_USER_API_URL, {
@@ -72,9 +72,9 @@ export class AuthService {
     if (userResponse.status >= 400) {
       this.logger.error("Get User detail failure");
       this.logger.error(userResponse.data);
-      throw new HTTPException(401, {
-        message: `get user detail failure: ${userResponse.data?.message}`,
-      });
+      throw new UnauthorizedException(
+        `get user detail failure: ${userResponse.data?.message}`,
+      );
     }
     return {
       id: userResponse.data.id,
