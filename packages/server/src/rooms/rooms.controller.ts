@@ -23,7 +23,7 @@ import { roomsService, authService } from "../services";
 import type { SSEPayload } from "./rooms.service";
 import { VERSIONS } from "@gi-tcg/core";
 import { DeckDto } from "../decks/decks.controller";
-import { IntParam, stringLength, validateDto } from "../utils";
+import { IntParam, stringLength, validate } from "../utils";
 import { ParsePlayerIdPipe } from "./rooms.pipe";
 import { getUserId, getUserOrGuestId } from "../auth/user.decorator";
 
@@ -129,19 +129,14 @@ export const RoomsController = new Hono()
     const userId = await getUserId(c);
     return c.json(roomsService.getAllRooms(userId === null));
   })
-  .post("/", async (c) => {
+  .post("/", sValidator("json", type.unknown), async (c) => {
+    const payload = await c.req.valid("json");
     const userId = await getUserId(c);
     if (userId !== null) {
-      const dto = await validateDto(c, UserCreateRoomDto);
-      if (dto instanceof Response) {
-        return dto;
-      }
+      const dto = validate(UserCreateRoomDto, payload);
       return c.json(await roomsService.createRoomFromUser(userId, dto), 201);
     } else {
-      const dto = await validateDto(c, GuestCreateRoomDto);
-      if (dto instanceof Response) {
-        return dto;
-      }
+      const dto = validate(GuestCreateRoomDto, payload);
       const { playerId, room } = await roomsService.createRoomFromGuest(dto);
       return c.json(
         {
@@ -184,31 +179,31 @@ export const RoomsController = new Hono()
     roomsService.deleteRoom(playerId, c.req.valid("param").roomId);
     return c.body(null, 200);
   })
-  .post("/:roomId/players", sValidator("param", RoomParam), async (c) => {
-    const { roomId } = c.req.valid("param");
-    const userId = await getUserId(c);
-    if (userId !== null) {
-      const dto = await validateDto(c, UserJoinRoomDto);
-      if (dto instanceof Response) {
-        return dto;
+  .post(
+    "/:roomId/players",
+    sValidator("param", RoomParam),
+    sValidator("json", type.unknown),
+    async (c) => {
+      const { roomId } = c.req.valid("param");
+      const payload = await c.req.valid("json");
+      const userId = await getUserId(c);
+      if (userId !== null) {
+        const dto = validate(UserJoinRoomDto, payload);
+        await roomsService.joinRoomFromUser(userId, roomId, dto.deckId);
+        return c.body(null, 201);
+      } else {
+        const dto = validate(GuestJoinRoomDto, payload);
+        const { playerId } = await roomsService.joinRoomFromGuest(roomId, dto);
+        return c.json(
+          {
+            accessToken: await authService.signGuest(playerId),
+            playerId,
+          },
+          201,
+        );
       }
-      await roomsService.joinRoomFromUser(userId, roomId, dto.deckId);
-      return c.body(null, 201);
-    } else {
-      const dto = await validateDto(c, GuestJoinRoomDto);
-      if (dto instanceof Response) {
-        return dto;
-      }
-      const { playerId } = await roomsService.joinRoomFromGuest(roomId, dto);
-      return c.json(
-        {
-          accessToken: await authService.signGuest(playerId),
-          playerId,
-        },
-        201,
-      );
-    }
-  })
+    },
+  )
   .get(
     "/:roomId/players/:targetPlayerId/notification",
     sValidator("param", PlayerParam),

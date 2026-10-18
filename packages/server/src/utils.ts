@@ -21,12 +21,10 @@ import {
   type EntityRawData,
 } from "@gi-tcg/assets-manager";
 import { type } from "arktype";
-import type { StandardSchemaV1 } from "@standard-schema/spec";
-import type { Context, Env } from "hono";
-import { sValidator } from "@hono/standard-validator";
 import { CURRENT_VERSION, VERSIONS, type Version } from "@gi-tcg/core";
 import { compare as semverCompare } from "semver";
 import { createId as createCuid, isCuid } from "@paralleldrive/cuid2";
+import { BadRequestException } from "./errors";
 
 export enum DeckVerificationErrorCode {
   SizeError = "SizeError",
@@ -223,14 +221,13 @@ export interface PaginationResult<T> {
   data: T[];
 }
 
-// Choose a schema after authentication while using the same Standard Schema
-// adapter and error response as statically declared route validators.
-export async function validateDto<Schema extends StandardSchemaV1>(
-  c: Context,
-  schema: Schema,
-): Promise<StandardSchemaV1.InferOutput<Schema> | Response> {
-  type Output = StandardSchemaV1.InferOutput<Schema>;
-  const validated = c as Context<Env, string, { out: { json: Output } }>;
-  const response = await sValidator("json", schema)(validated, async () => {});
-  return response instanceof Response ? response : validated.req.valid("json");
+export function validate<const T, R = type.infer.Out<T>>(
+  schema: type.validate<T>,
+  value: unknown,
+): R {
+  const result = type(schema as {})(value);
+  if (result instanceof type.errors) {
+    throw new BadRequestException(result.summary);
+  }
+  return result as R;
 }
