@@ -14,35 +14,52 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { createMiddleware } from "hono/factory";
-import { HTTPException } from "hono/http-exception";
-import { UnauthorizedException, ForbiddenException } from "../errors";
-import { jwt } from "hono/jwt";
-import { isUserJwtPayload, type AuthEnv } from "./user.decorator";
+import { every } from "hono/combine";
+import { ForbiddenException } from "../errors";
+import { jwt, verify } from "hono/jwt";
+import { isUserJwtPayload } from "./user.decorator";
+import type { Context } from "hono";
 
-// Resolve an optional identity once for every API request. Public routes can
-// use this identity without requiring authentication.
-export const parseAuth = createMiddleware<AuthEnv>(async (c, next) => {
-  const [scheme, token] = c.req.header("Authorization")?.split(" ") ?? [];
-  if (scheme === "Bearer" && token) {
-    try {
-      await jwt({
-        secret: process.env.JWT_SECRET!,
-        alg: "HS256",
-        verification: { iat: false },
-      })(c, async () => {});
-    } catch (error) {
-      if (!(error instanceof HTTPException) || error.status !== 401)
-        throw error;
-      c.set("authError", error);
-    }
+const secret = process.env.JWT_SECRET;
+
+if (!secret) {
+  throw new Error("JWT_SECRET environment variable is not set.");
+}
+
+const alg = "HS256";
+const options = {
+  iat: false,
+} as const;
+
+const jwtMiddleware = jwt({
+  secret,
+  alg: "HS256",
+  verification: options,
+});
+
+export const getJwtPayload = async (ctx: Context) => {
+  const payload = ctx.get("jwtPayload");
+  if (payload) {
+    return payload;
+  }
+  const authHeader = ctx.req.header("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return null;
+  }
+  const token = authHeader.substring(7);
+  try {
+    return await verify(token, secret, { ...options, alg });
+  } catch (error) {
+    return null;
+  }
+};
+
+const verifyJwtPayload = createMiddleware(async (ctx, next) => {
+  const jwtPayload = await getJwtPayload(ctx);
+  if (!jwtPayload || !isUserJwtPayload(jwtPayload)) {
+    throw new ForbiddenException();
   }
   await next();
 });
 
-// Register after public routes and before routes that require a login user.
-export const AuthGuard = createMiddleware<AuthEnv>(async (c, next) => {
-  const payload = c.get("jwtPayload");
-  if (!payload) throw c.get("authError") ?? new UnauthorizedException();
-  if (!isUserJwtPayload(payload)) throw new ForbiddenException();
-  await next();
-});
+export const AuthGuard = every(jwtMiddleware, verifyJwtPayload);

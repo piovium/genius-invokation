@@ -18,9 +18,9 @@ import { NotFoundException } from "../errors";
 import { type } from "arktype";
 import { sValidator } from "@hono/standard-validator";
 import { usersService } from "../services";
-import { User, type AuthEnv } from "../auth/user.decorator";
 import { AuthGuard } from "../auth/auth.guard";
 import { IntParam, stringLength } from "../utils";
+import { getUserId } from "../auth/user.decorator";
 
 export const UpdateUserInfoDto = type({
   "chessboardColor?": type(/^#[0-9a-fA-F]{6}$/).or("null"),
@@ -28,9 +28,9 @@ export const UpdateUserInfoDto = type({
 });
 export type UpdateUserInfoDto = typeof UpdateUserInfoDto.infer;
 
-export const UsersController = new Hono<AuthEnv>()
+export const UsersController = new Hono()
   .get("/me", async (c) => {
-    const userId = User(c);
+    const userId = await getUserId(c);
     if (userId === null) {
       return c.json(null);
     }
@@ -42,7 +42,8 @@ export const UsersController = new Hono<AuthEnv>()
   })
   .use(AuthGuard)
   .patch("/me", sValidator("json", UpdateUserInfoDto), async (c) => {
-    await usersService.updateUserInfo(User(c)!, c.req.valid("json"));
+    const userId = await getUserId(c);
+    await usersService.updateUserInfo(userId!, c.req.valid("json"));
     return c.body(null, 200);
   })
   .get("/:id", sValidator("param", type({ id: IntParam })), async (c) => {

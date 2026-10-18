@@ -23,8 +23,8 @@ import { RoomsService } from "./rooms/rooms.service";
 import { MetricsService } from "./metrics/metrics.service";
 import { redis } from "./redis";
 
-// Constructors must not read other singletons. Wire dependencies in methods or
-// initialization hooks, after every module in the import cycle has evaluated.
+// Temporary singleton service registry.
+// The initialization/finalization is manually maintained and written.
 export const dbService = new DbService();
 export const usersService = new UsersService();
 export const authService = new AuthService();

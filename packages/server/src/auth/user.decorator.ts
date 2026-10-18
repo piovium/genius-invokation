@@ -14,20 +14,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import type { Context } from "hono";
-import type { HTTPException } from "hono/http-exception";
-import type { JwtVariables } from "hono/jwt";
 import { isGuestId } from "../utils";
-
-export type AuthEnv = {
-  Variables: JwtVariables & { authError?: HTTPException };
-};
+import type { JWTPayload } from "hono/utils/jwt/types";
+import { getJwtPayload } from "./auth.guard";
 
 export function isUserJwtPayload(
-  payload: unknown,
-): payload is { user: 1; sub: number } {
+  payload: JWTPayload,
+): payload is JWTPayload & { user: 1; sub: number } {
   return (
-    payload !== null &&
-    typeof payload === "object" &&
     "user" in payload &&
     payload.user === 1 &&
     "sub" in payload &&
@@ -36,26 +30,26 @@ export function isUserJwtPayload(
 }
 
 export function isGuestJwtPayload(
-  payload: unknown,
-): payload is { sub: string } {
-  return (
-    payload !== null &&
-    typeof payload === "object" &&
-    "sub" in payload &&
-    isGuestId(payload.sub)
-  );
+  payload: JWTPayload,
+): payload is JWTPayload & { sub: string } {
+  return "sub" in payload && isGuestId(payload.sub);
 }
 
-export function User(c: Context<AuthEnv>): number | null {
-  const payload = c.get("jwtPayload");
-  return isUserJwtPayload(payload) ? payload.sub : null;
+export async function getUserId(c: Context): Promise<number | null> {
+  const payload = await getJwtPayload(c);
+  return payload && isUserJwtPayload(payload) ? payload.sub : null;
 }
 
-export function Guest(c: Context<AuthEnv>): string | null {
-  const payload = c.get("jwtPayload");
-  return isGuestJwtPayload(payload) ? payload.sub : null;
+export async function getGuestId(c: Context): Promise<string | null> {
+  const payload = await getJwtPayload(c);
+  return payload && isGuestJwtPayload(payload) ? payload.sub : null;
 }
 
-export function UserOrGuest(c: Context<AuthEnv>): number | string | null {
-  return User(c) ?? Guest(c);
+export async function getUserOrGuestId(
+  c: Context,
+): Promise<number | string | null> {
+  const payload = await getJwtPayload(c);
+  return payload && (isUserJwtPayload(payload) || isGuestJwtPayload(payload))
+    ? payload.sub
+    : null;
 }

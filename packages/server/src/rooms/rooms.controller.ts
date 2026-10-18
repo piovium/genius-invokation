@@ -21,11 +21,11 @@ import { sValidator } from "@hono/standard-validator";
 import { type Observable, Subscription } from "rxjs";
 import { roomsService, authService } from "../services";
 import type { SSEPayload } from "./rooms.service";
-import { User, UserOrGuest, type AuthEnv } from "../auth/user.decorator";
 import { VERSIONS } from "@gi-tcg/core";
 import { DeckDto } from "../decks/decks.controller";
 import { IntParam, stringLength, validateDto } from "../utils";
 import { ParsePlayerIdPipe } from "./rooms.pipe";
+import { getUserId, getUserOrGuestId } from "../auth/user.decorator";
 
 export const CreateRoomDto = type({
   "hostFirst?": "boolean",
@@ -122,10 +122,13 @@ export function streamNotification(
   });
 }
 
-export const RoomsController = new Hono<AuthEnv>()
-  .get("/", (c) => c.json(roomsService.getAllRooms(User(c) === null)))
+export const RoomsController = new Hono()
+  .get("/", async (c) => {
+    const userId = await getUserId(c);
+    return c.json(roomsService.getAllRooms(userId === null));
+  })
   .post("/", async (c) => {
-    const userId = User(c);
+    const userId = await getUserId(c);
     if (userId !== null) {
       const dto = await validateDto(c, UserCreateRoomDto);
       if (dto instanceof Response) return dto;
@@ -144,35 +147,40 @@ export const RoomsController = new Hono<AuthEnv>()
       );
     }
   })
-  .get("/current", (c) => {
-    const playerId = UserOrGuest(c);
+  .get("/current", async (c) => {
+    const playerId = await getUserOrGuestId(c);
     return c.json(
       playerId === null ? null : roomsService.currentRoom(playerId),
     );
   })
-  .get("/:roomId", sValidator("param", RoomParam), (c) => {
+  .get("/:roomId", sValidator("param", RoomParam), async (c) => {
+    const userId = await getUserId(c);
     const room = roomsService.getRoom(c.req.valid("param").roomId);
-    if (User(c) === null && !room.config.allowGuest) {
+    if (userId === null && !room.config.allowGuest) {
       throw new UnauthorizedException("This room does not allow guests");
     }
     return c.json(room);
   })
-  .get("/:roomId/gameLog", sValidator("param", RoomParam), (c) => {
-    const playerId = UserOrGuest(c);
-    if (playerId === null) throw new UnauthorizedException();
+  .get("/:roomId/gameLog", sValidator("param", RoomParam), async (c) => {
+    const playerId = await getUserOrGuestId(c);
+    if (playerId === null) {
+      throw new UnauthorizedException();
+    }
     return c.json(
       roomsService.getRoomGameLog(playerId, c.req.valid("param").roomId),
     );
   })
-  .delete("/:roomId", sValidator("param", RoomParam), (c) => {
-    const playerId = UserOrGuest(c);
-    if (playerId === null) throw new UnauthorizedException();
+  .delete("/:roomId", sValidator("param", RoomParam), async (c) => {
+    const playerId = await getUserOrGuestId(c);
+    if (playerId === null) {
+      throw new UnauthorizedException();
+    }
     roomsService.deleteRoom(playerId, c.req.valid("param").roomId);
     return c.body(null, 200);
   })
   .post("/:roomId/players", sValidator("param", RoomParam), async (c) => {
     const { roomId } = c.req.valid("param");
-    const userId = User(c);
+    const userId = await getUserId(c);
     if (userId !== null) {
       const dto = await validateDto(c, UserJoinRoomDto);
       if (dto instanceof Response) return dto;
@@ -194,11 +202,12 @@ export const RoomsController = new Hono<AuthEnv>()
   .get(
     "/:roomId/players/:targetPlayerId/notification",
     sValidator("param", PlayerParam),
-    (c) => {
+    async (c) => {
       const { roomId, targetPlayerId } = c.req.valid("param");
+      const playerId = await getUserOrGuestId(c);
       const source = roomsService.playerNotification(
         roomId,
-        UserOrGuest(c),
+        playerId,
         targetPlayerId,
       );
       return streamNotification(c, source);
@@ -208,8 +217,8 @@ export const RoomsController = new Hono<AuthEnv>()
     "/:roomId/players/:targetPlayerId/actionResponse",
     sValidator("param", PlayerParam),
     sValidator("json", PlayerActionResponseDto),
-    (c) => {
-      const playerId = UserOrGuest(c);
+    async (c) => {
+      const playerId = await getUserOrGuestId(c);
       const { roomId, targetPlayerId } = c.req.valid("param");
       if (playerId !== targetPlayerId) {
         throw new UnauthorizedException(
@@ -223,8 +232,8 @@ export const RoomsController = new Hono<AuthEnv>()
   .post(
     "/:roomId/players/:targetPlayerId/giveUp",
     sValidator("param", PlayerParam),
-    (c) => {
-      const playerId = UserOrGuest(c);
+    async (c) => {
+      const playerId = await getUserOrGuestId(c);
       const { roomId, targetPlayerId } = c.req.valid("param");
       if (playerId !== targetPlayerId) {
         throw new UnauthorizedException("You can only give up your own game");

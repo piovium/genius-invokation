@@ -25,10 +25,8 @@ import { RoomsModule } from "./rooms/rooms.module";
 import { MetricsModule } from "./metrics/metrics.module";
 import { DatabaseExceptionFilter } from "./db/db.module";
 
-import { parseAuth } from "./auth/auth.guard";
 
 const api = new Hono()
-  .use(parseAuth)
   .route("/", AppController)
   .route("/auth", AuthModule)
   .route("/users", UsersModule)
@@ -37,15 +35,15 @@ const api = new Hono()
   .route("/rooms", RoomsModule)
   .all("*", (c) => c.notFound());
 
-export const AppModule = new Hono();
+export const root = new Hono();
 if (process.env.NODE_ENV !== "production") {
-  AppModule.use(
+  root.use(
     cors({
       origin: "*",
       allowMethods: ["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"],
     }),
   );
 }
-AppModule.use(DatabaseExceptionFilter)
+root.use(DatabaseExceptionFilter)
   .route(`${WEB_CLIENT_BASE_PATH}api`, api)
   .route("/", MetricsModule);

@@ -17,18 +17,25 @@ import { Hono } from "hono";
 import { type } from "arktype";
 import { sValidator } from "@hono/standard-validator";
 import { gamesService } from "../services";
-import { User, type AuthEnv } from "../auth/user.decorator";
 import { AuthGuard } from "../auth/auth.guard";
 import { PaginationDto, IntParam } from "../utils";
+import { getUserId } from "../auth/user.decorator";
 
-export const GamesController = new Hono<AuthEnv>()
+export const GamesController = new Hono()
   .use(AuthGuard)
-  .get("/", sValidator("query", PaginationDto), async (c) =>
-    c.json(await gamesService.getAllGames(c.req.valid("query"))),
-  )
-  .get("/mine", sValidator("query", PaginationDto), async (c) =>
-    c.json(await gamesService.gamesHasUser(User(c)!, c.req.valid("query"))),
-  )
-  .get("/:gameId", sValidator("param", type({ gameId: IntParam })), async (c) =>
-    c.json(await gamesService.getGame(c.req.valid("param").gameId)),
+  .get("/", sValidator("query", PaginationDto), async (c) => {
+    return c.json(await gamesService.getAllGames(c.req.valid("query")));
+  })
+  .get("/mine", sValidator("query", PaginationDto), async (c) => {
+    const userId = await getUserId(c);
+    return c.json(
+      await gamesService.gamesHasUser(userId!, c.req.valid("query")),
+    );
+  })
+  .get(
+    "/:gameId",
+    sValidator("param", type({ gameId: IntParam })),
+    async (c) => {
+      return c.json(await gamesService.getGame(c.req.valid("param").gameId));
+    },
   );

@@ -15,7 +15,7 @@
 
 import console from "node:console";
 import { serve, type ServerType } from "@hono/node-server";
-import { AppModule } from "./app.module";
+import { root } from "./app.module";
 import { frontend } from "./frontend";
 import { initializeServices, roomsService, shutdownServices } from "./services";
 
@@ -24,11 +24,11 @@ export async function startServer() {
   try {
     if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET is not set");
     await initializeServices();
-    await frontend(AppModule);
+    await frontend(root);
     await new Promise<void>((resolve, reject) => {
       server = serve(
         {
-          fetch: AppModule.fetch,
+          fetch: root.fetch,
           port: Number(process.env.PORT ?? 3000),
           hostname: "::",
           serverOptions: {
