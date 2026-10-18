@@ -63,7 +63,7 @@ vi.mock("./redis", () => ({ redis: null }));
 
 import { AppModule } from "./app.module";
 import { frontend } from "./frontend";
-import { AuthGuard, Public } from "./auth/auth.guard";
+import { AuthGuard, parseAuth } from "./auth/auth.guard";
 import { UserOrGuest, type AuthEnv } from "./auth/user.decorator";
 import { DatabaseExceptionFilter } from "./db/database-exception.filter";
 import { streamNotification } from "./rooms/rooms.controller";
@@ -186,6 +186,37 @@ describe("HTTP contract", () => {
 });
 
 describe("authentication", () => {
+  it("keeps public routes before the auth boundary and protects every later route", async () => {
+    expect((await AppModule.request("/beta/api/users/me")).status).toBe(200);
+    expect(
+      (
+        await AppModule.request(
+          "/beta/api/decks/version",
+          jsonRequest("POST", deck),
+        )
+      ).status,
+    ).toBe(201);
+    for (const [method, path] of [
+      ["PATCH", "users/me"],
+      ["GET", "users/123"],
+      ["POST", "decks"],
+      ["GET", "decks"],
+      ["GET", "decks/7"],
+      ["PATCH", "decks/7"],
+      ["DELETE", "decks/7"],
+      ["GET", "decks/version"],
+      ["GET", "games"],
+      ["GET", "games/mine"],
+      ["GET", "games/7"],
+    ] as const) {
+      expect(
+        (await AppModule.request(`/beta/api/${path}`, { method })).status,
+      ).toBe(401);
+    }
+    // Auth middleware in other sub-applications must not affect public rooms.
+    expect((await AppModule.request("/beta/api/rooms")).status).toBe(200);
+  });
+
   it("distinguishes missing, invalid, expired, guest and user credentials", async () => {
     const guestId = createGuestId();
     const guestToken = await sign({ user: 0, sub: guestId }, secret, "HS256");
@@ -220,9 +251,9 @@ describe("authentication", () => {
         })
       ).status,
     ).toBe(200);
-    const app = new Hono<AuthEnv>().get("/", Public(), (c) =>
-      c.json(UserOrGuest(c)),
-    );
+    const app = new Hono<AuthEnv>()
+      .use(parseAuth)
+      .get("/", (c) => c.json(UserOrGuest(c)));
     expect(
       await (
         await app.request("/", {
@@ -247,7 +278,7 @@ describe("authentication", () => {
   });
 
   it("does not swallow downstream errors on public routes", async () => {
-    const app = new Hono<AuthEnv>().get("/", Public(), () => {
+    const app = new Hono<AuthEnv>().use(parseAuth).get("/", () => {
       throw new HTTPException(409, { message: "conflict" });
     });
     const response = await app.request("/", {
@@ -255,9 +286,9 @@ describe("authentication", () => {
     });
     expect(response.status).toBe(409);
     expect(await response.text()).toBe("conflict");
-    const protectedApp = new Hono<AuthEnv>().get("/", AuthGuard(), (c) =>
-      c.text("ok"),
-    );
+    const protectedApp = new Hono<AuthEnv>()
+      .use(parseAuth)
+      .get("/", AuthGuard, (c) => c.text("ok"));
     const badSignature = await sign(
       { user: 1, sub: 123 },
       "wrong-secret",

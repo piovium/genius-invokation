@@ -25,7 +25,10 @@ import { RoomsModule } from "./rooms/rooms.module";
 import { MetricsModule } from "./metrics/metrics.module";
 import { DatabaseExceptionFilter } from "./db/db.module";
 
+import { parseAuth } from "./auth/auth.guard";
+
 const api = new Hono()
+  .use(parseAuth)
   .route("/", AppController)
   .route("/auth", AuthModule)
   .route("/users", UsersModule)

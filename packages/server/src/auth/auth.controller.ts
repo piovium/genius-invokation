@@ -17,14 +17,12 @@ import { Hono } from "hono";
 import { type } from "arktype";
 import { sValidator } from "@hono/standard-validator";
 import { authService } from "../services";
-import { Public } from "./auth.guard";
 import type { AuthEnv } from "./user.decorator";
 
 const GitHubCallbackDto = type({ code: "string > 0" });
 
 export const AuthController = new Hono<AuthEnv>().get(
   "/github/callback",
-  Public(),
   sValidator("query", GitHubCallbackDto),
   async (c) => {
     const { code } = c.req.valid("query");

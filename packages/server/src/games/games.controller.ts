@@ -22,7 +22,7 @@ import { AuthGuard } from "../auth/auth.guard";
 import { PaginationDto, IntParam } from "../utils";
 
 export const GamesController = new Hono<AuthEnv>()
-  .use(AuthGuard())
+  .use(AuthGuard)
   .get("/", sValidator("query", PaginationDto), async (c) =>
     c.json(await gamesService.getAllGames(c.req.valid("query"))),
   )

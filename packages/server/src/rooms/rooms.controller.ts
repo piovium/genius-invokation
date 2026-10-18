@@ -24,7 +24,6 @@ import type { SSEPayload } from "./rooms.service";
 import { User, UserOrGuest, type AuthEnv } from "../auth/user.decorator";
 import { VERSIONS } from "@gi-tcg/core";
 import { DeckDto } from "../decks/decks.controller";
-import { Public } from "../auth/auth.guard";
 import { IntParam, stringLength, validateDto } from "../utils";
 import { ParsePlayerIdPipe } from "./rooms.pipe";
 
@@ -124,7 +123,6 @@ export function streamNotification(
 }
 
 export const RoomsController = new Hono<AuthEnv>()
-  .use(Public())
   .get("/", (c) => c.json(roomsService.getAllRooms(User(c) === null)))
   .post("/", async (c) => {
     const userId = User(c);

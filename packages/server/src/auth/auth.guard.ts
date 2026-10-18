@@ -18,16 +18,11 @@ import { HTTPException } from "hono/http-exception";
 import { jwt } from "hono/jwt";
 import { isUserJwtPayload, type AuthEnv } from "./user.decorator";
 
-export function AuthGuard(isPublic = false) {
-  return createMiddleware<AuthEnv>(async (c, next) => {
-    const [scheme, token] = c.req.header("Authorization")?.split(" ") ?? [];
-    if (scheme !== "Bearer" || !token) {
-      if (!isPublic) {
-        throw new HTTPException(401);
-      }
-      return next();
-    }
-    // Only catch verification errors; downstream errors must remain errors.
+// Resolve an optional identity once for every API request. Public routes can
+// use this identity without requiring authentication.
+export const parseAuth = createMiddleware<AuthEnv>(async (c, next) => {
+  const [scheme, token] = c.req.header("Authorization")?.split(" ") ?? [];
+  if (scheme === "Bearer" && token) {
     try {
       await jwt({
         secret: process.env.JWT_SECRET!,
@@ -35,16 +30,18 @@ export function AuthGuard(isPublic = false) {
         verification: { iat: false },
       })(c, async () => {});
     } catch (error) {
-      if (!isPublic) {
+      if (!(error instanceof HTTPException) || error.status !== 401)
         throw error;
-      }
-      return next();
+      c.set("authError", error);
     }
-    if (!isPublic && !isUserJwtPayload(c.get("jwtPayload"))) {
-      throw new HTTPException(403);
-    }
-    return next();
-  });
-}
+  }
+  await next();
+});
 
-export const Public = () => AuthGuard(true);
+// Register after public routes and before routes that require a login user.
+export const AuthGuard = createMiddleware<AuthEnv>(async (c, next) => {
+  const payload = c.get("jwtPayload");
+  if (!payload) throw c.get("authError") ?? new HTTPException(401);
+  if (!isUserJwtPayload(payload)) throw new HTTPException(403);
+  await next();
+});

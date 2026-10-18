@@ -14,10 +14,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import type { Context } from "hono";
+import type { HTTPException } from "hono/http-exception";
 import type { JwtVariables } from "hono/jwt";
 import { isGuestId } from "../utils";
 
-export type AuthEnv = { Variables: JwtVariables };
+export type AuthEnv = {
+  Variables: JwtVariables & { authError?: HTTPException };
+};
 
 export function isUserJwtPayload(
   payload: unknown,

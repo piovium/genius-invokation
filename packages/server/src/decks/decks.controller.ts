@@ -21,7 +21,7 @@ import { User, type AuthEnv } from "../auth/user.decorator";
 import { decksService } from "../services";
 import { PaginationDto, QueryInteger, IntParam, stringLength } from "../utils";
 import { VERSIONS } from "@gi-tcg/core";
-import { AuthGuard, Public } from "../auth/auth.guard";
+import { AuthGuard } from "../auth/auth.guard";
 
 export const DeckDto = type({
   characters: "(number.integer > 0)[] == 3",
@@ -45,17 +45,18 @@ export type QueryDeckDto = typeof QueryDeckDto.infer;
 const DeckParam = type({ deckId: IntParam });
 
 export const DecksController = new Hono<AuthEnv>()
-  .post("/", AuthGuard(), sValidator("json", CreateDeckDto), async (c) => {
+  .post("/version", sValidator("json", CreateDeckDto), async (c) =>
+    c.json(await decksService.deckToCode(c.req.valid("json")), 201),
+  )
+  .use(AuthGuard)
+  .post("/", sValidator("json", CreateDeckDto), async (c) => {
     const result = await decksService.createDeck(User(c)!, c.req.valid("json"));
     return c.json({ id: result.id, code: result.code }, 201);
   })
-  .post("/version", Public(), sValidator("json", CreateDeckDto), async (c) =>
-    c.json(await decksService.deckToCode(c.req.valid("json")), 201),
-  )
-  .get("/", AuthGuard(), sValidator("query", QueryDeckDto), async (c) =>
+  .get("/", sValidator("query", QueryDeckDto), async (c) =>
     c.json(await decksService.getAllDecks(User(c)!, c.req.valid("query"))),
   )
-  .get("/:deckId", AuthGuard(), sValidator("param", DeckParam), async (c) => {
+  .get("/:deckId", sValidator("param", DeckParam), async (c) => {
     const { deckId } = c.req.valid("param");
     const deck = await decksService.getDeck(User(c)!, deckId);
     if (deck === null) {
@@ -65,7 +66,6 @@ export const DecksController = new Hono<AuthEnv>()
   })
   .patch(
     "/:deckId",
-    AuthGuard(),
     sValidator("param", DeckParam),
     sValidator("json", UpdateDeckDto),
     async (c) => {
@@ -75,13 +75,8 @@ export const DecksController = new Hono<AuthEnv>()
       );
     },
   )
-  .delete(
-    "/:deckId",
-    AuthGuard(),
-    sValidator("param", DeckParam),
-    async (c) => {
-      const { deckId } = c.req.valid("param");
-      await decksService.deleteDeck(User(c)!, deckId);
-      return c.json({ message: `deck ${deckId} deleted` });
-    },
-  );
+  .delete("/:deckId", sValidator("param", DeckParam), async (c) => {
+    const { deckId } = c.req.valid("param");
+    await decksService.deleteDeck(User(c)!, deckId);
+    return c.json({ message: `deck ${deckId} deleted` });
+  });

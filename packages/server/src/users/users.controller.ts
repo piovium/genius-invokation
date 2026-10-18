@@ -19,7 +19,7 @@ import { type } from "arktype";
 import { sValidator } from "@hono/standard-validator";
 import { usersService } from "../services";
 import { User, type AuthEnv } from "../auth/user.decorator";
-import { AuthGuard, Public } from "../auth/auth.guard";
+import { AuthGuard } from "../auth/auth.guard";
 import { IntParam, stringLength } from "../utils";
 
 export const UpdateUserInfoDto = type({
@@ -29,7 +29,7 @@ export const UpdateUserInfoDto = type({
 export type UpdateUserInfoDto = typeof UpdateUserInfoDto.infer;
 
 export const UsersController = new Hono<AuthEnv>()
-  .get("/me", Public(), async (c) => {
+  .get("/me", async (c) => {
     const userId = User(c);
     if (userId === null) {
       return c.json(null);
@@ -40,25 +40,16 @@ export const UsersController = new Hono<AuthEnv>()
     }
     return c.json(user);
   })
-  .patch(
-    "/me",
-    AuthGuard(),
-    sValidator("json", UpdateUserInfoDto),
-    async (c) => {
-      await usersService.updateUserInfo(User(c)!, c.req.valid("json"));
-      return c.body(null, 200);
-    },
-  )
-  .get(
-    "/:id",
-    AuthGuard(),
-    sValidator("param", type({ id: IntParam })),
-    async (c) => {
-      const { id } = c.req.valid("param");
-      const user = await usersService.findById(id);
-      if (!user) {
-        throw new HTTPException(404);
-      }
-      return c.json(user);
-    },
-  );
+  .use(AuthGuard)
+  .patch("/me", sValidator("json", UpdateUserInfoDto), async (c) => {
+    await usersService.updateUserInfo(User(c)!, c.req.valid("json"));
+    return c.body(null, 200);
+  })
+  .get("/:id", sValidator("param", type({ id: IntParam })), async (c) => {
+    const { id } = c.req.valid("param");
+    const user = await usersService.findById(id);
+    if (!user) {
+      throw new HTTPException(404);
+    }
+    return c.json(user);
+  });
