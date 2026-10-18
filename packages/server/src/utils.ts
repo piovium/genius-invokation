@@ -20,24 +20,13 @@ import {
   type CharacterRawData,
   type EntityRawData,
 } from "@gi-tcg/assets-manager";
-import {
-  IsInt,
-  IsOptional,
-  IsPositive,
-  Max,
-  validate,
-  ValidationError,
-} from "class-validator";
+import { type } from "arktype";
+import type { StandardSchemaV1 } from "@standard-schema/spec";
+import type { Context, Env } from "hono";
+import { sValidator } from "@hono/standard-validator";
 import { CURRENT_VERSION, VERSIONS, type Version } from "@gi-tcg/core";
 import { compare as semverCompare } from "semver";
-import {
-  plainToClass,
-  Transform,
-  type ClassConstructor,
-  type TransformFnParams,
-} from "class-transformer";
 import { createId as createCuid, isCuid } from "@paralleldrive/cuid2";
-import { BadRequestException } from "@nestjs/common";
 
 export enum DeckVerificationErrorCode {
   SizeError = "SizeError",
@@ -189,8 +178,26 @@ export async function minimumRequiredVersionOfDeck({
   );
 }
 
-export function parseStringToInt({ value }: TransformFnParams): number {
-  return typeof value !== "string" || value.trim() === "" ? NaN : Number(value);
+export function parseStringToInt(value: string): number {
+  return value.trim() === "" ? NaN : Number(value);
+}
+
+export const QueryInteger = type("string")
+  .pipe(parseStringToInt)
+  .to("number.integer");
+export const IntParam = type(/^-?\d+$/)
+  .pipe(Number)
+  .to("number.integer");
+
+// Match class-validator's length constraint, including Unicode code points.
+export function stringLength(min: number, max: number) {
+  return type("string").narrow((value, ctx) => {
+    const length = [...value].length;
+    return (
+      (length >= min && length <= max) ||
+      ctx.reject(`a string of ${min}–${max} characters`)
+    );
+  });
 }
 
 export function createGuestId() {
@@ -205,84 +212,25 @@ export function isGuestId(id: unknown): id is string {
   return tag === "guest" && !!cuid && isCuid(cuid);
 }
 
-export class PaginationDto {
-  @IsInt()
-  @IsPositive()
-  @IsOptional()
-  @Transform(parseStringToInt)
-  skip?: number;
-
-  @IsInt()
-  @IsPositive()
-  @Max(30)
-  @IsOptional()
-  @Transform(parseStringToInt)
-  take?: number;
-}
+export const PaginationDto = type({
+  "skip?": QueryInteger.to("number > 0"),
+  "take?": QueryInteger.to("0 < number <= 30"),
+});
+export type PaginationDto = typeof PaginationDto.infer;
 
 export interface PaginationResult<T> {
   count: number;
   data: T[];
 }
 
-type ValidationErrorWithConstraints = ValidationError & {
-  constraints?: Record<string, string>;
-};
-
-// https://github.com/nestjs/nest/blob/b6ea2a1899fe54f289e2c6188c843705c9072698/packages/common/pipes/validation.pipe.ts#L266
-
-function mapChildrenToValidationErrors(
-  error: ValidationError,
-  parentPath?: string,
-): ValidationErrorWithConstraints[] {
-  if (!(error.children && error.children.length)) {
-    return [error];
-  }
-  const validationErrors = [];
-  parentPath = parentPath ? `${parentPath}.${error.property}` : error.property;
-  for (const item of error.children) {
-    if (item.children && item.children.length) {
-      validationErrors.push(...mapChildrenToValidationErrors(item, parentPath));
-    }
-    validationErrors.push(prependConstraintsWithParentProp(parentPath, item));
-  }
-  return validationErrors;
-}
-
-function prependConstraintsWithParentProp(
-  parentPath: string,
-  error: ValidationError,
-): ValidationErrorWithConstraints {
-  const constraints: Record<string, string> = {};
-  for (const key in error.constraints) {
-    constraints[key] = `${parentPath}.${error.constraints[key]}`;
-  }
-  return {
-    ...error,
-    constraints,
-  };
-}
-
-function flattenValidationErrors(
-  validationErrors: ValidationError[],
-): string[] {
-  return validationErrors
-    .flatMap((error) => mapChildrenToValidationErrors(error))
-    .filter((item) => !!item.constraints)
-    .flatMap((item) => Object.values(item.constraints!));
-}
-
-export async function validateDto<T extends object>(
-  value: unknown,
-  type: ClassConstructor<T>,
-): Promise<T> {
-  if (value === null || typeof value !== "object") {
-    throw new BadRequestException("body must be a JSON object");
-  }
-  const dto = plainToClass(type, value);
-  const errors = await validate(dto);
-  if (errors.length > 0) {
-    throw new BadRequestException(flattenValidationErrors(errors));
-  }
-  return dto;
+// Choose a schema after authentication while using the same Standard Schema
+// adapter and error response as statically declared route validators.
+export async function validateDto<Schema extends StandardSchemaV1>(
+  c: Context,
+  schema: Schema,
+): Promise<StandardSchemaV1.InferOutput<Schema> | Response> {
+  type Output = StandardSchemaV1.InferOutput<Schema>;
+  const validated = c as Context<Env, string, { out: { json: Output } }>;
+  const response = await sValidator("json", schema)(validated, async () => {});
+  return response instanceof Response ? response : validated.req.valid("json");
 }

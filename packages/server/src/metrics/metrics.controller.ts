@@ -1,5 +1,4 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,19 +13,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Controller, Get, Res } from "@nestjs/common";
-import type { FastifyReply } from "fastify";
-import { Public } from "../auth/auth.guard";
-import { MetricsService } from "./metrics.service";
+import { Hono } from "hono";
+import { metricsService } from "../services";
 
-@Controller()
-export class MetricsController {
-  constructor(private readonly metrics: MetricsService) {}
-
-  @Public()
-  @Get("/metrics")
-  async getMetrics(@Res({ passthrough: true }) reply: FastifyReply) {
-    reply.header("Content-Type", this.metrics.contentType);
-    return await this.metrics.getMetrics();
-  }
-}
+export const MetricsController = new Hono().get("/metrics", async (c) => {
+  c.header("Content-Type", metricsService.contentType);
+  return c.body(await metricsService.getMetrics());
+});

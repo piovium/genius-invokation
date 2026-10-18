@@ -13,64 +13,52 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import {
-  Controller,
-  Get,
-  NotFoundException,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Body,
-} from "@nestjs/common";
-import { UsersService, type UserInfo } from "./users.service";
-import { User } from "../auth/user.decorator";
-import { Public } from "../auth/auth.guard";
-import { IsOptional, Length, Matches } from "class-validator";
+import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
+import { type } from "arktype";
+import { sValidator } from "@hono/standard-validator";
+import { usersService } from "../services";
+import { User, type AuthEnv } from "../auth/user.decorator";
+import { AuthGuard, Public } from "../auth/auth.guard";
+import { IntParam, stringLength } from "../utils";
 
-export class UpdateUserInfoDto {
-  @Matches(/^#[0-9a-fA-F]{6}$/)
-  @IsOptional()
-  chessboardColor?: string | null;
+export const UpdateUserInfoDto = type({
+  "chessboardColor?": type(/^#[0-9a-fA-F]{6}$/).or("null"),
+  "name?": stringLength(1, 64),
+});
+export type UpdateUserInfoDto = typeof UpdateUserInfoDto.infer;
 
-  @Length(1, 64)
-  @IsOptional()
-  name?: string;
-}
-
-@Controller("users")
-export class UsersController {
-  constructor(private users: UsersService) {}
-
-  @Get("me")
-  @Public()
-  async me(@User() userId: number | null): Promise<UserInfo | null> {
+export const UsersController = new Hono<AuthEnv>()
+  .get("/me", Public(), async (c) => {
+    const userId = User(c);
     if (userId === null) {
-      return null;
+      return c.json(null);
     }
-    const user = await this.users.findById(userId);
+    const user = await usersService.findById(userId);
     if (!user) {
-      throw new NotFoundException();
+      throw new HTTPException(404);
     }
-    return user;
-  }
-
-  @Patch("me")
-  async updateMe(
-    @User() userId: number | null,
-    @Body() userInfo: UpdateUserInfoDto,
-  ) {
-    if (userId === null) {
-      throw new NotFoundException();
-    }
-    return await this.users.updateUserInfo(userId, userInfo);
-  }
-
-  @Get(":id")
-  async getUser(@Param("id", ParseIntPipe) id: number): Promise<UserInfo> {
-    const user = await this.users.findById(id);
-    if (!user) {
-      throw new NotFoundException();
-    }
-    return user;
-  }
-}
+    return c.json(user);
+  })
+  .patch(
+    "/me",
+    AuthGuard(),
+    sValidator("json", UpdateUserInfoDto),
+    async (c) => {
+      await usersService.updateUserInfo(User(c)!, c.req.valid("json"));
+      return c.body(null, 200);
+    },
+  )
+  .get(
+    "/:id",
+    AuthGuard(),
+    sValidator("param", type({ id: IntParam })),
+    async (c) => {
+      const { id } = c.req.valid("param");
+      const user = await usersService.findById(id);
+      if (!user) {
+        throw new HTTPException(404);
+      }
+      return c.json(user);
+    },
+  );

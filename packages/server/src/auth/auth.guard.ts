@@ -13,65 +13,38 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import {
-  type CanActivate,
-  type ExecutionContext,
-  Injectable,
-  SetMetadata,
-  UnauthorizedException,
-} from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
-import { JwtService } from "@nestjs/jwt";
-import type { FastifyRequest } from "fastify";
-import { isUserJwtPayload } from "./user.decorator";
+import { createMiddleware } from "hono/factory";
+import { HTTPException } from "hono/http-exception";
+import { jwt } from "hono/jwt";
+import { isUserJwtPayload, type AuthEnv } from "./user.decorator";
 
-export const IS_PUBLIC_KEY: unique symbol = Symbol("isPublic");
-
-type PublicValue = true | undefined;
-
-/**
- * By default, a route can only be accessed by login users.
- * Decorate a route with `@Public()` to allow public access (un-login or guest).
- * @returns 
- */
-export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
-
-@Injectable()
-export class AuthGuard implements CanActivate {
-  constructor(
-    private jwtService: JwtService,
-    private reflector: Reflector,
-  ) {}
-
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isPublic = this.reflector.getAllAndOverride<PublicValue>(
-      IS_PUBLIC_KEY,
-      [context.getHandler(), context.getClass()],
-    ) || false;
-
-    const request = context.switchToHttp().getRequest();
-    request.auth = null;
-    
-    const token = this.extractTokenFromHeader(request);
-    if (!token) {
-      return isPublic;
-    }
-    try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_SECRET,
-      });
-      request.auth = payload;
-      if (isUserJwtPayload(payload)) {
-        return true;
+export function AuthGuard(isPublic = false) {
+  return createMiddleware<AuthEnv>(async (c, next) => {
+    const [scheme, token] = c.req.header("Authorization")?.split(" ") ?? [];
+    if (scheme !== "Bearer" || !token) {
+      if (!isPublic) {
+        throw new HTTPException(401);
       }
-      return isPublic;
-    } catch {
-      return isPublic;
+      return next();
     }
-  }
-
-  private extractTokenFromHeader(request: FastifyRequest): string | undefined {
-    const [type, token] = request.headers.authorization?.split(" ") ?? [];
-    return type === "Bearer" ? token : undefined;
-  }
+    // Only catch verification errors; downstream errors must remain errors.
+    try {
+      await jwt({
+        secret: process.env.JWT_SECRET!,
+        alg: "HS256",
+        verification: { iat: false },
+      })(c, async () => {});
+    } catch (error) {
+      if (!isPublic) {
+        throw error;
+      }
+      return next();
+    }
+    if (!isPublic && !isUserJwtPayload(c.get("jwtPayload"))) {
+      throw new HTTPException(403);
+    }
+    return next();
+  });
 }
+
+export const Public = () => AuthGuard(true);

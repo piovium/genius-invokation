@@ -13,9 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Injectable } from "@nestjs/common";
+import { dbService, metricsService } from "../services";
 import { count, desc, eq, getColumns, inArray } from "drizzle-orm";
-import { DbService } from "../db/db.service";
 import {
   games,
   playersOnGames,
@@ -23,7 +22,6 @@ import {
   type PlayerOnGames,
 } from "../db/schema";
 import type { PaginationDto, PaginationResult } from "../utils";
-import { MetricsService } from "../metrics/metrics.service";
 
 export interface AddGameOption {
   playerIds: number[];
@@ -35,30 +33,22 @@ export interface AddGameOption {
 type GameNoData = Omit<GameModel, "data">;
 const { data: logData, ...summaryColumns } = getColumns(games);
 
-@Injectable()
 export class GamesService {
-  constructor(
-    private database: DbService,
-    private metrics: MetricsService,
-  ) {}
-
   async addGame({ playerIds, ...data }: AddGameOption): Promise<GameModel> {
-    const game = await this.database.db.transaction(async (tx) => {
+    const game = await dbService.db.transaction(async (tx) => {
       const [game] = await tx.insert(games).values(data).returning();
       if (playerIds.length) {
-        await tx
-          .insert(playersOnGames)
-          .values(
-            playerIds.map((playerId, who) => ({
-              playerId,
-              who,
-              gameId: game!.id,
-            })),
-          );
+        await tx.insert(playersOnGames).values(
+          playerIds.map((playerId, who) => ({
+            playerId,
+            who,
+            gameId: game!.id,
+          })),
+        );
       }
       return game!;
     });
-    this.metrics.incrementStoredGames();
+    metricsService.incrementStoredGames();
     return game;
   }
 
@@ -66,7 +56,7 @@ export class GamesService {
     skip = 0,
     take = 10,
   }: PaginationDto): Promise<PaginationResult<GameNoData>> {
-    return this.database.db.transaction(async (tx) => {
+    return dbService.db.transaction(async (tx) => {
       const data = await tx
         .select(summaryColumns)
         .from(games)
@@ -98,7 +88,7 @@ export class GamesService {
   }
 
   async getGame(gameId: number) {
-    return this.database.db.transaction(async (tx) => {
+    return dbService.db.transaction(async (tx) => {
       const [game] = await tx
         .select()
         .from(games)
@@ -120,7 +110,7 @@ export class GamesService {
     userId: number,
     { skip = 0, take = 10 }: PaginationDto,
   ): Promise<PaginationResult<PlayerOnGames & { game: GameNoData }>> {
-    return this.database.db.transaction(async (tx) => {
+    return dbService.db.transaction(async (tx) => {
       const data = await tx
         .select({ ...getColumns(playersOnGames), game: summaryColumns })
         .from(playersOnGames)

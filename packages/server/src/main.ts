@@ -13,44 +13,76 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { NestFactory } from "@nestjs/core";
-import {
-  FastifyAdapter,
-  type NestFastifyApplication,
-} from "@nestjs/platform-fastify";
+import console from "node:console";
+import { serve, type ServerType } from "@hono/node-server";
 import { AppModule } from "./app.module";
-import { RequestMethod, ValidationPipe } from "@nestjs/common";
-import { DatabaseExceptionFilter } from "./db/database-exception.filter";
-import { WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
 import { frontend } from "./frontend";
+import { initializeServices, roomsService, shutdownServices } from "./services";
 
-const app = await NestFactory.create<NestFastifyApplication>(
-  AppModule,
-  new FastifyAdapter({
-    // http2: true,
-    keepAliveTimeout: 65000, // 65 seconds (should be longer than ping interval)
-    requestTimeout: 0, // Disable request timeout for SSE
-  }),
-);
-app.enableShutdownHooks();
-app.useGlobalPipes(new ValidationPipe({ transform: true }));
-app.useGlobalFilters(new DatabaseExceptionFilter(app.getHttpAdapter()));
-app.setGlobalPrefix(`${WEB_CLIENT_BASE_PATH}api`, {
-  exclude: [{ path: "metrics", method: RequestMethod.GET }],
-});
-await app.register(frontend);
+export async function startServer() {
+  let server: ServerType | undefined;
+  try {
+    if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET is not set");
+    await initializeServices();
+    await frontend(AppModule);
+    await new Promise<void>((resolve, reject) => {
+      server = serve(
+        {
+          fetch: AppModule.fetch,
+          port: Number(process.env.PORT ?? 3000),
+          hostname: "::",
+          serverOptions: {
+            keepAliveTimeout: 65000,
+            requestTimeout: 0,
+          },
+        },
+        (address) => {
+          server?.off("error", reject);
+          console.log(
+            `Server listening at http://[${address.address}]:${address.port}`,
+          );
+          resolve();
+        },
+      );
+      server.once("error", reject);
+    });
+  } catch (error) {
+    server?.close();
+    await shutdownServices().catch(console.error);
+    throw error;
+  }
 
-if (process.env.NODE_ENV !== "production") {
-  app.enableCors({
-    origin: "*",
-    methods: ["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"],
-  });
+  let stopping: Promise<void> | undefined;
+  const shutdown = () =>
+    (stopping ??= (async () => {
+      // Keep accepting game actions until existing rooms have finished.
+      await roomsService.waitForShutdown();
+      try {
+        await new Promise<void>((resolve, reject) => {
+          server!.close((error) => (error ? reject(error) : resolve()));
+        });
+      } finally {
+        await shutdownServices();
+      }
+    })());
+  return { server: server!, shutdown };
 }
 
-await app.listen(process.env.PORT ?? 3000, "::", (err, address) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
-  console.log(`Server listening at ${address}`);
-});
+if (import.meta.main) {
+  const { shutdown } = await startServer();
+  let stopping = false;
+  const onShutdown = () => {
+    if (stopping) return;
+    stopping = true;
+    void shutdown().then(
+      () => process.exit(0),
+      (error) => {
+        console.error(error);
+        process.exit(1);
+      },
+    );
+  };
+  process.on("SIGINT", onShutdown);
+  process.on("SIGTERM", onShutdown);
+  process.on("SIGQUIT", onShutdown);
+}

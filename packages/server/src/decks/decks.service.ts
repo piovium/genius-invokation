@@ -13,12 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
-import { DbService } from "../db/db.service";
+import { dbService } from "../services";
+import { HTTPException } from "hono/http-exception";
 import type {
   CreateDeckDto,
   QueryDeckDto,
@@ -37,10 +33,7 @@ interface DeckWithVersion extends Deck {
 
 export interface DeckWithDeckModel extends DeckWithVersion, DeckModel {}
 
-@Injectable()
 export class DecksService {
-  constructor(private database: DbService) {}
-
   async deckToCode(deck: Deck): Promise<DeckWithVersion> {
     try {
       const sinceVersion = await verifyDeck(deck);
@@ -52,7 +45,7 @@ export class DecksService {
       };
     } catch (e) {
       if (e instanceof Error) {
-        throw new BadRequestException(e.message);
+        throw new HTTPException(400, { message: e.message });
       } else {
         throw e;
       }
@@ -69,7 +62,7 @@ export class DecksService {
 
   async createDeck(userId: number, deck: CreateDeckDto): Promise<DeckModel> {
     const { code, requiredVersion } = await this.deckToCode(deck);
-    const [model] = await this.database.db
+    const [model] = await dbService.db
       .insert(decks)
       .values({ name: deck.name, code, ownerUserId: userId, requiredVersion })
       .returning();
@@ -86,7 +79,7 @@ export class DecksService {
         ? undefined
         : lte(decks.requiredVersion, requiredVersion),
     );
-    const [models, total] = await this.database.db.transaction(async (tx) =>
+    const [models, total] = await dbService.db.transaction(async (tx) =>
       Promise.all([
         tx
           .select()
@@ -113,7 +106,7 @@ export class DecksService {
     userId: number,
     deckId: number,
   ): Promise<DeckWithDeckModel | null> {
-    const [model] = await this.database.db
+    const [model] = await dbService.db
       .select()
       .from(decks)
       .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
@@ -136,9 +129,9 @@ export class DecksService {
       if (!deck.characters && !deck.cards) {
         code = void 0;
       } else {
-        throw new BadRequestException(
-          `characters and cards must be provided together`,
-        );
+        throw new HTTPException(400, {
+          message: `characters and cards must be provided together`,
+        });
       }
     } else {
       ({ code, requiredVersion } = await this.deckToCode({
@@ -146,24 +139,24 @@ export class DecksService {
         cards: deck.cards,
       }));
     }
-    const [model] = await this.database.db
+    const [model] = await dbService.db
       .update(decks)
       .set({ name: deck.name, code, requiredVersion, updatedAt: new Date() })
       .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
       .returning();
     if (!model) {
-      throw new NotFoundException("Deck not found");
+      throw new HTTPException(404, { message: "Deck not found" });
     }
     return model;
   }
 
   async deleteDeck(userId: number, deckId: number) {
-    const [model] = await this.database.db
+    const [model] = await dbService.db
       .delete(decks)
       .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
       .returning({ id: decks.id });
     if (!model) {
-      throw new NotFoundException("Deck not found");
+      throw new HTTPException(404, { message: "Deck not found" });
     }
   }
 }

@@ -14,7 +14,7 @@ process.env.PGLITE_DATA_DIR ??= path.resolve(import.meta.dirname, "../.pglite");
 
 await $({ stdio: "inherit" })`pnpm db:migrate`;
 
-// ts-node/SWC preserves Nest's emitDecoratorMetadata, unlike tsx.
+// Keep the existing TypeScript loader for extensionless imports and transforms.
 const preload = pathToFileURL(
   path.resolve(import.meta.dirname, "../scripts/ts_preload.js"),
 ).href;

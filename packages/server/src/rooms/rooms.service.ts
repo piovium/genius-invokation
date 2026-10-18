@@ -13,15 +13,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import console from "node:console";
 import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from "@nestjs/common";
+  usersService,
+  decksService,
+  gamesService,
+  metricsService,
+} from "../services";
+import { HTTPException } from "hono/http-exception";
 import {
   type GameConfig,
   type GameStateLogEntry,
@@ -66,10 +65,7 @@ import {
   takeUntil,
 } from "rxjs";
 import { createGuestId, DeckVerificationError, verifyDeck } from "../utils";
-import {
-  MetricsService,
-  type RoomMetricsSnapshot,
-} from "../metrics/metrics.service";
+import type { RoomMetricsSnapshot } from "../metrics/metrics.service";
 import type {
   CreateRoomDto,
   GuestCreateRoomDto,
@@ -77,9 +73,6 @@ import type {
   PlayerActionResponseDto,
   UserCreateRoomDto,
 } from "./rooms.controller";
-import { DecksService } from "../decks/decks.service";
-import { UsersService } from "../users/users.service";
-import { GamesService } from "../games/games.service";
 import { inspect } from "node:util";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import semver from "semver";
@@ -287,10 +280,10 @@ class Player implements PlayerIOWithError {
 
   receiveResponse(response: PlayerActionResponseDto) {
     if (!this._rpcResolver) {
-      throw new NotFoundException(`No rpc now`);
+      throw new HTTPException(404, { message: `No rpc now` });
     } else if (this._rpcResolver.id !== response.id) {
       console.error(this._rpcResolver, response);
-      throw new NotFoundException(`Rpc id not match`);
+      throw new HTTPException(404, { message: `Rpc id not match` });
     }
     try {
       const rpcResponse = PbRpcResponse.decode(base64Decode(response.response));
@@ -302,7 +295,7 @@ class Player implements PlayerIOWithError {
       }
       this._rpcResolver.resolve(rpcResponse);
     } catch {
-      throw new BadRequestException("Invalid RPC response");
+      throw new HTTPException(400, { message: "Invalid RPC response" });
     }
   }
 
@@ -526,28 +519,30 @@ class Room {
 
   setHost(player: Player) {
     if (this.host !== null) {
-      throw new ConflictException("host already set");
+      throw new HTTPException(409, { message: "host already set" });
     }
     this.host = player;
     return this.hostWho;
   }
   setParticipant(player: Player) {
     if (this.host?.playerInfo.id === player.playerInfo.id) {
-      throw new ConflictException("player already occupies the host seat");
+      throw new HTTPException(409, {
+        message: "player already occupies the host seat",
+      });
     }
     if (this.participant !== null) {
-      throw new ConflictException("participant already set");
+      throw new HTTPException(409, { message: "participant already set" });
     }
     this.participant = player;
     return flip(this.hostWho);
   }
   start() {
     if (this.terminated) {
-      throw new ConflictException("room terminated");
+      throw new HTTPException(409, { message: "room terminated" });
     }
     const [player0, player1] = this.players;
     if (player0 === null || player1 === null) {
-      throw new ConflictException("player not ready");
+      throw new HTTPException(409, { message: "player not ready" });
     }
     let state: GameState;
     try {
@@ -562,9 +557,9 @@ class Room {
       });
     } catch (e) {
       this.stop();
-      throw new InternalServerErrorException(
-        `Failed to create initial game state: ${e}; propably due to invalid decks`,
-      );
+      throw new HTTPException(500, {
+        message: `Failed to create initial game state: ${e}; propably due to invalid decks`,
+      });
     }
     this.startedAt = new Date();
     const game = new InternalGame(state);
@@ -612,7 +607,7 @@ class Room {
     } else if (this.players[1]?.playerInfo.id === userId) {
       this.game?.giveUp(1);
     } else {
-      throw new NotFoundException(`Player ${userId} not found`);
+      throw new HTTPException(404, { message: `Player ${userId} not found` });
     }
   }
 
@@ -670,32 +665,23 @@ function toShuffled<T>(array: readonly T[]): T[] {
   return result;
 }
 
-@Injectable()
 export class RoomsService {
-  private logger = new Logger(RoomsService.name);
+  private logger = console;
 
   private roomIdPool = toShuffled(Array.from({ length: 10000 }, (_, i) => i));
   private rooms = new Map<number, Room>();
   private shutdownResolvers: PromiseWithResolvers<void> | null = null;
 
-  constructor(
-    private users: UsersService,
-    private decks: DecksService,
-    private games: GamesService,
-    private metrics: MetricsService,
-  ) {
-    this.metrics.setRoomMetricsProvider(() => this.getRoomMetricsSnapshot());
-    const onShutdown = async () => {
-      console.log(`Waiting for ${this.rooms.size} rooms to stop...`);
-      if (!this.shutdownResolvers && this.rooms.size !== 0) {
-        this.shutdownResolvers = Promise.withResolvers();
-      }
-      await this.shutdownResolvers?.promise;
-      process.exit();
-    };
-    process.on("SIGINT", onShutdown);
-    process.on("SIGTERM", onShutdown);
-    process.on("SIGQUIT", onShutdown);
+  onModuleInit() {
+    metricsService.setRoomMetricsProvider(() => this.getRoomMetricsSnapshot());
+  }
+
+  async waitForShutdown() {
+    console.log(`Waiting for ${this.rooms.size} rooms to stop...`);
+    if (!this.shutdownResolvers && this.rooms.size !== 0) {
+      this.shutdownResolvers = Promise.withResolvers();
+    }
+    await this.shutdownResolvers?.promise;
   }
 
   currentRoom(playerId: PlayerId) {
@@ -744,16 +730,20 @@ export class RoomsService {
   }
 
   async createRoomFromUser(userId: number, params: UserCreateRoomDto) {
-    const user = await this.users.findById(userId);
+    const user = await usersService.findById(userId);
     if (user === null) {
-      throw new NotFoundException(`User ${userId} not found`);
+      throw new HTTPException(404, { message: `User ${userId} not found` });
     }
     if (this.currentRoom(userId) !== null) {
-      throw new ConflictException(`User ${userId} is already in a room`);
+      throw new HTTPException(409, {
+        message: `User ${userId} is already in a room`,
+      });
     }
-    const deck = await this.decks.getDeck(userId, params.hostDeckId);
+    const deck = await decksService.getDeck(userId, params.hostDeckId);
     if (deck === null) {
-      throw new NotFoundException(`Deck ${params.hostDeckId} not found`);
+      throw new HTTPException(404, {
+        message: `Deck ${params.hostDeckId} not found`,
+      });
     }
     const playerInfo: PlayerInfo = {
       isGuest: false,
@@ -784,9 +774,9 @@ export class RoomsService {
   private async createRoom(playerInfo: PlayerInfo, params: CreateRoomDto) {
     let deploying = (await redis?.get("meta:deploying")) ?? null;
     if (this.shutdownResolvers || deploying !== null) {
-      throw new ConflictException(
-        "Creating room is disabled now; we are planning a maintenance",
-      );
+      throw new HTTPException(409, {
+        message: "Creating room is disabled now; we are planning a maintenance",
+      });
     }
 
     const hostWho =
@@ -817,13 +807,15 @@ export class RoomsService {
     try {
       const version = await verifyDeck(playerInfo.deck);
       if (semver.compare(version, roomConfig.gameVersion) > 0) {
-        throw new BadRequestException(
-          `Deck version required ${version}, it's higher game version ${roomConfig.gameVersion}`,
-        );
+        throw new HTTPException(400, {
+          message: `Deck version required ${version}, it's higher game version ${roomConfig.gameVersion}`,
+        });
       }
     } catch (e) {
       if (e instanceof DeckVerificationError) {
-        throw new BadRequestException(`Deck verification failed: ${e.message}`);
+        throw new HTTPException(400, {
+          message: `Deck verification failed: ${e.message}`,
+        });
       } else {
         throw e;
       }
@@ -831,17 +823,17 @@ export class RoomsService {
 
     const roomId = this.roomIdPool[0];
     if (typeof roomId === "undefined") {
-      throw new InternalServerErrorException("no room available");
+      throw new HTTPException(500, { message: "no room available" });
     }
     const room = new Room(roomId, roomConfig);
     this.rooms.set(roomId, room);
     this.roomIdPool.shift();
-    this.metrics.incrementCreatedRooms();
+    metricsService.incrementCreatedRooms();
     this.logger.log(`Room ${room.id} created, host is ${playerInfo.name}`);
 
     room.onStop(async (room, game) => {
       if (game) {
-        this.metrics.incrementFinishedRooms();
+        metricsService.incrementFinishedRooms();
       }
       let deploying = (await redis?.get("meta:deploying")) ?? null;
 
@@ -880,27 +872,29 @@ export class RoomsService {
   deleteRoom(playerId: PlayerId, roomId: number) {
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new NotFoundException(`Room ${roomId} not found`);
+      throw new HTTPException(404, { message: `Room ${roomId} not found` });
     }
     if (room.status !== RoomStatus.Waiting) {
-      throw new ConflictException(
-        `${roomId} has status ${room.status}, while only waiting room can be deleted`,
-      );
+      throw new HTTPException(409, {
+        message: `${roomId} has status ${room.status}, while only waiting room can be deleted`,
+      });
     }
     if (room.getHost()?.playerInfo.id !== playerId) {
-      throw new UnauthorizedException(`You are not the host of room ${roomId}`);
+      throw new HTTPException(401, {
+        message: `You are not the host of room ${roomId}`,
+      });
     }
     room.stop();
   }
 
   async joinRoomFromUser(userId: number, roomId: number, deckId: number) {
-    const user = await this.users.findById(userId);
+    const user = await usersService.findById(userId);
     if (user === null) {
-      throw new NotFoundException(`User ${userId} not found`);
+      throw new HTTPException(404, { message: `User ${userId} not found` });
     }
-    const deck = await this.decks.getDeck(userId, deckId);
+    const deck = await decksService.getDeck(userId, deckId);
     if (deck === null) {
-      throw new NotFoundException(`Deck ${deckId} not found`);
+      throw new HTTPException(404, { message: `Deck ${deckId} not found` });
     }
     const playerInfo: PlayerInfo = {
       isGuest: false,
@@ -927,30 +921,36 @@ export class RoomsService {
   private async joinRoom(playerInfo: PlayerInfo, roomId: number) {
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new NotFoundException(`Room ${roomId} not found`);
+      throw new HTTPException(404, { message: `Room ${roomId} not found` });
     }
     if (room.status !== RoomStatus.Waiting) {
-      throw new ConflictException(`Room ${roomId} is not waiting`);
+      throw new HTTPException(409, {
+        message: `Room ${roomId} is not waiting`,
+      });
     }
     if (playerInfo.isGuest && !room.config.allowGuest) {
-      throw new UnauthorizedException(`Room ${roomId} does not allow guest`);
+      throw new HTTPException(401, {
+        message: `Room ${roomId} does not allow guest`,
+      });
     }
     if (this.currentRoom(playerInfo.id) !== null) {
-      throw new ConflictException(
-        `Player ${playerInfo.id} is already in a room`,
-      );
+      throw new HTTPException(409, {
+        message: `Player ${playerInfo.id} is already in a room`,
+      });
     }
 
     try {
       const version = await verifyDeck(playerInfo.deck);
       if (semver.compare(version, room.config.gameVersion) > 0) {
-        throw new BadRequestException(
-          `Deck version required ${version}, it's higher game version ${room.config.gameVersion}`,
-        );
+        throw new HTTPException(400, {
+          message: `Deck version required ${version}, it's higher game version ${room.config.gameVersion}`,
+        });
       }
     } catch (e) {
       if (e instanceof DeckVerificationError) {
-        throw new BadRequestException(`Deck verification failed: ${e.message}`);
+        throw new HTTPException(400, {
+          message: `Deck verification failed: ${e.message}`,
+        });
       } else {
         throw e;
       }
@@ -990,7 +990,7 @@ export class RoomsService {
       ) as number[];
       const winnerWho = game.state.winner;
       const winnerId = winnerWho === null ? null : playerIds[winnerWho]!;
-      this.games
+      gamesService
         .addGame({
           coreVersion: Room.CORE_VERSION,
           gameVersion: room.config.gameVersion,
@@ -1021,13 +1021,13 @@ export class RoomsService {
         `Failed to update meta:active_rooms for room ${room.id}: ${e}`,
       );
     }
-    this.metrics.incrementStartedRooms();
+    metricsService.incrementStartedRooms();
   }
 
   getRoom(roomId: number): RoomInfo {
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new NotFoundException(`Room not found`);
+      throw new HTTPException(404, { message: `Room not found` });
     }
     return room.getRoomInfo();
   }
@@ -1035,10 +1035,12 @@ export class RoomsService {
   getRoomGameLog(playerId: PlayerId, roomId: number) {
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new NotFoundException(`Room not found`);
+      throw new HTTPException(404, { message: `Room not found` });
     }
     if (room.status !== RoomStatus.Finished) {
-      throw new ConflictException(`Room ${roomId} is not finished`);
+      throw new HTTPException(409, {
+        message: `Room ${roomId} is not finished`,
+      });
     }
     if (
       room.config.watchable ||
@@ -1046,9 +1048,9 @@ export class RoomsService {
     ) {
       return room.getStateLog();
     } else {
-      throw new UnauthorizedException(
-        `Room ${roomId} is not watchable, and you are not in the room`,
-      );
+      throw new HTTPException(401, {
+        message: `Room ${roomId} is not watchable, and you are not in the room`,
+      });
     }
   }
 
@@ -1076,25 +1078,27 @@ export class RoomsService {
   ): Observable<{ data: SSEPayload }> {
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new NotFoundException(`Room not found`);
+      throw new HTTPException(404, { message: `Room not found` });
     }
     const players = room.getPlayers();
     const playerUserIds = players.map((player) => player.playerInfo.id);
     if (!playerUserIds.includes(watchingPlayerId)) {
-      throw new NotFoundException(`Player ${watchingPlayerId} not in room`);
+      throw new HTTPException(404, {
+        message: `Player ${watchingPlayerId} not in room`,
+      });
     }
     if (!room.config.watchable && visitorPlayerId !== watchingPlayerId) {
-      throw new UnauthorizedException(
-        `Room ${roomId} cannot be watched by other`,
-      );
+      throw new HTTPException(401, {
+        message: `Room ${roomId} cannot be watched by other`,
+      });
     }
     if (
       (playerUserIds as (PlayerId | null)[]).includes(visitorPlayerId) &&
       visitorPlayerId !== watchingPlayerId
     ) {
-      throw new UnauthorizedException(
-        `You cannot watch ${watchingPlayerId}, he is your opponent!`,
-      );
+      throw new HTTPException(401, {
+        message: `You cannot watch ${watchingPlayerId}, he is your opponent!`,
+      });
     }
     for (const player of players) {
       if (player.playerInfo.id === watchingPlayerId) {
@@ -1114,7 +1118,7 @@ export class RoomsService {
         );
       }
     }
-    throw new InternalServerErrorException("unreachable");
+    throw new HTTPException(500, { message: "unreachable" });
   }
 
   receivePlayerResponse(
@@ -1124,7 +1128,7 @@ export class RoomsService {
   ) {
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new NotFoundException(`Room not found`);
+      throw new HTTPException(404, { message: `Room not found` });
     }
     const players = room.getPlayers();
     for (const player of players) {
@@ -1133,13 +1137,13 @@ export class RoomsService {
         return;
       }
     }
-    throw new NotFoundException(`Player ${playerId} not in room`);
+    throw new HTTPException(404, { message: `Player ${playerId} not in room` });
   }
 
   receivePlayerGiveUp(roomId: number, playerId: PlayerId) {
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new NotFoundException(`Room not found`);
+      throw new HTTPException(404, { message: `Room not found` });
     }
     room.giveUp(playerId);
   }

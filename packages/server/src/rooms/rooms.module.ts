@@ -13,19 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Module } from "@nestjs/common";
-import { RoomsService } from "./rooms.service";
+import { Hono } from "hono";
 import { RoomsController } from "./rooms.controller";
-import { DecksModule } from "../decks/decks.module";
-import { UsersModule } from "../users/users.module";
-import { GamesModule } from "../games/games.module";
-import { AuthModule } from "../auth/auth.module";
-import { ParsePlayerIdPipe } from "./rooms.pipe";
-import { MetricsModule } from "../metrics/metrics.module";
 
-@Module({
-  imports: [DecksModule, UsersModule, GamesModule, AuthModule, MetricsModule],
-  providers: [RoomsService, ParsePlayerIdPipe],
-  controllers: [RoomsController],
-})
-export class RoomsModule {}
+export const RoomsModule = new Hono().route("/", RoomsController);

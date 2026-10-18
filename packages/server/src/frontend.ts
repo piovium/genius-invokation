@@ -16,8 +16,8 @@
 import { glob, readFile } from "node:fs/promises";
 import path from "node:path";
 import mime from "mime";
-import type { FastifyInstance, RouteHandlerMethod } from "fastify";
-import fastifyEtag from "@fastify/etag";
+import { Hono, type Handler } from "hono";
+import { etag } from "hono/etag";
 import { IS_BETA, WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
 
 const HTML_INJECTION_PLACEHOLDERS = {
@@ -43,11 +43,12 @@ export function injectHtml(
   );
 }
 
-export async function frontend(app: FastifyInstance) {
-  await app.register(fastifyEtag);
-
+export async function frontend(
+  app: Hono,
+  publicDir = path.resolve(import.meta.dirname, "../public"),
+) {
   if (process.env.NODE_ENV === "production") {
-    const publicDir = path.resolve(import.meta.dirname, "../public");
+    const assets = new Hono().use(etag());
     const indexHtml = await readFile(
       path.join(publicDir, "index.html"),
       "utf8",
@@ -70,33 +71,32 @@ export async function frontend(app: FastifyInstance) {
       if (name === "index.html") {
         continue;
       }
-      const buffer = await readFile(filepath);
+      const buffer = new Uint8Array(await readFile(filepath));
       const type = mime.getType(name) ?? "application/octet-stream";
-      app.get(`${WEB_CLIENT_BASE_PATH}${name}`, (_req, reply) => {
-        reply
-          .header(
-            "Cache-Control",
-            name === "sw.js"
-              ? "public, no-cache, must-revalidate"
-              : "public, max-age=31536000, immutable",
-          )
-          .type(type)
-          .send(buffer);
+      assets.get(`${WEB_CLIENT_BASE_PATH}${name}`, (c) => {
+        c.header(
+          "Cache-Control",
+          name === "sw.js"
+            ? "public, no-cache, must-revalidate"
+            : "public, max-age=31536000, immutable",
+        );
+        c.header("Content-Type", type);
+        return c.body(buffer);
       });
     }
 
     const indexHtmlContent = injectHtml(indexHtml, {
       head: IS_BETA ? '<meta name="robots" content="noindex">' : "",
     });
-    const indexHtmlBuffer = Buffer.from(indexHtmlContent);
-    const indexHtmlHandler: RouteHandlerMethod = (_req, reply) => {
-      return reply
-        .header("Cache-Control", "public, no-cache, must-revalidate")
-        .type("text/html")
-        .send(indexHtmlBuffer);
+    const indexHtmlBuffer = new TextEncoder().encode(indexHtmlContent);
+    const indexHtmlHandler: Handler = (c) => {
+      c.header("Cache-Control", "public, no-cache, must-revalidate");
+      c.header("Content-Type", "text/html");
+      return c.body(indexHtmlBuffer);
     };
     const baseNoSuffix = WEB_CLIENT_BASE_PATH.replace(/(.+)\/$/, "$1");
-    app.get(baseNoSuffix, indexHtmlHandler);
-    app.get(`${WEB_CLIENT_BASE_PATH}*`, indexHtmlHandler);
+    assets.get(baseNoSuffix, indexHtmlHandler);
+    assets.get(`${WEB_CLIENT_BASE_PATH}*`, indexHtmlHandler);
+    app.route("/", assets);
   }
 }

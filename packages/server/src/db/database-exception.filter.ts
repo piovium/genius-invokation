@@ -1,16 +1,15 @@
-import { type ArgumentsHost, Catch, ConflictException } from "@nestjs/common";
-import { BaseExceptionFilter } from "@nestjs/core";
+import { createMiddleware } from "hono/factory";
+import { HTTPException } from "hono/http-exception";
 import { DrizzleQueryError } from "drizzle-orm";
 
-@Catch(DrizzleQueryError)
-export class DatabaseExceptionFilter extends BaseExceptionFilter {
-  catch(exception: DrizzleQueryError, host: ArgumentsHost) {
-    const cause = exception.cause as { code?: string } | undefined;
-    super.catch(
-      cause?.code === "23505"
-        ? new ConflictException("Record already exists")
-        : exception,
-      host,
-    );
+export const DatabaseExceptionFilter = createMiddleware(async (c, next) => {
+  await next();
+  if (c.error instanceof DrizzleQueryError) {
+    const cause = c.error.cause as { code?: string } | undefined;
+    if (cause?.code === "23505") {
+      c.res = new HTTPException(409, {
+        message: "Record already exists",
+      }).getResponse();
+    }
   }
-}
+});

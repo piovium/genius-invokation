@@ -13,41 +13,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Query,
-  Req,
-  Res,
-} from "@nestjs/common";
-import type { FastifyReply, FastifyRequest } from "fastify";
-import { IsNotEmpty } from "class-validator";
-import { AuthService } from "./auth.service";
+import { Hono } from "hono";
+import { type } from "arktype";
+import { sValidator } from "@hono/standard-validator";
+import { authService } from "../services";
 import { Public } from "./auth.guard";
-import { SERVER_HOST } from "@gi-tcg/config";
+import type { AuthEnv } from "./user.decorator";
 
-class GitHubCallbackDto {
-  @IsNotEmpty()
-  code!: string;
-}
+const GitHubCallbackDto = type({ code: "string > 0" });
 
-@Controller("auth")
-export class AuthController {
-  constructor(private auth: AuthService) {}
-
-  @Public()
-  @HttpCode(HttpStatus.OK)
-  @Get("github/callback")
-  async login(
-    @Query() { code }: GitHubCallbackDto,
-    @Res() res: FastifyReply,
-  ) {
-    const { accessToken } = await this.auth.login(code);
-    res.type("text/html").send(
+export const AuthController = new Hono<AuthEnv>().get(
+  "/github/callback",
+  Public(),
+  sValidator("query", GitHubCallbackDto),
+  async (c) => {
+    const { code } = c.req.valid("query");
+    const { accessToken } = await authService.login(code);
+    return c.html(
       `<!DOCTYPE html>
 <title>Login Success</title>
 <p>Redirecting back...</p>
@@ -59,5 +41,5 @@ export class AuthController {
   window.close();
 </script>`,
     );
-  }
-}
+  },
+);

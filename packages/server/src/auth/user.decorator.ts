@@ -13,8 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { createParamDecorator, type ExecutionContext } from "@nestjs/common";
+import type { Context } from "hono";
+import type { JwtVariables } from "hono/jwt";
 import { isGuestId } from "../utils";
+
+export type AuthEnv = { Variables: JwtVariables };
 
 export function isUserJwtPayload(
   payload: unknown,
@@ -40,35 +43,16 @@ export function isGuestJwtPayload(
   );
 }
 
-export const User = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<{ auth?: unknown }>();
-    if (!isUserJwtPayload(request.auth)) {
-      return null;
-    }
-    return request.auth.sub;
-  },
-);
+export function User(c: Context<AuthEnv>): number | null {
+  const payload = c.get("jwtPayload");
+  return isUserJwtPayload(payload) ? payload.sub : null;
+}
 
-export const Guest = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<{ auth?: unknown }>();
-    if (!isGuestJwtPayload(request.auth)) {
-      return null;
-    }
-    return request.auth.sub;
-  },
-);
+export function Guest(c: Context<AuthEnv>): string | null {
+  const payload = c.get("jwtPayload");
+  return isGuestJwtPayload(payload) ? payload.sub : null;
+}
 
-export const UserOrGuest = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<{ auth?: unknown }>();
-    if (!request.auth) {
-      return null;
-    }
-    if (!(isUserJwtPayload(request.auth) || isGuestJwtPayload(request.auth))) {
-      return null;
-    }
-    return request.auth.sub;
-  },
-);
+export function UserOrGuest(c: Context<AuthEnv>): number | string | null {
+  return User(c) ?? Guest(c);
+}

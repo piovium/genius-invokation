@@ -1,15 +1,9 @@
-import {
-  Injectable,
-  type OnModuleInit,
-  type OnModuleDestroy,
-} from "@nestjs/common";
 import { drizzle } from "drizzle-orm/node-postgres";
 import type { PgAsyncDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import pg from "pg";
 
-@Injectable()
-export class DbService implements OnModuleInit, OnModuleDestroy {
+export class DbService {
   db!: PgAsyncDatabase<PgQueryResultHKT>;
   private close?: () => Promise<void>;
 
@@ -35,6 +29,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy() {
-    await this.close?.();
+    const close = this.close;
+    this.close = undefined;
+    await close?.();
   }
 }
