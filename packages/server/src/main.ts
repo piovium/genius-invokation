@@ -22,7 +22,9 @@ import { initializeServices, roomsService, shutdownServices } from "./services";
 export async function startServer() {
   let server: ServerType | undefined;
   try {
-    if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET is not set");
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET is not set");
+    }
     await initializeServices();
     await frontend(root);
     await new Promise<void>((resolve, reject) => {
@@ -72,7 +74,9 @@ if (import.meta.main) {
   const { shutdown } = await startServer();
   let stopping = false;
   const onShutdown = () => {
-    if (stopping) return;
+    if (stopping) {
+      return;
+    }
     stopping = true;
     void shutdown().then(
       () => process.exit(0),

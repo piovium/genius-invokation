@@ -57,7 +57,8 @@ export function shutdownServices() {
     const errors = results.flatMap((result) =>
       result.status === "rejected" ? [result.reason] : [],
     );
-    if (errors.length)
+    if (errors.length) {
       throw new AggregateError(errors, "Failed to close services");
+    }
   })());
 }

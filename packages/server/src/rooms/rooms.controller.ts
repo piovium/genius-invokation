@@ -85,7 +85,9 @@ export function streamNotification(
       finished.resolve();
     });
     try {
-      if (stream.aborted) return;
+      if (stream.aborted) {
+        return;
+      }
       subscription.add(
         source.subscribe({
           next: ({ data }) => {
@@ -131,11 +133,15 @@ export const RoomsController = new Hono()
     const userId = await getUserId(c);
     if (userId !== null) {
       const dto = await validateDto(c, UserCreateRoomDto);
-      if (dto instanceof Response) return dto;
+      if (dto instanceof Response) {
+        return dto;
+      }
       return c.json(await roomsService.createRoomFromUser(userId, dto), 201);
     } else {
       const dto = await validateDto(c, GuestCreateRoomDto);
-      if (dto instanceof Response) return dto;
+      if (dto instanceof Response) {
+        return dto;
+      }
       const { playerId, room } = await roomsService.createRoomFromGuest(dto);
       return c.json(
         {
@@ -183,12 +189,16 @@ export const RoomsController = new Hono()
     const userId = await getUserId(c);
     if (userId !== null) {
       const dto = await validateDto(c, UserJoinRoomDto);
-      if (dto instanceof Response) return dto;
+      if (dto instanceof Response) {
+        return dto;
+      }
       await roomsService.joinRoomFromUser(userId, roomId, dto.deckId);
       return c.body(null, 201);
     } else {
       const dto = await validateDto(c, GuestJoinRoomDto);
-      if (dto instanceof Response) return dto;
+      if (dto instanceof Response) {
+        return dto;
+      }
       const { playerId } = await roomsService.joinRoomFromGuest(roomId, dto);
       return c.json(
         {

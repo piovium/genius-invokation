@@ -94,7 +94,9 @@ export class GamesService {
         .from(games)
         .where(eq(games.id, gameId))
         .limit(1);
-      if (!game) return null;
+      if (!game) {
+        return null;
+      }
       const players = await tx
         .select({
           player: { id: playersOnGames.playerId },
