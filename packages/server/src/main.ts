@@ -14,71 +14,44 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import console from "node:console";
-import { serve, type ServerType } from "@hono/node-server";
+import { serve } from "@hono/node-server";
 import { root } from "./app.module";
-import { frontend } from "./frontend";
-import { initializeServices, roomsService, shutdownServices } from "./services";
+import { initializeServices, roomsService } from "./services";
+import type { AddressInfo } from "node:net";
 
 export async function startServer() {
-  let server: ServerType | undefined;
-  try {
-    if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is not set");
-    }
-    await initializeServices();
-    await frontend(root);
-    await new Promise<void>((resolve, reject) => {
-      server = serve(
-        {
-          fetch: root.fetch,
-          port: Number(process.env.PORT ?? 3000),
-          hostname: "::",
-          serverOptions: {
-            keepAliveTimeout: 65000,
-            requestTimeout: 0,
-          },
-        },
-        (address) => {
-          server?.off("error", reject);
-          console.log(
-            `Server listening at http://[${address.address}]:${address.port}`,
-          );
-          resolve();
-        },
-      );
-      server.once("error", reject);
-    });
-  } catch (error) {
-    server?.close();
-    await shutdownServices().catch(console.error);
-    throw error;
-  }
-
-  let stopping: Promise<void> | undefined;
-  const shutdown = () =>
-    (stopping ??= (async () => {
-      // Keep accepting game actions until existing rooms have finished.
-      await roomsService.waitForShutdown();
-      try {
-        await new Promise<void>((resolve, reject) => {
-          server!.close((error) => (error ? reject(error) : resolve()));
-        });
-      } finally {
-        await shutdownServices();
-      }
-    })());
-  return { server: server!, shutdown };
+  await using disposeStack = await initializeServices();
+  const { promise, resolve, reject } = Promise.withResolvers<AddressInfo>();
+  const server = serve(
+    {
+      fetch: root.fetch,
+      port: Number(process.env.PORT ?? 3000),
+      hostname: "::",
+      serverOptions: {
+        keepAliveTimeout: 65000,
+        requestTimeout: 0,
+      },
+    },
+    resolve,
+  );
+  server.once("error", reject);
+  const { address, port } = await promise;
+  server.off("error", reject);
+  disposeStack.use(server);
+  disposeStack.defer(() => roomsService.waitForShutdown());
+  console.log(`Server listening at http://[${address}]:${port}`);
+  return disposeStack.move();
 }
 
 if (import.meta.main) {
-  const { shutdown } = await startServer();
+  const disposeStack = await startServer();
   let stopping = false;
   const onShutdown = () => {
     if (stopping) {
       return;
     }
     stopping = true;
-    void shutdown().then(
+    void disposeStack.disposeAsync().then(
       () => process.exit(0),
       (error) => {
         console.error(error);

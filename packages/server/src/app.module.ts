@@ -24,6 +24,7 @@ import { DecksModule } from "./decks/decks.module";
 import { RoomsModule } from "./rooms/rooms.module";
 import { MetricsModule } from "./metrics/metrics.module";
 import { handleError, NotFoundException } from "./errors";
+import { frontendApp } from "./frontend";
 
 const api = new Hono()
   .route("/", AppController)
@@ -45,4 +46,8 @@ if (process.env.NODE_ENV !== "production") {
     }),
   );
 }
-root.route(`${WEB_CLIENT_BASE_PATH}api`, api).route("/", MetricsModule);
+
+root
+  .route(`${WEB_CLIENT_BASE_PATH}api`, api)
+  .route("/", MetricsModule)
+  .route("/", frontendApp);

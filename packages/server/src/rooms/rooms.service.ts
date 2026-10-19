@@ -82,7 +82,7 @@ import type {
 import { inspect } from "node:util";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import semver from "semver";
-import { redis } from "../redis";
+import { redisService as redis } from "../services";
 
 const s3 = process.env.S3_ENDPOINT
   ? new S3Client({

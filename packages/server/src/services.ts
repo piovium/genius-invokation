@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import console from "node:console";
 import { DbService } from "./db/db.module";
 import { UsersService } from "./users/users.service";
 import { AuthService } from "./auth/auth.service";
@@ -21,7 +20,7 @@ import { DecksService } from "./decks/decks.service";
 import { GamesService } from "./games/games.service";
 import { RoomsService } from "./rooms/rooms.service";
 import { MetricsService } from "./metrics/metrics.service";
-import { redis } from "./redis";
+import Redis from "ioredis";
 
 // Temporary singleton service registry.
 // The initialization/finalization is manually maintained and written.
@@ -32,33 +31,23 @@ export const decksService = new DecksService();
 export const gamesService = new GamesService();
 export const roomsService = new RoomsService();
 export const metricsService = new MetricsService();
+export const redisService = process.env.REDIS_URL
+  ? new Redis(process.env.REDIS_URL)
+  : null;
 
-let initialization: Promise<void> | undefined;
-let shutdown: Promise<void> | undefined;
+let initialization: Promise<AsyncDisposableStack> | undefined;
 
 export function initializeServices() {
   return (initialization ??= (async () => {
-    try {
-      await dbService.onModuleInit();
-      roomsService.onModuleInit();
-    } catch (error) {
-      await shutdownServices().catch(console.error);
-      throw error;
-    }
-  })());
-}
-
-export function shutdownServices() {
-  return (shutdown ??= (async () => {
-    const results = await Promise.allSettled([
-      dbService.onModuleDestroy(),
-      redis?.quit(),
-    ]);
-    const errors = results.flatMap((result) =>
-      result.status === "rejected" ? [result.reason] : [],
-    );
-    if (errors.length) {
-      throw new AggregateError(errors, "Failed to close services");
-    }
+    await using disposeStack = new AsyncDisposableStack();
+    disposeStack.defer(async () => {
+      await dbService.onModuleDestroy();
+    });
+    disposeStack.defer(async () => {
+      await redisService?.quit();
+    });
+    await dbService.onModuleInit();
+    await roomsService.onModuleInit();
+    return disposeStack.move();
   })());
 }

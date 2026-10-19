@@ -25,6 +25,8 @@ const HTML_INJECTION_PLACEHOLDERS = {
   body: "<!-- server:body -->",
 } as const;
 
+const PUBLIC_DIR = path.resolve(import.meta.dirname, "../public");
+
 export function injectHtml(
   html: string,
   injections: Partial<Record<keyof typeof HTML_INJECTION_PLACEHOLDERS, string>>,
@@ -43,60 +45,55 @@ export function injectHtml(
   );
 }
 
-export async function frontend(
-  app: Hono,
-  publicDir = path.resolve(import.meta.dirname, "../public"),
-) {
-  if (process.env.NODE_ENV === "production") {
-    const assets = new Hono().use(etag());
-    const indexHtml = await readFile(
-      path.join(publicDir, "index.html"),
-      "utf8",
-    ).catch((cause) => {
-      throw new Error(
-        `Cannot read frontend index.html in ${publicDir}; build server and its dependencies before starting production.`,
-        { cause },
-      );
-    });
+export const frontendApp = new Hono().use(etag());
 
-    for await (const entry of glob("**/*", {
-      cwd: publicDir,
-      withFileTypes: true,
-    })) {
-      if (!entry.isFile()) {
-        continue;
-      }
-      const filepath = path.join(entry.parentPath, entry.name);
-      const name = path.relative(publicDir, filepath).replaceAll(path.sep, "/");
-      if (name === "index.html") {
-        continue;
-      }
-      const buffer = new Uint8Array(await readFile(filepath));
-      const type = mime.getType(name) ?? "application/octet-stream";
-      assets.get(`${WEB_CLIENT_BASE_PATH}${name}`, (c) => {
-        c.header(
-          "Cache-Control",
-          name === "sw.js"
-            ? "public, no-cache, must-revalidate"
-            : "public, max-age=31536000, immutable",
-        );
-        c.header("Content-Type", type);
-        return c.body(buffer);
-      });
+if (process.env.NODE_ENV === "production") {
+  const indexHtml = await readFile(
+    path.join(PUBLIC_DIR, "index.html"),
+    "utf8",
+  ).catch((cause) => {
+    throw new Error(
+      `Cannot read frontend index.html in ${PUBLIC_DIR}; build server and its dependencies before starting production.`,
+      { cause },
+    );
+  });
+
+  for await (const entry of glob("**/*", {
+    cwd: PUBLIC_DIR,
+    withFileTypes: true,
+  })) {
+    if (!entry.isFile()) {
+      continue;
     }
-
-    const indexHtmlContent = injectHtml(indexHtml, {
-      head: IS_BETA ? '<meta name="robots" content="noindex">' : "",
+    const filepath = path.join(entry.parentPath, entry.name);
+    const name = path.relative(PUBLIC_DIR, filepath).replaceAll(path.sep, "/");
+    if (name === "index.html") {
+      continue;
+    }
+    const buffer = new Uint8Array(await readFile(filepath));
+    const type = mime.getType(name) ?? "application/octet-stream";
+    frontendApp.get(`${WEB_CLIENT_BASE_PATH}${name}`, (c) => {
+      c.header(
+        "Cache-Control",
+        name === "sw.js"
+          ? "public, no-cache, must-revalidate"
+          : "public, max-age=31536000, immutable",
+      );
+      c.header("Content-Type", type);
+      return c.body(buffer);
     });
-    const indexHtmlBuffer = new TextEncoder().encode(indexHtmlContent);
-    const indexHtmlHandler: Handler = (c) => {
-      c.header("Cache-Control", "public, no-cache, must-revalidate");
-      c.header("Content-Type", "text/html");
-      return c.body(indexHtmlBuffer);
-    };
-    const baseNoSuffix = WEB_CLIENT_BASE_PATH.replace(/(.+)\/$/, "$1");
-    assets.get(baseNoSuffix, indexHtmlHandler);
-    assets.get(`${WEB_CLIENT_BASE_PATH}*`, indexHtmlHandler);
-    app.route("/", assets);
   }
+
+  const indexHtmlContent = injectHtml(indexHtml, {
+    head: IS_BETA ? '<meta name="robots" content="noindex">' : "",
+  });
+  const indexHtmlBuffer = new TextEncoder().encode(indexHtmlContent);
+  const indexHtmlHandler: Handler = (c) => {
+    c.header("Cache-Control", "public, no-cache, must-revalidate");
+    c.header("Content-Type", "text/html");
+    return c.body(indexHtmlBuffer);
+  };
+  const baseNoSuffix = WEB_CLIENT_BASE_PATH.replace(/(.+)\/$/, "$1");
+  frontendApp.get(baseNoSuffix, indexHtmlHandler);
+  frontendApp.get(`${WEB_CLIENT_BASE_PATH}*`, indexHtmlHandler);
 }

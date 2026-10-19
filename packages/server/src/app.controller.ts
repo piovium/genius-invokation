@@ -17,7 +17,7 @@ import { Hono } from "hono";
 import { ImATeapotException, ServiceUnavailableException } from "./errors";
 import { CORE_VERSION, CURRENT_VERSION, VERSIONS } from "@gi-tcg/core";
 import simpleGit, { type LogResult } from "simple-git";
-import { redis } from "./redis";
+import { redisService as redis } from "./services";
 
 const git = simpleGit();
 
