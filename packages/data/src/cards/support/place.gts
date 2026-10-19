@@ -289,10 +289,10 @@ define card {
     };
     on actionPhase {
       if (:variables.count === 2) {
-        :generateDice(:variables.d1, 1);
-        :generateDice(:variables.d2, 1);
+        :generateDice(:variables.d1 as DiceType, 1);
+        :generateDice(:variables.d2 as DiceType, 1);
       } else if (:variables.count === 1) {
-        :generateDice(:variables.d1, 1);
+        :generateDice(:variables.d1 as DiceType, 1);
       }
       :variables.count = 0;
     };
