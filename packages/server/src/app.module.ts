@@ -15,6 +15,7 @@
 
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { bodyLimit } from "hono/body-limit";
 import { WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
 import { AppController } from "./app.controller";
 import { AuthModule } from "./auth/auth.module";
@@ -25,6 +26,7 @@ import { RoomsModule } from "./rooms/rooms.module";
 import { MetricsModule } from "./metrics/metrics.module";
 import { handleError, NotFoundException } from "./errors";
 import { frontendApp } from "./frontend";
+import { except } from "hono/combine";
 
 const api = new Hono()
   .route("/", AppController)
@@ -37,17 +39,18 @@ const api = new Hono()
     throw new NotFoundException();
   });
 
-export const root = new Hono().onError(handleError);
-if (process.env.NODE_ENV !== "production") {
-  root.use(
-    cors({
-      origin: "*",
-      allowMethods: ["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"],
-    }),
-  );
-}
-
-root
+export const root = new Hono()
+  .onError(handleError)
+  .use(bodyLimit({ maxSize: 1024 * 1024 }))
+  .use(
+    except(
+      () => process.env.NODE_ENV === "production",
+      cors({
+        origin: "*",
+        allowMethods: ["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"],
+      }),
+    ),
+  )
   .route(`${WEB_CLIENT_BASE_PATH}api`, api)
   .route("/", MetricsModule)
   .route("/", frontendApp);
