@@ -440,7 +440,7 @@ export class StateMutator {
     }
     const result: DiceType[] = [];
     for (let i = 0; i < count; i++) {
-      result.push((this.stepRandom() % 8) + 1);
+      result.push(((this.stepRandom() % 8) + 1) as DiceType);
     }
     return result;
   }
@@ -1481,7 +1481,7 @@ export class StateMutator {
         return;
       }
       for (const dice of diceToReroll) {
-        const index = oldDice.indexOf(dice);
+        const index = oldDice.findIndex((value) => value === dice);
         if (index === -1) {
           throw new GiTcgIoError(
             who,

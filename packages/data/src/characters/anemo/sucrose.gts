@@ -32,7 +32,7 @@ define summon {
   };
   on endPhase {
     usage 3;
-    :damage(:self.variables.hintIcon, 2);
+    :damage(:self.variables.hintIcon as DamageType, 2);
   };
   on increaseDamage {
     when :{
@@ -59,7 +59,7 @@ define summon {
   };
   on endPhase {
     usage 3;
-    :damage(:self.variables.hintIcon, 2);
+    :damage(:self.variables.hintIcon as DamageType, 2);
   };
 };
 

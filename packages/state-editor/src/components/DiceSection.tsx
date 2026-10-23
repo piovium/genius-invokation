@@ -1,6 +1,7 @@
 import { For, createMemo, type Accessor } from "solid-js";
 import type { Draft } from "immer";
 import type { GameState } from "@gi-tcg/core";
+import type { DiceType } from "@gi-tcg/typings";
 import { Surface } from "./Fields";
 import { DiceIcon } from "./DiceIcon";
 import { ListItem, type ListItemButton } from "./ListItem";
@@ -63,7 +64,7 @@ export function DiceSection() {
 }
 
 interface DiceTypeListItemProps {
-  diceType: number;
+  diceType: DiceType;
   count: Accessor<number>;
 }
 

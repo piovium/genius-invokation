@@ -729,11 +729,12 @@ export class Game {
         }
         const actionInfo = actions[chosenActionIndex];
         if (actionInfo.validity !== ActionValidity.VALID) {
+          const validity = Object.entries(ActionValidity).find(
+            ([, value]) => value === actionInfo.validity,
+          )?.[0];
           throw new GiTcgIoError(
             who,
-            `User-selected action is invalid: ${
-              ActionValidity[actionInfo.validity]
-            }`,
+            `User-selected action is invalid: ${validity}`,
           );
         }
         // 第一遍确认玩家选择的骰子确实存在；此时不存在为 player 负责的 IoError

@@ -168,7 +168,7 @@ export function parseMutations(
           PbRemoveEntityReason.EVENT_CARD_PLAY_NO_EFFECT,
           PbRemoveEntityReason.EQUIP_OVERRIDDEN,
           PbRemoveEntityReason.CREATE_SUPPORT_OVERRIDDEN,
-        ].includes(mutation.value.reason)
+        ].some((reason) => reason === mutation.value.reason)
       ) {
         playingCard = {
           who: mutation.value.who as 0 | 1,
@@ -181,8 +181,8 @@ export function parseMutations(
       }
     } else if (mutation.$case === "moveEntity") {
       if (
-        [PbMoveEntityReason.EQUIP, PbMoveEntityReason.CREATE_SUPPORT].includes(
-          mutation.value.reason,
+        [PbMoveEntityReason.EQUIP, PbMoveEntityReason.CREATE_SUPPORT].some(
+          (reason) => reason === mutation.value.reason,
         )
       ) {
         playingCard = {
@@ -290,7 +290,7 @@ export function parseMutations(
           ![
             PbSkillType.TRIGGERED,
             PbSkillType.TRIGGERED_FROM_ITS_ATTACHMENT,
-          ].includes(mutation.value.skillType)
+          ].some((type) => type === mutation.value.skillType)
         ) {
           notificationBox = {
             type: "useSkill",
@@ -333,10 +333,9 @@ export function parseMutations(
       case "moveEntity": {
         handleCardOps(mutation);
         if (
-          [
-            PbMoveEntityReason.EQUIP,
-            PbMoveEntityReason.CREATE_SUPPORT,
-          ].includes(mutation.value.reason)
+          [PbMoveEntityReason.EQUIP, PbMoveEntityReason.CREATE_SUPPORT].some(
+            (reason) => reason === mutation.value.reason,
+          )
         ) {
           enteringEntities.push(mutation.value.entity!.id);
         }
@@ -391,8 +390,8 @@ export function parseMutations(
       case "changePhase": {
         if (
           mutation.value.hasChange &&
-          [PbPhaseType.ROLL, PbPhaseType.ACTION, PbPhaseType.END].includes(
-            mutation.value.newPhase,
+          [PbPhaseType.ROLL, PbPhaseType.ACTION, PbPhaseType.END].some(
+            (phase) => phase === mutation.value.newPhase,
           )
         ) {
           roundAndPhase.value = mutation.value.newPhase;

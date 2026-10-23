@@ -19,7 +19,7 @@ import {
   type CharacterHandle,
   DamageType,
   DiceType,
-  type Pair,
+  pair,
   Reaction,
   type SkillHandle,
   type SupportHandle,
@@ -664,7 +664,7 @@ define card {
 define extension {
   idHint 322023 as DamageTypeCountExtension;
   schema ({
-    damages: type.declare<Pair<DamageType[]>>().type("pair<number[]>"),
+    damages: pair(type.enumerated(...Object.values(DamageType)).array()),
   });
   initialState ({
     damages: [[], []],
