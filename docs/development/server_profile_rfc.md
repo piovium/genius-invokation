@@ -17,7 +17,7 @@ Profile 可以导出 CreateInitialStateConfig 和 AssetsManagerOptions。
 
 若 Custom Mods 不引入新卡，则 defaultDeckCompatible；否则反之。对于 defaultDeckCompatible 的 AssetsManager，用户可以直接使用标准 Deck ID/数据接入。
 
-首期禁止 defaultDeckCompatible=false。
+首期禁止 defaultDeckCompatible=false，从而目前玩家接入的方式不会发生较大改变。
 
 Profile 是 Self-Contained 的，为了简化 Profile 的编写方式，引入 Preset 概念：
 
