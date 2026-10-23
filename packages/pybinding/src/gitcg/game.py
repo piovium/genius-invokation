@@ -76,9 +76,9 @@ class Game:
     """
 
     _game_handle: FFI.CData = ll.NULL
-    _players: list[Player | None] = [None, None]
-    _player_callbacks: list[_GameCallback | None] = [None, None]
-    _player_callback_handles: list[FFI.CData | None] = [None, None]
+    _players: list[Player | None]
+    _player_callbacks: list[_GameCallback | None]
+    _player_callback_handles: list[FFI.CData | None]
 
     def __init__(
         self, /, state: State | None = None, create_param: CreateParam | None = None
@@ -88,6 +88,10 @@ class Game:
 
         `Game(create_param=cp)` is a shortcut to `Game(state=State(create_param=cp))`.
         """
+        self._players = [None, None]
+        self._player_callbacks = [None, None]
+        self._player_callback_handles = [None, None]
+
         if state is not None:
             self._game_handle = ll.game_new(state._state_handle)
         elif create_param is not None:

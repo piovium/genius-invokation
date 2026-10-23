@@ -15,6 +15,7 @@
 
 import {
   $,
+  customEvent,
   DamageType,
   DiceType,
   type EquipmentHandle,
@@ -138,6 +139,8 @@ define skill {
   };
 };
 
+const PassiveDecreaseDamagedTriggered = customEvent("arlecchino/passiveDecreaseDamagedTriggered");
+
 /**
  * @id 13147
  * @name 唯厄月可知晓
@@ -154,9 +157,13 @@ define skill {
       const bond = :self.hasStatus(BondOfLife);
       if (bond) {
         :e.decreaseDamage(1);
-        :consumeUsage(1, bond);
+        :emitCustomEvent(PassiveDecreaseDamagedTriggered);
       }
     };
+    on PassiveDecreaseDamagedTriggered {
+      const bond = :self.hasStatus(BondOfLife);
+      bond?.consumeUsage(1);
+    }
     // 生命之契：所附属角色受到伤害后：若伤害来自斩首之邀，减少3层。（无论增伤多少）
     on BondOfLifeOnDamaged {
       bypassDefeatedFilter;
