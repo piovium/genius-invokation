@@ -41,11 +41,14 @@ interface Profile {
   id: string;
   name: string;
   baseVersion: Version;
-  defaultDeckCompatible: boolean;
-  initialStateConfig: Omit<CreateInitialStateConfig, "decks" | RoomOwnedConfig>;
+  officialDeckCompatible: boolean;
+  gameConfig: ProfileGameConfig;
+  versionBehavior: VersionBehavior;
+  versionMap: Record<number, Version>;
+  mods: ModSource[];
   assets: Pick<
     AssetsManagerOption,
-    "version" | "customData" | "overrideData" | "defaultDeckCompatible"
+    "version" | "customData" | "overrideData" | "officialDeckCompatible" // renamed, see below
   >;
 }
 ```
@@ -204,38 +207,51 @@ Preset loader、Plugin loader 和三类底层 loader 共用引用解析机制；
 2. 补齐规则默认值，汇总显式版本映射，检查冲突。
 3. 设置版本解析器，依次加载 Mod，取得 `GameData` 与 Mod 资源元数据。
 4. 应用 `static_data` 覆盖，生成 `AssetsManagerOption`。
-5. 计算 `defaultDeckCompatible`（见下文）， `false` 时生成失败。
+5. 计算 `officialDeckCompatible`（见下文）， `false` 时生成失败。
 
 生成失败会阻塞服务启动。
 
-## `defaultDeckCompatible` 的设置
+## `officialDeckCompatible` 的设置
 
-> 建议：重命名为 `officialDeckCompatible`。
+重命名自原 `defaultDeckCompatible`。
 
 ### 含义
 
 该标志表示 Profile 的可组牌角色和行动牌仍使用官方 ID 及标准分享码映射，可以继续读取已有牌组记录和标准牌组数据。
 
-只要新增了官方映射之外的可组牌角色或行动牌，或改变了已有 ID 的身份、类别和分享码含义，就视为不兼容。
+目前实现为：当且仅当 Custom Mod 加载了未指定 id 的牌（即自定义新卡）时才 toggle 为 false。
 
 ### 牌组校验与 requiredVersion
 
-由于 defaultDeckCompatible 期望恒为 true，预期校验方式和 requiredVersion 计算方式与现状相同。
+由于本期 officialDeckCompatible 期望 true，预期校验方式和 requiredVersion 计算方式与现状相同。
+
+> versionMap 不会影响 requiredVersion 逻辑：官方牌组下 versionMap 不可能取到高于牌本身 requiredVersion 的版本。
 
 ## 通信协议
 
-| 操作              | 行为                                                                                    |
-| ----------------- | --------------------------------------------------------------------------------------- |
-| `GET /profiles`   | 返回可用于新房间的 `id`、`name`、`revision`、`baseVersion`、兼容性标志和默认 Profile ID |
-| `POST /rooms`     | 增加 `profileId` ；省略 ID 时使用默认 Profile                                           |
-| 房间信息          | 增加 `{ id, name, revision, baseVersion, profileHash }` 的 Profile 摘要                 |
-| SSE `initialized` | 为玩家及观战者提供固定的 Profile 摘要                                                   |
+| 操作               | 行为                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| `GET /profiles`    | 返回可用于新房间的 `id`、`name`、`profileHash`、`baseVersion`、兼容性标志和默认 Profile ID |
+| `GET /profile/:id` | 返回对应 Profile 具体信息，至少应包括 `assets`                                             |
+| `POST /rooms`      | 增加 `profileId` ；省略 ID 时使用默认 Profile                                              |
+| 房间信息           | 增加 `{ id, name, baseVersion, profileHash }` 的 Profile 摘要                              |
+| SSE `initialized`  | 为玩家及观战者提供固定的 Profile 摘要                                                      |
 
-开局时等价于：
+开局代码类似：
 
 ```ts
+const loader = new CustomDataLoader().setVersion(
+  createOfficialVersionResolver(profile.baseVersion, profile.versionMap),
+);
+for (const { content } of profile.mods) {
+  await loader.loadMod(content);
+}
+const [data, assets] = loader.done();
+
 const initialState = Game.createInitialState({
-  ...profile.initialStateConfig,
+  ...profile.gameConfig,
+  data,
+  versionBehavior: profile.versionBehavior,
   decks: [deck0, deck1],
   randomSeed: room.randomSeed,
   hostWho: room.hostWho,
