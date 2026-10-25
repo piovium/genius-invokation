@@ -27,11 +27,16 @@ export interface AddGameOption {
   playerIds: number[];
   coreVersion: string;
   gameVersion: string;
+  profile: import("../profiles/types").Profile;
   data: string;
   winnerId: number | null;
 }
-type GameNoData = Omit<GameModel, "data">;
-const { data: logData, ...summaryColumns } = getColumns(games);
+type GameNoData = Omit<GameModel, "data" | "profile">;
+const {
+  data: logData,
+  profile: profileData,
+  ...summaryColumns
+} = getColumns(games);
 
 export class GamesService {
   async addGame({ playerIds, ...data }: AddGameOption): Promise<GameModel> {

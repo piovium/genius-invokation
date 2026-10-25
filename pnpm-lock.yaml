@@ -249,7 +249,7 @@ importers:
         version: 0.8.0(prettier@3.9.5)
       '@gi-tcg/unplugin-gts':
         specifier: 'catalog:'
-        version: 0.8.0(esbuild@0.23.1)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.23.1))
+        version: 0.8.0(esbuild@0.23.1)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)(yaml@2.9.1))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.23.1))
       '@microsoft/api-extractor':
         specifier: ^7.58.2
         version: 7.58.2(@types/node@26.6.5)
@@ -288,7 +288,7 @@ importers:
         version: 0.21.7(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(typescript@6.0.3)
       tsup:
         specifier: ^8.3.0
-        version: 8.3.0(@microsoft/api-extractor@7.58.2(@types/node@26.6.5))(@swc/core@1.15.33)(jiti@2.7.0)(postcss@8.5.9)(supports-color@8.1.1)(tsx@4.21.0)(typescript@6.0.3)
+        version: 8.3.0(@microsoft/api-extractor@7.58.2(@types/node@26.6.5))(@swc/core@1.15.33)(jiti@2.7.0)(postcss@8.5.9)(supports-color@8.1.1)(tsx@4.21.0)(typescript@6.0.3)(yaml@2.9.1)
       type-fest:
         specifier: ^4.26.1
         version: 4.41.0
@@ -297,7 +297,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^4.1.6
-        version: 4.1.6(@opentelemetry/api@1.9.0)(@types/node@26.6.5)(vite@8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))
+        version: 4.1.6(@opentelemetry/api@1.9.0)(@types/node@26.6.5)(vite@8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)(yaml@2.9.1))
 
   packages/assets-manager:
     dependencies:
@@ -636,6 +636,9 @@ importers:
       '@gi-tcg/core':
         specifier: workspace:*
         version: link:../core
+      '@gi-tcg/custom-data-loader':
+        specifier: workspace:*
+        version: link:../custom-data-loader
       '@gi-tcg/data':
         specifier: workspace:*
         version: link:../data
@@ -681,9 +684,18 @@ importers:
       hono:
         specifier: ^4.12.18
         version: 4.12.18
+      import-meta-resolve:
+        specifier: ^4.2.0
+        version: 4.2.0
       ioredis:
         specifier: ^5.10.1
         version: 5.10.1(supports-color@8.1.1)
+      jiti:
+        specifier: ^2.7.0
+        version: 2.7.0
+      json5:
+        specifier: ^2.2.3
+        version: 2.2.3
       mime:
         specifier: ^4.0.6
         version: 4.1.0
@@ -702,12 +714,18 @@ importers:
       simple-git:
         specifier: ^3.36.0
         version: 3.36.0(supports-color@8.1.1)
+      smol-toml:
+        specifier: ^1.9.1
+        version: 1.9.1
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.15.33)(@types/node@26.6.5)(typescript@6.0.3)
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+      yaml:
+        specifier: ^2.9.1
+        version: 2.9.1
     devDependencies:
       '@electric-sql/pglite':
         specifier: ^0.3.14
@@ -5450,6 +5468,9 @@ packages:
     resolution: {integrity: sha512-rKtvo6a868b5Hu3heneU+L4yEQ4jYKLtjpnPeUdK7h0yzXGmyBTypknlkCvHFBqfX9YlorEiMM6Dnq/5atfHkw==}
     engines: {node: '>=8'}
 
+  import-meta-resolve@4.2.0:
+    resolution: {integrity: sha512-Iqv2fzaTQN28s/FwZAoFq0ZSs/7hMAHJVX+w8PZl3cY19Pxk6jFFalxQoIfW2826i/fDLXv8IiEZRIT0lDuWcg==}
+
   import-without-cache@0.2.5:
     resolution: {integrity: sha512-B6Lc2s6yApwnD2/pMzFh/d5AVjdsDXjgkeJ766FmFuJELIGHNycKRj+l3A39yZPM4CchqNCB4RITEAYB1KUM6A==}
     engines: {node: '>=20.19.0'}
@@ -6429,6 +6450,10 @@ packages:
     resolution: {integrity: sha512-FoqMu0NCGBLCcAkS1qA+XJIQTR6/JHfQXl+uGteNCQ76T91DMUjPa9xfmeqMY3z80nLSg9yQmNjK0Px6RWsH/A==}
     engines: {node: '>=18'}
 
+  smol-toml@1.9.1:
+    resolution: {integrity: sha512-j7WyPdf0CJoutMzMoPLF/bVXHtKZIT9Rb4eGeEbWw8X2t5oirjPgpL+OpaENZrILYaXqYwnVH+qgUwVbl+pUJQ==}
+    engines: {node: '>= 18'}
+
   solid-devtools@0.29.3:
     resolution: {integrity: sha512-9j3VxVbEoC54ML22gAMytR8ZS1nk9xKatsWziKSkI4c/Bcyh4sxQBGESHuXSLs9xaxpyGVTmFl3hknoxEpKzlA==}
     peerDependencies:
@@ -7212,6 +7237,11 @@ packages:
 
   yallist@4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
+
+  yaml@2.9.1:
+    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
 
   yargs-parser@21.1.1:
     resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
@@ -9227,7 +9257,7 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
 
-  '@gi-tcg/unplugin-gts@0.8.0(esbuild@0.23.1)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.23.1))':
+  '@gi-tcg/unplugin-gts@0.8.0(esbuild@0.23.1)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)(yaml@2.9.1))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.23.1))':
     dependencies:
       '@gi-tcg/gts-transpiler': 0.8.0
       '@types/bun': 1.3.14
@@ -9237,7 +9267,7 @@ snapshots:
       esbuild: 0.23.1
       rolldown: 1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)
       unloader: 0.9.0
-      vite: 8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)
+      vite: 8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)(yaml@2.9.1)
       webpack: 5.104.1(@swc/core@1.15.33)(esbuild@0.23.1)
     transitivePeerDependencies:
       - babel-plugin-macros
@@ -10674,13 +10704,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.0
 
-  '@vitest/mocker@4.1.6(vite@8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))':
+  '@vitest/mocker@4.1.6(vite@8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)(yaml@2.9.1))':
     dependencies:
       '@vitest/spy': 4.1.6
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)
+      vite: 8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)(yaml@2.9.1)
 
   '@vitest/pretty-format@4.1.6':
     dependencies:
@@ -11977,6 +12007,8 @@ snapshots:
 
   import-lazy@4.0.0: {}
 
+  import-meta-resolve@4.2.0: {}
+
   import-without-cache@0.2.5: {}
 
   importx@0.5.1(supports-color@8.1.1):
@@ -12569,13 +12601,14 @@ snapshots:
       exsolve: 1.0.7
       pathe: 2.0.3
 
-  postcss-load-config@6.0.1(jiti@2.7.0)(postcss@8.5.9)(tsx@4.21.0):
+  postcss-load-config@6.0.1(jiti@2.7.0)(postcss@8.5.9)(tsx@4.21.0)(yaml@2.9.1):
     dependencies:
       lilconfig: 3.1.2
     optionalDependencies:
       jiti: 2.7.0
       postcss: 8.5.9
       tsx: 4.21.0
+      yaml: 2.9.1
 
   postcss@8.5.9:
     dependencies:
@@ -12966,6 +12999,8 @@ snapshots:
       mrmime: 2.0.0
       totalist: 3.0.1
 
+  smol-toml@1.9.1: {}
+
   solid-devtools@0.29.3(solid-js@1.9.12)(supports-color@8.1.1)(vite@8.0.8(@types/node@26.6.5)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)):
     dependencies:
       '@babel/core': 7.24.7(supports-color@8.1.1)
@@ -13270,7 +13305,7 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tsup@8.3.0(@microsoft/api-extractor@7.58.2(@types/node@26.6.5))(@swc/core@1.15.33)(jiti@2.7.0)(postcss@8.5.9)(supports-color@8.1.1)(tsx@4.21.0)(typescript@6.0.3):
+  tsup@8.3.0(@microsoft/api-extractor@7.58.2(@types/node@26.6.5))(@swc/core@1.15.33)(jiti@2.7.0)(postcss@8.5.9)(supports-color@8.1.1)(tsx@4.21.0)(typescript@6.0.3)(yaml@2.9.1):
     dependencies:
       bundle-require: 5.0.0(esbuild@0.23.1)
       cac: 6.7.14
@@ -13281,7 +13316,7 @@ snapshots:
       execa: 5.1.1
       joycon: 3.1.1
       picocolors: 1.1.1
-      postcss-load-config: 6.0.1(jiti@2.7.0)(postcss@8.5.9)(tsx@4.21.0)
+      postcss-load-config: 6.0.1(jiti@2.7.0)(postcss@8.5.9)(tsx@4.21.0)(yaml@2.9.1)
       resolve-from: 5.0.0
       rollup: 4.46.2
       source-map: 0.8.0-beta.0
@@ -13540,7 +13575,7 @@ snapshots:
       tinyglobby: 0.2.15
       vite: 8.0.8(@types/node@26.6.5)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)
 
-  vite@8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0):
+  vite@8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)(yaml@2.9.1):
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
@@ -13554,6 +13589,7 @@ snapshots:
       jiti: 2.7.0
       terser: 5.31.1
       tsx: 4.21.0
+      yaml: 2.9.1
 
   vite@8.0.8(@types/node@26.6.5)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0):
     dependencies:
@@ -13574,10 +13610,10 @@ snapshots:
     optionalDependencies:
       vite: 8.0.8(@types/node@26.6.5)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)
 
-  vitest@4.1.6(@opentelemetry/api@1.9.0)(@types/node@26.6.5)(vite@8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)):
+  vitest@4.1.6(@opentelemetry/api@1.9.0)(@types/node@26.6.5)(vite@8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)(yaml@2.9.1)):
     dependencies:
       '@vitest/expect': 4.1.6
-      '@vitest/mocker': 4.1.6(vite@8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))
+      '@vitest/mocker': 4.1.6(vite@8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)(yaml@2.9.1))
       '@vitest/pretty-format': 4.1.6
       '@vitest/runner': 4.1.6
       '@vitest/snapshot': 4.1.6
@@ -13594,7 +13630,7 @@ snapshots:
       tinyexec: 1.1.1
       tinyglobby: 0.2.15
       tinyrainbow: 3.1.0
-      vite: 8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)
+      vite: 8.0.8(@types/node@26.6.5)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)(yaml@2.9.1)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
@@ -13815,6 +13851,8 @@ snapshots:
   yallist@3.1.1: {}
 
   yallist@4.0.0: {}
+
+  yaml@2.9.1: {}
 
   yargs-parser@21.1.1: {}
 

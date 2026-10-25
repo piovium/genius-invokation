@@ -15,6 +15,7 @@
 
 import {
   createSignal,
+  createResource,
   Show,
   For,
   createEffect,
@@ -30,6 +31,7 @@ import { useNavigate } from "@solidjs/router";
 import { useAuth } from "../auth";
 import { useVersionContext } from "../App";
 import { useGuestDecks, useGuestInfo } from "../guest";
+import type { ProfileList } from "../profiles";
 import { useI18n } from "../i18n";
 
 function SelectableDeckInfo(
@@ -152,11 +154,21 @@ export function RoomDialog(props: RoomDialogProps) {
     dialogEl.close();
   };
   const { versionInfo } = useVersionContext();
-  const [savedVersion, setSavedVersion] = makePersisted(
+  const [savedProfile, setSavedProfile] = makePersisted(
     createSignal<string | null>(null),
-    { name: "room-game-version" },
+    { name: "room-profile" },
   );
-  const [version, setVersion] = createSignal(-1);
+  const [profiles] = createResource(() =>
+    axios.get<ProfileList>("profiles").then(({ data }) => data),
+  );
+  const [profileId, setProfileId] = createSignal("official/latest");
+  const selectedProfile = () =>
+    props.joiningRoomInfo?.config.profile ??
+    profiles()?.profiles.find((p) => p.id === profileId());
+  const version = () =>
+    versionInfo()?.supportedGameVersions.indexOf(
+      selectedProfile()?.baseVersion,
+    ) ?? -1;
   const [timeConfig, setTimeConfig] = createSignal(TIME_CONFIGS[1]);
   const [isPublic, setIsPublic] = createSignal(true);
   const [watchable, setWatchable] = createSignal(true);
@@ -167,24 +179,27 @@ export function RoomDialog(props: RoomDialogProps) {
   const [entering, setEntering] = createSignal(false);
 
   createEffect(() => {
-    const versions = versionInfo()?.supportedGameVersions ?? [];
-    if (props.joiningRoomInfo?.config.gameVersion) {
-      const ver = versions.indexOf(props.joiningRoomInfo.config.gameVersion);
-      setVersion(ver);
-    } else {
-      const savedVersionIndex = versions.indexOf(savedVersion());
-      setVersion(
-        savedVersionIndex >= 0 ? savedVersionIndex : versions.length - 1,
+    const list = profiles();
+    if (props.joiningRoomInfo?.config.profile) {
+      setProfileId(props.joiningRoomInfo.config.profile.id);
+    } else if (list) {
+      setProfileId(
+        list.profiles.some((p) => p.id === savedProfile())
+          ? savedProfile()!
+          : list.defaultProfileId,
       );
     }
   });
 
+  let deckRequest = 0;
   const updateAvailableDecks = async (version: number) => {
+    const request = ++deckRequest;
     setLoadingDecks(true);
     const { type } = status();
     try {
       if (type === "user") {
         const { data } = await axios.get(`decks?requiredVersion=${version}`);
+        if (request !== deckRequest) return;
         setAvailableDecks(data.data);
       } else if (type === "guest") {
         setAvailableDecks(
@@ -192,6 +207,7 @@ export function RoomDialog(props: RoomDialogProps) {
         );
       }
     } catch (e) {
+      if (request !== deckRequest) return;
       setAvailableDecks([]);
       if (e instanceof AxiosError) {
         alert(getErrorMessage(e));
@@ -220,14 +236,9 @@ export function RoomDialog(props: RoomDialogProps) {
       let playerId = id ?? null;
       let response;
       if (typeof roomId === "undefined") {
-        const selectedVersion = version();
-        const selectedVersionName =
-          versionInfo()?.supportedGameVersions[selectedVersion];
-        if (selectedVersionName) {
-          setSavedVersion(selectedVersionName);
-        }
+        setSavedProfile(profileId());
         const payload: any = {
-          gameVersion: selectedVersion,
+          profileId: profileId(),
           ...timeConfig(),
           private: !isPublic(),
           watchable: watchable(),
@@ -294,15 +305,23 @@ export function RoomDialog(props: RoomDialogProps) {
           <div class="flex flex-col w-full md:w-130" data-editable={editable()}>
             <Show when={versionInfo()}>
               <div class="mb-3 flex flex-row gap-4 items-center">
-                <h4 class="text-lg">{t("gameVersion")}</h4>
+                <h4 class="text-lg">{t("roomProfile")}</h4>
                 <select
                   class="disabled:pointer-events-none appearance-none"
-                  value={version()}
-                  onChange={(e) => setVersion(Number(e.target.value))}
+                  value={profileId()}
+                  onChange={(e) => setProfileId(e.target.value)}
                   disabled={!editable()}
                 >
-                  <For each={versionInfo()?.supportedGameVersions ?? []}>
-                    {(version, idx) => <option value={idx()}>{version}</option>}
+                  <For
+                    each={
+                      props.joiningRoomInfo
+                        ? [selectedProfile()]
+                        : (profiles()?.profiles ?? [])
+                    }
+                  >
+                    {(profile) => (
+                      <option value={profile.id}>{profile.name}</option>
+                    )}
                   </For>
                 </select>
               </div>
@@ -439,7 +458,12 @@ export function RoomDialog(props: RoomDialogProps) {
           <button
             class="btn btn-solid-green"
             onClick={enterRoom}
-            disabled={selectedDeck() === null || entering()}
+            disabled={
+              selectedDeck() === null ||
+              entering() ||
+              loadingDecks() ||
+              !selectedProfile()
+            }
           >
             {selectedDeck() === null
               ? t("selectDeckFirst")

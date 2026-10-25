@@ -24,6 +24,7 @@ export default {
   logout: "Log out",
   includeUnreleasedData: "Includes unreleased data",
   license: "License",
+  roomProfile: "Rules profile",
   gameVersion: "Game version",
   latestBeta: "Latest beta",
   simulatorVersion: "Simulator version",
@@ -39,7 +40,8 @@ export default {
   nickname: "Nickname",
   chessboardColor: "Board color",
   gameRecords: "Match history",
-  guestNoGameRecords: "Guest mode will not retain match records. Please log in with GitHub to save your match records.",
+  guestNoGameRecords:
+    "Guest mode will not retain match records. Please log in with GitHub to save your match records.",
   noGameRecords: "No match history yet",
   notLoggedIn: "Not logged in",
   myDecks: "My Deck(s)",
@@ -52,7 +54,8 @@ export default {
   unsavedChangesConfirm: "You have unsaved changes. Save them now?",
   inputShareCode: "Enter Sharing Code",
   shareCodeCopied: "Sharing Code copied to clipboard: \n{{code}}",
-  shareCodeFallback: "Failed to copy to clipboard. Error: \n{{error}}\nPlease copy the code manually: \n{{code}}",
+  shareCodeFallback:
+    "Failed to copy to clipboard. Error: \n{{error}}\nPlease copy the code manually: \n{{code}}",
   importShareCode: "Import Sharing Code",
   generateShareCode: "Generate Sharing Code",
   save: "Save",

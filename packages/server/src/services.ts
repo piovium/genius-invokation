@@ -20,10 +20,12 @@ import { DecksService } from "./decks/decks.service";
 import { GamesService } from "./games/games.service";
 import { RoomsService } from "./rooms/rooms.service";
 import { MetricsService } from "./metrics/metrics.service";
+import { ProfilesService } from "./profiles/profiles.service";
 import Redis from "ioredis";
 
 // Temporary singleton service registry.
 // The initialization/finalization is manually maintained and written.
+export const profilesService = new ProfilesService();
 export const dbService = new DbService();
 export const usersService = new UsersService();
 export const authService = new AuthService();
@@ -46,6 +48,7 @@ export function initializeServices() {
     disposeStack.defer(async () => {
       await redisService?.quit();
     });
+    await profilesService.onModuleInit();
     await dbService.onModuleInit();
     await roomsService.onModuleInit();
     return disposeStack.move();

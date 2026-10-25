@@ -21,7 +21,6 @@ import { sValidator } from "@hono/standard-validator";
 import { type Observable, Subscription } from "rxjs";
 import { roomsService, authService } from "../services";
 import type { SSEPayload } from "./rooms.service";
-import { VERSIONS } from "@gi-tcg/core";
 import { DeckDto } from "../decks/decks.controller";
 import { IntParam, stringLength, validate } from "../utils";
 import { ParsePlayerIdPipe } from "./rooms.pipe";
@@ -29,7 +28,7 @@ import { getUserId, getUserOrGuestId } from "../auth/user.decorator";
 
 export const CreateRoomDto = type({
   "hostFirst?": "boolean",
-  "gameVersion?": type("number.integer >= 0").atMost(VERSIONS.length - 1),
+  "profileId?": "string",
   "initTotalActionTime?": "0 <= number <= 300",
   "rerollTime?": "25 <= number <= 300",
   "roundTotalActionTime?": "0 <= number <= 300",

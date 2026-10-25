@@ -5,6 +5,7 @@ import {
   createSignal,
   useContext,
 } from "solid-js";
+import type { ProfileDetail } from "./profiles";
 import { AssetsManager, DEFAULT_VERSION } from "@gi-tcg/assets-manager";
 import { I18nDictionary } from "./locales";
 import { makePersisted } from "@solid-primitives/storage";
@@ -28,7 +29,7 @@ export type Translator = SolidTranslator<I18nDictionary>;
 interface I18nContextValue {
   locale: () => Locale;
   setLocale: (locale: Locale) => void;
-  assetsManager: (version?: string) => AssetsManager;
+  assetsManager: (version?: string | ProfileDetail) => AssetsManager;
   t: Translator;
 }
 
@@ -40,15 +41,15 @@ export function I18nProvider(props: ParentProps) {
   });
   const assetsManagerCache = new Map<string, AssetsManager>();
 
-  const assetsManager = (version: string = DEFAULT_VERSION) => {
+  const assetsManager = (version: string | ProfileDetail = DEFAULT_VERSION) => {
     const language = locale() === "zh-CN" ? "CHS" : "EN";
-    const cacheKey = `${language}-${version}`;
+    const cacheKey = `${language}-${typeof version === "string" ? version : version.profileHash}`;
     if (assetsManagerCache.has(cacheKey)) {
       return assetsManagerCache.get(cacheKey)!;
     }
     const manager = new AssetsManager({
       language,
-      version: version,
+      ...(typeof version === "string" ? { version } : version.assets),
     });
     assetsManagerCache.set(cacheKey, manager);
     void manager.prepareForSync().catch(() => void 0);

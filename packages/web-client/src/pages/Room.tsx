@@ -51,11 +51,13 @@ import type { CancellablePlayerIO } from "@gi-tcg/core";
 import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
 
+import { fetchProfile, type ProfileSummary } from "../profiles";
+
 interface InitializedPayload {
+  profile: ProfileSummary;
   who: 0 | 1;
   config: {
     watchable: boolean;
-    gameVersion: string;
   };
   myPlayerInfo: PlayerInfo;
   oppPlayerInfo: PlayerInfo;
@@ -76,7 +78,7 @@ const SSE_RECONNECT_TIMEOUT = 30 * 1000;
 
 const createReconnectSse = <T,>(
   url: string | (() => string),
-  onPayload: (payload: T) => void,
+  onPayload: (payload: T) => void | Promise<void>,
   onError?: (e: Error) => void,
 ): [fetch: () => void, abort: () => void] => {
   let reconnectTimeout: number | null = null;
@@ -141,9 +143,10 @@ const createReconnectSse = <T,>(
           resetReconnectTimer(); // Reset the timer on receiving data
           const payload = JSON.parse(value.data);
           try {
-            onPayload(payload);
+            await onPayload(payload);
           } catch (e) {
-            console.error("Error processing payload:", e);
+            abortController?.abort();
+            throw e;
           }
         }
 
@@ -153,6 +156,8 @@ const createReconnectSse = <T,>(
       })
       .catch((error) => {
         // network error / abort error, try reconnect later
+        activating = false;
+        if (cancelled) return;
         onError?.(error);
         setTimeout(connect, 1000);
       });
@@ -194,6 +199,10 @@ export default function Room() {
   const [oppPlayerIo, setOppPlayerIo] = createSignal<CancellablePlayerIO>();
 
   const reportStreamError = async (e: Error) => {
+    if (!initialized()) {
+      setLoading(false);
+      setFailed(getErrorMessage(e));
+    }
     if (e instanceof AxiosError) {
       const response = e.response;
       if (response?.data instanceof ReadableStream) {
@@ -213,7 +222,8 @@ export default function Room() {
     console.error(e);
   };
 
-  const initializeClient = (payload: InitializedPayload) => {
+  const initializeClient = async (payload: InitializedPayload) => {
+    const profile = await fetchProfile(payload.profile);
     const onGiveUp = async () => {
       try {
         const { data } = await axios.post(
@@ -228,7 +238,7 @@ export default function Room() {
     };
     if (!playerIo()) {
       const [io, Ui] = createClient(payload.who, {
-        assetsManager: () => assetsManager(payload.config.gameVersion),
+        assetsManager: () => assetsManager(profile),
         locale,
         onGiveUp,
         disableAction: !action,
@@ -326,12 +336,13 @@ export default function Room() {
 
   const [fetchMyNotification, abortMyNotification] = createReconnectSse(
     `rooms/${id}/players/${playerId}/notification`,
-    (payload: any) => {
+    async (payload: any) => {
       setLoading(false);
       switch (payload.type) {
         case "initialized": {
+          await initializeClient(payload);
+          setFailed(null);
           setInitialized(payload);
-          initializeClient(payload);
           if (payload?.config?.watchable && allowWatchOpp()) {
             setObserverMode(true);
           }

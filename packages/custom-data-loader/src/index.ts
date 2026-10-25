@@ -276,6 +276,12 @@ export class CustomDataLoader {
     return [
       gameData,
       {
+        officialDeckCompatible:
+          customData.characters.length === 0 &&
+          !customData.entities.some(
+            (entity) =>
+              playSkillOfCard(gameData.entities.get(entity.id)!) !== null,
+          ),
         customData: [customData],
         overrideData: [...this.dataOverrides.values()],
       },

@@ -1,0 +1,115 @@
+[
+  {
+    "id": 1101,
+    "maxEnergy": 2
+  },
+  {
+    "id": 1305,
+    "maxEnergy": 2
+  },
+  {
+    "id": 22042,
+    "rawDescription": "造成$[D__KEY__DAMAGE_2]点$[D__KEY__ELEMENT]，此角色每有3点<color=#FFFFFFFF>$[S22044]</color>提供的额外最大生命，此伤害+1（最多+5）。然后$[K56]1张$[K3002]最高的手牌。\n"
+  },
+  {
+    "id": 25013,
+    "playCost": [
+      {
+        "type": "GCG_COST_DICE_ANEMO",
+        "count": 3
+      }
+    ]
+  },
+  {
+    "id": 311409,
+    "rawDescription": "<color=#FFFFFFFF>所附属角色受到伤害时：</color>如可能，$[K56]1张$[K3002]最高的手牌，以抵消1点伤害，然后累积1点<color=#FFFFFFFF>「团结」</color>。（每回合最多触发2次）\n<color=#FFFFFFFF>角色造成伤害时：</color>如果此牌已有<color=#FFFFFFFF>「团结」</color>，则消耗所有<color=#FFFFFFFF>「团结」</color>，使此伤害+1，并且每消耗1点<color=#FFFFFFFF>「团结」</color>就抓1张牌。\n（<color=#FFFFFFFF>「{SPRITE_PRESET#3205}单手剑」角色</color>才能装备。角色最多装备1件「{SPRITE_PRESET#3003}武器」）\n",
+    "rawPlayingDescription": "<color=#FFFFFFFF>所附属角色受到伤害时：</color>如可能，$[K56]1张$[K3002]最高的手牌，以抵消1点伤害，然后累积1点<color=#FFFFFFFF>「团结」</color>。（每回合最多触发2次）\n<color=#FFFFFFFF>角色造成伤害时：</color>如果此牌已有<color=#FFFFFFFF>「团结」</color>，则消耗所有<color=#FFFFFFFF>「团结」</color>，使此伤害+1，并且每消耗1点<color=#FFFFFFFF>「团结」</color>就抓1张牌。\n"
+  },
+  {
+    "id": 322022,
+    "rawDynamicDescription": "此牌会记录本场对局中我方支援区弃置卡牌的数量，称为「阅历」。（最多6点，<color=#D3BC8EFF>当前为${[GCG_TOKEN_COUNTER]}点</color>）\n<color=#FFFFFFFF>我方角色使用「元素爆发」后：</color>如果「阅历」至少为5，则弃置此牌，生成<color=#FFFFFFFF>「阅历」-2</color>数量的$[K411]。\n"
+  },
+  {
+    "id": 323008,
+    "rawDescription": "<color=#FFFFFFFF>行动阶段开始时：</color>$[K56]最多2张$[K3002]最高的手牌，每$[K56]1张，此牌就累积1点<color=#FFFFFFFF>「记忆和梦」</color>。（最多2点）\n<color=#FFFFFFFF>我方角色使用技能时：</color>如果我方本回合未打出过行动牌，则消耗1点<color=#FFFFFFFF>「记忆和梦」</color>，以使此技能少花费1个元素骰。\n"
+  },
+  {
+    "id": 333008,
+    "rawDescription": "目标角色在本回合结束前，<color=#FFFFFFFF>「普通攻击」</color>少花费1个$[K309]。\n（每回合每个角色最多食用1次「{SPRITE_PRESET#3101}料理」）\n"
+  },
+  {
+    "id": 117082,
+    "rawDescription": "<color=#FFFFFFFF>双方选择行动前：</color>如果我方场上存在$[C116]或$[C112082]，则使其$[K3]-1，并$[K56]我方牌库顶的1张卡牌。然后，造成所$[K56]卡牌$[K3002]+1的$[K107]。\n<color=#FFFFFFFF>$[K3]：1</color>（可叠加，最多叠加到3次）\n"
+  },
+  {
+    "id": 211041,
+    "rawDescription": "$[K1]：我方出战角色为<color=#FFFFFFFF>$[A1104]</color>时，装备此牌。\n$[A1104]装备此牌后，立刻使用一次<color=#FFD780FF>$[S11042]</color>。\n装备有此牌的$[A1104]生成的<color=#FFFFFFFF>$[C111041]</color>获得以下效果：\n初始$[K4]+1，并且使我方单手剑、双手剑或长柄武器角色的<color=#FFFFFFFF>普通攻击</color>伤害+1。\n（牌组中包含$[A1104]，才能加入牌组）\n",
+    "rawPlayingDescription": "装备有此牌的$[A1104]生成的<color=#FFFFFFFF>$[C111041]</color>获得以下效果：\n初始$[K4]+1，并且使我方单手剑、双手剑或长柄武器角色的<color=#FFFFFFFF>普通攻击</color>伤害+1。\n"
+  },
+  {
+    "id": 217091,
+    "rawDescription": "装备有此牌的<color=#FFFFFFFF>$[A1709]</color>切换至前台或使用<color=#FFFFFFFF>$[S17092]</color>时：若我方手牌不多于对方，则窃取1张$[K3002]最高的对方手牌，然后对手抓1张牌。（每回合1次）\n（牌组中包含$[A1709]，才能加入牌组）\n",
+    "rawPlayingDescription": "装备有此牌的<color=#FFFFFFFF>$[A1709]</color>切换至前台或使用<color=#FFFFFFFF>$[S17092]</color>时：若我方手牌不多于对方，则窃取1张$[K3002]最高的对方手牌，然后对手抓1张牌。（每回合1次）\n"
+  },
+  {
+    "id": 217091,
+    "rawDescription": "$[K1]：我方出战角色为<color=#FFFFFFFF>$[A2204]</color>时，装备此牌。\n$[A2204]装备此牌后，立刻使用一次<color=#FFD780FF>$[S22042]</color>。\n装备有此牌的$[A2204]使用<color=#FFFFFFFF>$[S22042]</color>$[K56]1张手牌后：治疗此角色，其数值等同于所$[K56]手牌的$[K3002]。（每回合1次）\n（牌组中包含$[A2204]，才能加入牌组）\n",
+    "rawPlayingDescription": "装备有此牌的$[A2204]使用<color=#FFFFFFFF>$[S22042]</color>$[K56]1张手牌后：治疗此角色，其数值等同于所$[K56]手牌的$[K3002]。（每回合1次）\n"
+  },
+  {
+    "id": 122041,
+    "rawDescription": "我方$[K56]或$[K57]的手牌，会被吞噬。\n<color=#FFFFFFFF>每吞噬3张牌：</color>$[A2204]获得1点额外最大生命；如果其中存在$[K3002]相同的牌，则额外获得1点；如果3张均相同，再额外获得1点。\n"
+  },
+  {
+    "id": 122043,
+    "rawDescription": "<color=#FFFFFFFF>入场时：</color>获得我方已吞噬卡牌中最高$[K3002]的「攻击力」，获得该费用的已吞噬卡牌数量的$[K3]。\n<color=#FFFFFFFF>结束阶段和我方宣布结束时：</color>造成此牌「攻击力」值的$[K104]。\n<color=#FFFFFFFF>我方出战角色受到伤害时：</color>抵消1点伤害，然后此牌$[K3]-2。\n"
+  },
+  {
+    "id": 124051,
+    "rawDescription": "随机$[K56]1张$[K3002]最高的手牌，生成1个我方出战角色类型的元素骰。如果我方出战角色是「{SPRITE_PRESET#3506}圣骸兽」角色，则使其获得1点$[K310]。（每回合最多打出1张）\n"
+  },
+  {
+    "id": 1151121,
+    "rawDescription": "消耗1点<color=#FFFFFFFF>「夜魂值」</color>，造成$[D__KEY__DAMAGE]点$[D__KEY__ELEMENT]，然后随机$[K56]3张$[K3002]最高的手牌。\n"
+  },
+  {
+    "id": 3130021,
+    "rawDescription": "造成1点$[K100]，窃取1张$[K3002]最高的对方手牌。\n如果我方手牌数不多于2，此特技少花费1个元素骰。\n"
+  },
+  {
+    "id": -104,
+    "rawDescription": "附着{SPRITE_PRESET#2104}雷元素，可发生元素反应：\n{SPRITE_PRESET#2104}{SPRITE_PRESET#2103}<color=#FFFFFFFF>超载</color>：本伤害+2，目标强制切换到下一个角色\n{SPRITE_PRESET#2104}{SPRITE_PRESET#2101}<color=#FFFFFFFF>超导</color>：本伤害+1，对目标以外的所有敌方角色造成1点穿透伤害\n{SPRITE_PRESET#2104}{SPRITE_PRESET#2102}<color=#FFFFFFFF>感电</color>：本伤害+1，对目标以外的所有敌方角色造成1点穿透伤害\n{SPRITE_PRESET#2104}{SPRITE_PRESET#2107}<color=#FFFFFFFF>原激化</color>：本伤害+1，生成使下3次草元素或雷元素伤害+1的[<color=#FFFFFFFF>激化领域</color>]\n{SPRITE_PRESET#2104}{SPRITE_PRESET#2102}<color=#FFFFFFFF>月感电</color>：生成回合结束时造成2点{SPRITE_PRESET#2104}<color=#FFACFFFF>雷元素伤害</color>的[<color=#FFFFFFFF>雷暴云</color>]。（可用次数1，可叠加，没有上限，入场或可用次数增加时，赋予敌方随机1张手牌[<color=#FFFFFFFF>电击</color>]）\n"
+  },
+  {
+    "id": -107,
+    "rawDescription": "附着{SPRITE_PRESET#2107}草元素，可发生元素反应：\n{SPRITE_PRESET#2107}{SPRITE_PRESET#2102}<color=#FFFFFFFF>绽放</color>：本伤害+1，生成使下次火元素或雷元素伤害+2的[<color=#FFFFFFFF>草原核</color>]\n{SPRITE_PRESET#2107}{SPRITE_PRESET#2103}<color=#FFFFFFFF>燃烧</color>：本伤害+1，生成回合结束时造成1点火元素伤害的[<color=#FFFFFFFF>燃烧烈焰</color>]（可用次数1，最多叠加到2）\n{SPRITE_PRESET#2107}{SPRITE_PRESET#2104}<color=#FFFFFFFF>原激化</color>：本伤害+1，生成使下3次草元素或雷元素伤害+1的[<color=#FFFFFFFF>激化领域</color>]。\n{SPRITE_PRESET#2107}{SPRITE_PRESET#2102}<color=#FFFFFFFF>月绽放</color>：本伤害+1，并赋予我方随机1张手牌[<color=#FFFFFFFF>费用降低</color>]\n"
+  },
+  {
+    "id": -204,
+    "rawDescription": "不通过伤害附着{SPRITE_PRESET#2104}雷元素时，发生的元素反应会忽略伤害效果：\n{SPRITE_PRESET#2104}{SPRITE_PRESET#2103}<color=#FFFFFFFF>超载</color>：目标强制切换到下一个角色\n{SPRITE_PRESET#2104}{SPRITE_PRESET#2101}<color=#FFFFFFFF>超导</color>：没有效果\n{SPRITE_PRESET#2104}{SPRITE_PRESET#2102}<color=#FFFFFFFF>感电</color>：没有效果\n{SPRITE_PRESET#2104}{SPRITE_PRESET#2107}<color=#FFFFFFFF>原激化</color>：生成使下3次草元素或雷元素伤害+1的[<color=#FFFFFFFF>激化领域</color>]\n"
+  },
+  {
+    "id": -207,
+    "rawDescription": "不通过伤害附着{SPRITE_PRESET#2107}草元素时，发生的元素反应会忽略伤害效果：\n{SPRITE_PRESET#2107}{SPRITE_PRESET#2102}<color=#FFFFFFFF>绽放</color>：生成使下次火元素或雷元素伤害+2的[<color=#FFFFFFFF>草原核</color>]\n{SPRITE_PRESET#2107}{SPRITE_PRESET#2103}<color=#FFFFFFFF>燃烧</color>：生成回合结束时造成1点火元素伤害的[<color=#FFFFFFFF>燃烧烈焰</color>]（可用次数1，最多叠加到2）\n{SPRITE_PRESET#2107}{SPRITE_PRESET#2104}<color=#FFFFFFFF>原激化</color>：生成使下3次草元素或雷元素伤害+1的[<color=#FFFFFFFF>激化领域</color>]\n"
+  },
+  {
+    "id": -214,
+    "rawDescription": "{SPRITE_PRESET#2104}{SPRITE_PRESET#2103}<color=#FFFFFFFF>超载</color>：本伤害+2，目标强制切换到下一个角色\n{SPRITE_PRESET#2104}{SPRITE_PRESET#2101}<color=#FFFFFFFF>超导</color>：本伤害+1，对目标以外的所有敌方角色造成1点穿透伤害\n{SPRITE_PRESET#2104}{SPRITE_PRESET#2102}<color=#FFFFFFFF>感电</color>：本伤害+1，对目标以外的所有敌方角色造成1点穿透伤害\n{SPRITE_PRESET#2104}{SPRITE_PRESET#2107}<color=#FFFFFFFF>原激化</color>：本伤害+1，生成使下3次草元素或雷元素伤害+1的[<color=#FFFFFFFF>激化领域</color>]\n{SPRITE_PRESET#2106}{SPRITE_PRESET#2104}<color=#FFFFFFFF>结晶（雷）</color>：本伤害+1，我方出战角色获得1点护盾（可叠加，最多2点）。\n{SPRITE_PRESET#2105}{SPRITE_PRESET#2104}<color=#FFFFFFFF>扩散（雷）</color>：对目标以外的所有敌方角色造成1点雷元素伤害\\\\n{SPRITE_PRESET#2104}{SPRITE_PRESET#2102}<color=#FFFFFFFF>月感电</color>：生成回合结束时造成2点{SPRITE_PRESET#2104}<color=#FFACFFFF>雷元素伤害</color>的[<color=#FFFFFFFF>雷暴云</color>]。（可用次数1，可叠加，没有上限，入场或可用次数增加时，赋予敌方随机1张手牌[<color=#FFFFFFFF>电击</color>]）\n"
+  },
+  {
+    "id": -217,
+    "rawDescription": "{SPRITE_PRESET#2107}{SPRITE_PRESET#2102}<color=#FFFFFFFF>绽放</color>：本伤害+1，生成使下次火元素或雷元素伤害+2的[<color=#FFFFFFFF>草原核</color>]\n{SPRITE_PRESET#2107}{SPRITE_PRESET#2103}<color=#FFFFFFFF>燃烧</color>：本伤害+1，生成回合结束时造成1点火元素伤害的[<color=#FFFFFFFF>燃烧烈焰</color>]（可用次数1，最多叠加到2）\n{SPRITE_PRESET#2107}{SPRITE_PRESET#2104}<color=#FFFFFFFF>原激化</color>：本伤害+1，生成使下3次草元素或雷元素伤害+1的[<color=#FFFFFFFF>激化领域</color>]\n{SPRITE_PRESET#2107}{SPRITE_PRESET#2102}<color=#FFFFFFFF>月绽放</color>：本伤害+1，并赋予我方随机1张手牌[<color=#FFFFFFFF>费用降低</color>]\n"
+  },
+  {
+    "id": -1033,
+    "rawDescription": "<color=#FFFFFFFF>双方选择行动前：</color>如果我方场上存在草原核或丰穰之核，则使其<color=#FFFFFFFF>可用次数</color>-1，并<color=#FFFFFFFF>舍弃</color>我方牌库顶的1张卡牌。然后，造成所<color=#FFFFFFFF>舍弃</color>卡牌的元素骰费用+1的{SPRITE_PRESET#2107}<color=#7EC236FF>草元素伤害</color>。\n<color=#FFFFFFFF><color=#FFFFFFFF>可用次数</color>：1</color>（可叠加，最多叠加到3次）\n"
+  },
+  {
+    "id": -1049,
+    "rawDescription": "<color=#FFFFFFFF>结束阶段：</color>造成2点<color=#FFFFFFFF>穿透伤害</color>。\n此卡牌被弃置时，对场上生命值最高的一名角色造成5点<color=#FFFFFFFF>穿透伤害</color>。\n<color=#FFFFFFFF>可用次数：3</color>\n"
+  },
+  {
+    "id": -2003,
+    "rawDescription": "费用：0{SPRITE_PRESET#1108}\n治疗我方出战角色1点，生成1个随机基础元素骰。\n"
+  }
+]

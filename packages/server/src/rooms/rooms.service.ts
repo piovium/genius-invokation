@@ -15,6 +15,7 @@
 
 import console from "node:console";
 import {
+  profilesService,
   usersService,
   decksService,
   gamesService,
@@ -38,9 +39,6 @@ import {
   type RpcResponse,
   serializeGameStateLog,
   CORE_VERSION,
-  VERSIONS,
-  CURRENT_VERSION,
-  type Version,
   type GameState,
   setAsyncContext,
 } from "@gi-tcg/core";
@@ -53,7 +51,7 @@ import {
   RpcResponse as PbRpcResponse,
   type Deck,
 } from "@gi-tcg/typings";
-import getData from "@gi-tcg/data";
+import type { CompiledProfile, ProfileSummary } from "../profiles/types";
 import { flip } from "@gi-tcg/utils";
 import {
   BehaviorSubject,
@@ -103,7 +101,7 @@ interface RoomConfig extends Partial<GameConfig> {
   watchable: boolean; // defaults true
   private: boolean; // defaults false
   allowGuest: boolean; // defaults true
-  gameVersion: Version; // defaults latest
+  profile: ProfileSummary;
 }
 
 interface CreateRoomConfig extends RoomConfig {
@@ -148,6 +146,7 @@ export interface SSEPing {
 
 export interface SSEInitialized {
   type: "initialized";
+  profile: ProfileSummary;
   who: 0 | 1;
   config: RoomConfig | null;
   myPlayerInfo: PlayerInfo;
@@ -426,6 +425,7 @@ class Player implements PlayerIOWithError {
     this._oppPlayer = oppPlayer;
     this.initializedSubject.next({
       type: "initialized",
+      profile: this._timeoutConfig!.profile,
       who,
       config: this._timeoutConfig,
       myPlayerInfo: this.playerInfo,
@@ -448,6 +448,7 @@ enum RoomStatus {
 
 interface RoomInfo {
   id: number;
+  profile: ProfileSummary;
   config: RoomConfig;
   status: RoomStatus;
   watchable: boolean;
@@ -491,6 +492,7 @@ class Room {
   constructor(
     public readonly id: number,
     createRoomConfig: CreateRoomConfig,
+    public readonly compiledProfile: CompiledProfile,
   ) {
     const { hostWho, ...config } = createRoomConfig;
     this.hostWho = hostWho;
@@ -553,9 +555,11 @@ class Room {
       player0.setTimeoutConfig(this.config);
       player1.setTimeoutConfig(this.config);
       state = InternalGame.createInitialState({
+        ...this.compiledProfile.profile.gameConfig,
+        randomSeed: this.config.randomSeed,
         decks: [player0.playerInfo.deck, player1.playerInfo.deck],
-        data: getData(this.config.gameVersion),
-        versionBehavior: this.config.gameVersion,
+        data: this.compiledProfile.data,
+        versionBehavior: this.compiledProfile.profile.versionBehavior,
         hostRelatedExecution: true,
         hostWho: this.hostWho,
       });
@@ -596,7 +600,8 @@ class Room {
         player1.onError(e);
         sendDebugLog("gameErrorLog", {
           em: inspect(e),
-          gv: this.config.gameVersion,
+          gv: this.compiledProfile.profile.id,
+          profile: this.compiledProfile.profile,
           ...serializeGameStateLog(this.stateLog),
         });
       } finally {
@@ -639,7 +644,8 @@ class Room {
     });
     return {
       ...serializeGameStateLog(this.stateLog),
-      gv: this.config.gameVersion,
+      gv: this.compiledProfile.profile.id,
+      profile: this.compiledProfile.profile,
       m: {
         roomId: this.id,
         startedAt: this.startedAt?.toISOString() ?? null,
@@ -652,6 +658,7 @@ class Room {
   getRoomInfo(): RoomInfo {
     return {
       id: this.id,
+      profile: this.config.profile,
       config: this.config,
       status: this.status,
       watchable: this.config.watchable,
@@ -788,13 +795,11 @@ export class RoomsService {
           ? 0
           : 1;
 
+    const compiledProfile = profilesService.get(params.profileId);
     const roomConfig: CreateRoomConfig = {
       hostWho,
       randomSeed: params.randomSeed,
-      gameVersion:
-        typeof params.gameVersion === "number"
-          ? VERSIONS[params.gameVersion]!
-          : CURRENT_VERSION,
+      profile: compiledProfile.summary,
       initTotalActionTime: params.initTotalActionTime ?? 45,
       rerollTime: params.rerollTime ?? 40,
       roundTotalActionTime: params.roundTotalActionTime ?? 60,
@@ -806,9 +811,9 @@ export class RoomsService {
 
     try {
       const version = await verifyDeck(playerInfo.deck);
-      if (semver.compare(version, roomConfig.gameVersion) > 0) {
+      if (semver.compare(version, roomConfig.profile.baseVersion) > 0) {
         throw new BadRequestException(
-          `Deck version required ${version}, it's higher game version ${roomConfig.gameVersion}`,
+          `Deck version required ${version}, it's higher game version ${roomConfig.profile.baseVersion}`,
         );
       }
     } catch (e) {
@@ -823,7 +828,7 @@ export class RoomsService {
     if (typeof roomId === "undefined") {
       throw new InternalServerErrorException("no room available");
     }
-    const room = new Room(roomId, roomConfig);
+    const room = new Room(roomId, roomConfig, compiledProfile);
     this.rooms.set(roomId, room);
     this.roomIdPool.shift();
     metricsService.incrementCreatedRooms();
@@ -933,9 +938,9 @@ export class RoomsService {
 
     try {
       const version = await verifyDeck(playerInfo.deck);
-      if (semver.compare(version, room.config.gameVersion) > 0) {
+      if (semver.compare(version, room.config.profile.baseVersion) > 0) {
         throw new BadRequestException(
-          `Deck version required ${version}, it's higher game version ${room.config.gameVersion}`,
+          `Deck version required ${version}, it's higher game version ${room.config.profile.baseVersion}`,
         );
       }
     } catch (e) {
@@ -983,7 +988,8 @@ export class RoomsService {
       gamesService
         .addGame({
           coreVersion: Room.CORE_VERSION,
-          gameVersion: room.config.gameVersion,
+          gameVersion: room.compiledProfile.profile.id,
+          profile: room.compiledProfile.profile,
           data: gameData,
           winnerId,
           playerIds,

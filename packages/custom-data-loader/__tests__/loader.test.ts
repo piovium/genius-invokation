@@ -174,6 +174,7 @@ describe("CustomDataLoader GTS", () => {
     const roundTrippedOptions = JSON.parse(
       JSON.stringify(amOptions),
     ) as Partial<AssetsManagerOption>;
+    expect(roundTrippedOptions.officialDeckCompatible).toBe(false);
     const assets = new AssetsManager(roundTrippedOptions);
 
     expect(assets.getNameSync(10_000_000)).toBe("Shield");

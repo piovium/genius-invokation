@@ -87,7 +87,7 @@ export interface AssetsManagerOption {
   language: Language;
   customData: CustomData[];
   overrideData: OverrideData[];
-  defaultDeckCompatible: boolean;
+  officialDeckCompatible: boolean;
   concurrency: number;
 }
 
@@ -124,7 +124,7 @@ export class AssetsManager {
       version: DEFAULT_VERSION,
       customData: [],
       overrideData: [],
-      defaultDeckCompatible: false,
+      officialDeckCompatible: false,
       concurrency: 32,
       ...options,
     };
@@ -607,7 +607,7 @@ export class AssetsManager {
   }
 
   async getDeckData(): Promise<DeckData> {
-    if (this.options.defaultDeckCompatible) {
+    if (this.options.officialDeckCompatible) {
       return getStaticDeckData();
     }
     await this.prepareForSync();
@@ -623,7 +623,7 @@ export class AssetsManager {
   }
 
   encode(deck: Deck) {
-    if (this.options.defaultDeckCompatible) {
+    if (this.options.officialDeckCompatible) {
       return staticEncode(deck);
     }
     throw new Error(`Unsupported`);
@@ -642,5 +642,5 @@ function isActionCard(data: { type?: string }): boolean {
 }
 
 export const DEFAULT_ASSETS_MANAGER = new AssetsManager({
-  defaultDeckCompatible: true,
+  officialDeckCompatible: true,
 });

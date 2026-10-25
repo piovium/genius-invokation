@@ -24,6 +24,7 @@ export const games = pgTable("Game", {
   coreVersion: text().notNull(),
   gameVersion: text().notNull(),
   data: jsonb().notNull(),
+  profile: jsonb().$type<import("../profiles/types").Profile>(),
   winnerId: integer(),
   createdAt: createdAt(),
 });

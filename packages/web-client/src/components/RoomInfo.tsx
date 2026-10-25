@@ -59,6 +59,9 @@ export function RoomInfo(props: RoomInfoProps) {
     <div class="w-full bg-yellow-100 rounded-xl p-4 flex flex-col">
       <div class="flex flex-row items-center gap-2 mb-3">
         <h4 class="font-semibold">{t("room", { code: code() })}</h4>
+        <span class="text-sm text-yellow-800">
+          {props.config.profile?.name}
+        </span>
         <Show when={!props.watchable}>
           <span title={t("spectateUnavailable")}>&#8856;</span>
         </Show>
