@@ -141,7 +141,7 @@ interface PluginConfig {
 }
 ```
 
-每个文件是“定义 ID → 官方版本”的映射，不含 `$base` 或 `$category`（生成 Profile 时提供）。
+每个文件是“定义 ID → 官方版本”的映射，不含 `$base`（应取 `baseVersion`） 或 `$category`（应始终置空）。
 
 生成 Game Data 时调用 `createOfficialVersionResolver(baseVersion, versions, dependencies)` 展开依赖。`dependencies` 使用与官方数据同一构建的 `@gi-tcg/data-code-analyzer` 产物。
 
@@ -232,7 +232,7 @@ Preset loader、Plugin loader 和三类底层 loader 共用引用解析机制；
 | 操作               | 行为                                                                                       |
 | ------------------ | ------------------------------------------------------------------------------------------ |
 | `GET /profiles`    | 返回可用于新房间的 `id`、`name`、`profileHash`、`baseVersion`、兼容性标志和默认 Profile ID |
-| `GET /profile/:id` | 返回对应 Profile 具体信息，至少应包括 `assets`                                             |
+| `GET /profile/:id` | 返回对应 Profile 具体信息，至少应包括 `profileHash` `assets`                               |
 | `POST /rooms`      | 增加 `profileId` ；省略 ID 时使用默认 Profile                                              |
 | 房间信息           | 增加 `{ id, name, baseVersion, profileHash }` 的 Profile 摘要                              |
 | SSE `initialized`  | 为玩家及观战者提供固定的 Profile 摘要                                                      |
@@ -259,7 +259,9 @@ const initialState = Game.createInitialState({
 });
 ```
 
-`profileHash` 直接从序列化 Profile 结构后计算 SHA-256 得出，无业务层语义，仅用于客户端缓存：客户端以 `(profileHash, language)` 缓存 `AssetsManager`；
+`profileHash` 直接从序列化 Profile 结构后计算 SHA-256 得出，无业务层语义，仅用于客户端缓存：客户端获取 `assets` 作为创建参数并以 `(profileHash, language)` 缓存 `AssetsManager`。
+
+客户端只受 `assets` 影响，不考虑 `baseVersion` / `versionMap` 字段。
 
 ## 杂项
 
