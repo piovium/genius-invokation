@@ -1,12 +1,11 @@
 # `@gi-tcg/server` 对战平台后端
 
+
 ## 本地开发与调试
 
 1. 安装构建依赖：根目录执行 `pnpm build server...`）。
 2. 在 `packages/server/.env` 设置 `JWT_SECRET=任意字符串`。
-
-- 可选： `GH_CLIENT_ID`、`GH_CLIENT_SECRET` 启用 GitHub OAuth
-
+  - 可选： `GH_CLIENT_ID`、`GH_CLIENT_SECRET` 启用 GitHub OAuth
 3. 在 `packages/server` 执行 `pnpm dev`
 
 未设置 `DATABASE_URL` 时，本地数据保存于 `packages/server/.pglite`；设置 `DATABASE_URL` 时使用指定 Postgres 数据库。

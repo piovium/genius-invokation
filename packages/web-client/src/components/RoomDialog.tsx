@@ -31,7 +31,7 @@ import { useNavigate } from "@solidjs/router";
 import { useAuth } from "../auth";
 import { useVersionContext } from "../App";
 import { useGuestDecks, useGuestInfo } from "../guest";
-import type { ProfileList } from "../profiles";
+import type { ProfileList, ProfileSummary } from "../profiles";
 import { useI18n } from "../i18n";
 
 function SelectableDeckInfo(
@@ -81,7 +81,10 @@ export interface RoomDialogProps {
   ref: HTMLDialogElement;
   joiningRoomInfo?: {
     id: number;
-    config: TimeConfig & { [k: string]: any };
+    config: TimeConfig & {
+      profile: ProfileSummary;
+      [k: string]: any;
+    };
   };
 }
 
@@ -161,14 +164,7 @@ export function RoomDialog(props: RoomDialogProps) {
   const [profiles] = createResource(() =>
     axios.get<ProfileList>("profiles").then(({ data }) => data),
   );
-  const [profileId, setProfileId] = createSignal("official/latest");
-  const selectedProfile = () =>
-    props.joiningRoomInfo?.config.profile ??
-    profiles()?.profiles.find((p) => p.id === profileId());
-  const version = () =>
-    versionInfo()?.supportedGameVersions.indexOf(
-      selectedProfile()?.baseVersion,
-    ) ?? -1;
+  const [profile, setProfile] = createSignal<ProfileSummary>();
   const [timeConfig, setTimeConfig] = createSignal(TIME_CONFIGS[1]);
   const [isPublic, setIsPublic] = createSignal(true);
   const [watchable, setWatchable] = createSignal(true);
@@ -180,26 +176,35 @@ export function RoomDialog(props: RoomDialogProps) {
 
   createEffect(() => {
     const list = profiles();
-    if (props.joiningRoomInfo?.config.profile) {
-      setProfileId(props.joiningRoomInfo.config.profile.id);
-    } else if (list) {
-      setProfileId(
-        list.profiles.some((p) => p.id === savedProfile())
-          ? savedProfile()!
-          : list.defaultProfileId,
-      );
+    if (props.joiningRoomInfo) {
+      setProfile(props.joiningRoomInfo.config.profile);
+    } else {
+      const saved = savedProfile();
+      if (saved) {
+        setProfileById(saved);
+      } else if (list) {
+        setProfileById(list.defaultProfileId);
+      }
     }
   });
+  const setProfileById = (id: string) => {
+    const list = profiles();
+    if (list) {
+      const p = list.profiles.find((p) => p.id === id);
+      if (p) {
+        setProfile(p);
+        return true;
+      }
+    }
+    return false;
+  };
 
-  let deckRequest = 0;
   const updateAvailableDecks = async (version: number) => {
-    const request = ++deckRequest;
     setLoadingDecks(true);
     const { type } = status();
     try {
       if (type === "user") {
         const { data } = await axios.get(`decks?requiredVersion=${version}`);
-        if (request !== deckRequest) return;
         setAvailableDecks(data.data);
       } else if (type === "guest") {
         setAvailableDecks(
@@ -207,7 +212,6 @@ export function RoomDialog(props: RoomDialogProps) {
         );
       }
     } catch (e) {
-      if (request !== deckRequest) return;
       setAvailableDecks([]);
       if (e instanceof AxiosError) {
         alert(getErrorMessage(e));
@@ -222,7 +226,9 @@ export function RoomDialog(props: RoomDialogProps) {
   };
 
   createEffect(() => {
-    const ver = version();
+    const ver =
+      versionInfo()?.supportedGameVersions.indexOf(profile()?.baseVersion) ??
+      -1;
     if (ver >= 0) {
       updateAvailableDecks(ver);
     }
@@ -236,9 +242,10 @@ export function RoomDialog(props: RoomDialogProps) {
       let playerId = id ?? null;
       let response;
       if (typeof roomId === "undefined") {
-        setSavedProfile(profileId());
+        const profileId = profile()!.id;
+        setSavedProfile(profileId);
         const payload: any = {
-          profileId: profileId(),
+          profileId,
           ...timeConfig(),
           private: !isPublic(),
           watchable: watchable(),
@@ -308,14 +315,14 @@ export function RoomDialog(props: RoomDialogProps) {
                 <h4 class="text-lg">{t("roomProfile")}</h4>
                 <select
                   class="disabled:pointer-events-none appearance-none"
-                  value={profileId()}
-                  onChange={(e) => setProfileId(e.target.value)}
+                  value={profile()?.id}
+                  onChange={(e) => setProfileById(e.target.value)}
                   disabled={!editable()}
                 >
                   <For
                     each={
                       props.joiningRoomInfo
-                        ? [selectedProfile()]
+                        ? [props.joiningRoomInfo.config.profile]
                         : (profiles()?.profiles ?? [])
                     }
                   >
@@ -462,7 +469,7 @@ export function RoomDialog(props: RoomDialogProps) {
               selectedDeck() === null ||
               entering() ||
               loadingDecks() ||
-              !selectedProfile()
+              !profile()
             }
           >
             {selectedDeck() === null

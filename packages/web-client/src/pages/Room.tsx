@@ -157,7 +157,9 @@ const createReconnectSse = <T,>(
       .catch((error) => {
         // network error / abort error, try reconnect later
         activating = false;
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
         onError?.(error);
         setTimeout(connect, 1000);
       });
