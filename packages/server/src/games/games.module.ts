@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Hono } from "hono";
 import { GamesController } from "./games.controller";
 
-export const GamesModule = new Hono().route("/", GamesController);
+export const GamesModule = GamesController;

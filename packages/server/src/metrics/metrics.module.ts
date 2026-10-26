@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Hono } from "hono";
 import { MetricsController } from "./metrics.controller";
 
-export const MetricsModule = new Hono().route("/", MetricsController);
+export const MetricsModule = MetricsController;

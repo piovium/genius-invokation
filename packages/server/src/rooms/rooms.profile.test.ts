@@ -36,7 +36,7 @@ vi.mock("../utils", () => ({
 import { profilesService, gamesService } from "../services";
 import { verifyDeck } from "../utils";
 import { RoomsService } from "./rooms.service";
-import { AppController } from "../app.controller";
+import { ProfilesModule } from "../profiles/profiles.module";
 import { handleError } from "../errors";
 import type { Profile, ProfileSummary } from "../profiles/types";
 
@@ -48,20 +48,22 @@ afterEach(() => {
 });
 
 test("profile endpoints round-trip namespaced IDs, assets and hash", async () => {
-  const api = new Hono().onError(handleError).route("/", AppController);
+  const api = new Hono()
+    .onError(handleError)
+    .route("/profiles", ProfilesModule);
   const list = (await (await api.request("/profiles")).json()) as ReturnType<
     typeof profilesService.list
   >;
   expect(list.defaultProfileId).toBe(`official/${CURRENT_VERSION}`);
   const summary = list.profiles.find((p) => p.id === "piovium/lianyu-s1")!;
   const response = await api.request(
-    `/profile/${encodeURIComponent(summary.id)}`,
+    `/profiles/${encodeURIComponent(summary.id)}`,
   );
   expect(response.status).toBe(200);
   const detail = (await response.json()) as Profile & ProfileSummary;
   expect(detail.profileHash).toBe(summary.profileHash);
   expect(detail.assets.officialDeckCompatible).toBe(true);
-  expect((await api.request("/profile/unknown%2Fid")).status).toBe(404);
+  expect((await api.request("/profiles/unknown%2Fid")).status).toBe(404);
 });
 
 test("rooms default to latest and enforce requiredVersion against the selected base", async () => {

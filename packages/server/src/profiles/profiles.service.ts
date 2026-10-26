@@ -1,5 +1,4 @@
 import { CURRENT_VERSION, VERSIONS } from "@gi-tcg/core";
-import { resolve } from "node:path";
 import { loadPresets, officialProfile } from "./compiler";
 import type { CompiledProfile } from "./types";
 import { NotFoundException } from "../errors";

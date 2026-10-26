@@ -17,7 +17,7 @@ import { Hono } from "hono";
 import { ImATeapotException, ServiceUnavailableException } from "./errors";
 import { CORE_VERSION, CURRENT_VERSION, VERSIONS } from "@gi-tcg/core";
 import simpleGit, { type LogResult } from "simple-git";
-import { redisService as redis, profilesService } from "./services";
+import { redisService as redis } from "./services";
 
 const git = simpleGit();
 
@@ -46,11 +46,6 @@ const fallbackGitLog = (): LogResult => {
 };
 
 export const AppController = new Hono()
-  .get("/profiles", (c) => c.json(profilesService.list()))
-  .get("/profile/:id", (c) => {
-    const { profile, summary } = profilesService.get(c.req.param("id"));
-    return c.json({ ...profile, profileHash: summary.profileHash });
-  })
   .get("/version", async (c) => {
     const { latest } = await git.log({ maxCount: 1 }).catch(fallbackGitLog);
     return c.json({

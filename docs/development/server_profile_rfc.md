@@ -232,7 +232,7 @@ Preset loader、Plugin loader 和三类底层 loader 共用引用解析机制；
 | 操作               | 行为                                                                                       |
 | ------------------ | ------------------------------------------------------------------------------------------ |
 | `GET /profiles`    | 返回可用于新房间的 `id`、`name`、`profileHash`、`baseVersion`、兼容性标志和默认 Profile ID |
-| `GET /profile/:id` | 返回对应 Profile 具体信息，至少应包括 `profileHash` `assets`                               |
+| `GET /profiles/:id` | 返回对应 Profile 具体信息，至少应包括 `profileHash` `assets`                               |
 | `POST /rooms`      | 增加 `profileId` ；省略 ID 时使用默认 Profile                                              |
 | 房间信息           | 增加 `{ id, name, baseVersion, profileHash }` 的 Profile 摘要                              |
 | SSE `initialized`  | 为玩家及观战者提供固定的 Profile 摘要                                                      |

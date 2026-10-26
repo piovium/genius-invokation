@@ -22,6 +22,7 @@ import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
 import { GamesModule } from "./games/games.module";
 import { DecksModule } from "./decks/decks.module";
+import { ProfilesModule } from "./profiles/profiles.module";
 import { RoomsModule } from "./rooms/rooms.module";
 import { MetricsModule } from "./metrics/metrics.module";
 import { handleError, NotFoundException } from "./errors";
@@ -32,6 +33,7 @@ const api = new Hono()
   .route("/", AppController)
   .route("/auth", AuthModule)
   .route("/users", UsersModule)
+  .route("/profiles", ProfilesModule)
   .route("/games", GamesModule)
   .route("/decks", DecksModule)
   .route("/rooms", RoomsModule)

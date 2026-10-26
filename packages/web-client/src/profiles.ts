@@ -23,7 +23,7 @@ export function fetchProfile(summary: ProfileSummary) {
   let result = details.get(summary.profileHash);
   if (!result) {
     result = axios
-      .get<ProfileDetail>(`profile/${encodeURIComponent(summary.id)}`)
+      .get<ProfileDetail>(`profiles/${encodeURIComponent(summary.id)}`)
       .then(({ data }) => {
         if (data.profileHash !== summary.profileHash)
           throw new Error("Room Profile has changed; reload the room");
