@@ -1,7 +1,9 @@
 import { createHash } from "node:crypto";
+import { readdir, stat } from "node:fs/promises";
+import { join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   CURRENT_VERSION,
-  VERSIONS,
   createOfficialVersionResolver,
   getVersionBehavior,
   mergeGameConfigWithDefault,
@@ -18,33 +20,15 @@ import type {
   ProfileGameConfig,
 } from "./types";
 import { loadReference } from "./reference";
+import {
+  presetSchema,
+  pluginSchema,
+  externalPluginSchema,
+  versionMapSchema,
+  modSchema,
+  overridesSchema,
+} from "./schema";
 
-function object(value: unknown, label: string): Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value))
-    throw new Error(`${label} must be an object`);
-  return value as Record<string, unknown>;
-}
-function keys(
-  value: Record<string, unknown>,
-  allowed: readonly string[],
-  label: string,
-) {
-  for (const key of Object.keys(value))
-    if (!allowed.includes(key))
-      throw new Error(`Unknown ${label} field: ${key}`);
-}
-function array(value: unknown, label: string): unknown[] {
-  if (value === undefined) return [];
-  if (!Array.isArray(value)) throw new Error(`${label} must be an array`);
-  return value;
-}
-function version(value: unknown, fallback: Version = CURRENT_VERSION): Version {
-  if (value === undefined) return fallback;
-  if (value === "latest") return CURRENT_VERSION;
-  if (!(VERSIONS as readonly unknown[]).includes(value))
-    throw new Error(`Invalid version: ${value}`);
-  return value as Version;
-}
 function defaults(): ProfileGameConfig {
   const { randomSeed, hostWho, hostRelatedExecution, ...config } =
     mergeGameConfigWithDefault();
@@ -107,148 +91,55 @@ export async function compilePreset(
   input: unknown,
   source: URL,
 ): Promise<CompiledProfile> {
-  const preset = object(input, "Preset");
-  keys(
-    preset,
-    [
-      "$schema_version",
-      "id",
-      "name",
-      "version",
-      "version_behavior",
-      "config",
-      "plugins",
-    ],
-    "Preset",
-  );
-  if (preset.$schema_version !== 1)
-    throw new Error("Preset requires $schema_version: 1");
-  if (typeof preset.id !== "string" || !/^[\w.-]+\/[\w.-]+$/.test(preset.id))
-    throw new Error("Profile id must be namespace/name");
-  if (preset.name !== undefined && typeof preset.name !== "string")
-    throw new Error("Profile name must be a string");
-  const baseVersion = version(preset.version);
-  const gameConfig = defaults();
-  const config = object(preset.config ?? {}, "config");
-  keys(config, Object.keys(gameConfig), "config");
-  for (const [key, value] of Object.entries(config)) {
-    if (key === "unexpectedInsufficientDice") {
-      if (!["throw", "skipConsume", "skipAction"].includes(value as string))
-        throw new Error(`Invalid config.${key}`);
-    } else if (
-      typeof value !== "number" ||
-      !Number.isSafeInteger(value) ||
-      value < 0
-    ) {
-      throw new Error(`config.${key} must be a nonnegative integer`);
-    }
-  }
-  Object.assign(gameConfig, config);
-  const behavior = object(preset.version_behavior ?? {}, "version_behavior");
-  const versionBehavior = getVersionBehavior(
-    version(behavior.base, baseVersion),
-  );
-  keys(behavior, ["base", ...Object.keys(versionBehavior)], "version_behavior");
-  for (const [key, value] of Object.entries(behavior)) {
-    if (key === "base") continue;
-    if (
-      key === "defaultRecreateBehavior"
-        ? value !== "overwrite" && value !== "takeMax"
-        : typeof value !== "boolean"
-    )
-      throw new Error(`Invalid version_behavior.${key}`);
-    Object.assign(versionBehavior, { [key]: value });
-  }
+  const preset = presetSchema.parse(input);
+  const baseVersion = preset.version ?? CURRENT_VERSION;
+  const gameConfig = { ...defaults(), ...preset.config };
+  const { base, ...behavior } = preset.version_behavior ?? {};
+  const versionBehavior = {
+    ...getVersionBehavior(base ?? baseVersion),
+    ...behavior,
+  };
   const versionMap: Record<number, Version> = {};
   const mods: ModSource[] = [];
   const overrides: OverrideData[] = [];
-  for (const entry of array(preset.plugins, "plugins")) {
+  for (const entry of preset.plugins ?? []) {
     const loaded =
       typeof entry === "string"
         ? await loadReference(entry, source)
         : { value: entry, source };
-    const plugin = object(loaded.value, "Plugin");
-    keys(
-      plugin,
-      [
-        "$schema_version",
-        "name",
-        "version_maps",
-        "mods",
-        "static_data_overrides",
-      ],
-      "Plugin",
-    );
-    if (
-      (typeof entry === "string" || plugin.$schema_version !== undefined) &&
-      plugin.$schema_version !== 1
-    )
-      throw new Error("Plugin requires $schema_version: 1");
-    if (plugin.name !== undefined && typeof plugin.name !== "string")
-      throw new Error("Plugin name must be a string");
-    for (const entry of array(plugin.version_maps, "version_maps")) {
+    const plugin = (
+      typeof entry === "string" ? externalPluginSchema : pluginSchema
+    ).parse(loaded.value);
+    for (const entry of plugin.version_maps ?? []) {
       const value =
         typeof entry === "string"
           ? (await loadReference(entry, loaded.source)).value
           : entry;
-      for (const [id, rawVersion] of Object.entries(
-        object(value, "version map"),
+      for (const [id, selected] of Object.entries(
+        versionMapSchema.parse(value),
       )) {
-        if (!/^[1-9]\d*$/.test(id) || !Number.isSafeInteger(Number(id)))
-          throw new Error(`Invalid definition ID: ${id}`);
-        if (rawVersion === undefined)
-          throw new Error(`Missing version for ${id}`);
-        const selected = version(rawVersion);
         if (versionMap[Number(id)] && versionMap[Number(id)] !== selected)
           throw new Error(`Conflicting versions for ${id}`);
         versionMap[Number(id)] = selected;
       }
     }
-    for (const entry of array(plugin.mods, "mods")) {
+    for (const entry of plugin.mods ?? []) {
       const value =
         typeof entry === "string"
           ? (await loadReference(entry, loaded.source, true)).value
           : entry;
-      const mod = object(value, "Mod");
-      keys(mod, ["fileUri", "content"], "Mod");
-      if (
-        typeof mod.content !== "string" ||
-        (mod.fileUri !== undefined && typeof mod.fileUri !== "string")
-      )
-        throw new Error("Invalid Mod source");
+      const mod = modSchema.parse(value);
       mods.push({
         content: mod.content,
-        fileUri:
-          (mod.fileUri as string) ??
-          `profile://${preset.id}/mod-${mods.length}.gts`,
+        fileUri: mod.fileUri ?? `profile://${preset.id}/mod-${mods.length}.gts`,
       });
     }
-    for (const entry of array(
-      plugin.static_data_overrides,
-      "static_data_overrides",
-    )) {
+    for (const entry of plugin.static_data_overrides ?? []) {
       const value =
         typeof entry === "string"
           ? (await loadReference(entry, loaded.source)).value
           : entry;
-      for (const item of Array.isArray(value) ? value : [value]) {
-        const override = object(item, "OverrideData");
-        // Static keyword IDs are negative.
-        if (!Number.isSafeInteger(override.id))
-          throw new Error("OverrideData requires an integer id");
-        // Reject executable / non-JSON data from dynamic presets.
-        JSON.stringify(override, (_key, value) => {
-          if (
-            typeof value === "function" ||
-            typeof value === "symbol" ||
-            value === undefined ||
-            (typeof value === "number" && !Number.isFinite(value))
-          )
-            throw new Error("OverrideData must be JSON serializable");
-          return value;
-        });
-        overrides.push(override as OverrideData);
-      }
+      overrides.push(...(overridesSchema.parse(value) as OverrideData[]));
     }
   }
   const resolver = createOfficialVersionResolver(
@@ -273,7 +164,7 @@ export async function compilePreset(
   return finishProfile(
     {
       id: preset.id,
-      name: (preset.name as string) ?? preset.id,
+      name: preset.name ?? preset.id,
       baseVersion,
       officialDeckCompatible: true,
       gameConfig,
@@ -291,11 +182,55 @@ export async function compilePreset(
   );
 }
 
-export async function loadPreset(reference: string, parent: URL) {
-  try {
-    const { value, source } = await loadReference(reference, parent);
-    return await compilePreset(value, source);
-  } catch (cause) {
-    throw new Error(`Cannot compile Preset ${reference}`, { cause });
+const presetExtensions = [
+  "json",
+  "yaml",
+  "yml",
+  "jsonc",
+  "json5",
+  "toml",
+  "js",
+  "ts",
+  "cjs",
+  "cts",
+  "mjs",
+  "mts",
+];
+
+/** Load the first supported preset in a directory, or null if none exists. */
+export async function loadPreset(
+  directory: string | URL,
+): Promise<CompiledProfile | null> {
+  const path = directory instanceof URL ? fileURLToPath(directory) : directory;
+  for (const extension of presetExtensions) {
+    const source = pathToFileURL(join(path, `preset.${extension}`));
+    try {
+      await stat(source);
+    } catch (cause) {
+      if ((cause as NodeJS.ErrnoException).code === "ENOENT") continue;
+      throw cause;
+    }
+    try {
+      const { value } = await loadReference(source.href, source);
+      return await compilePreset(value, source);
+    } catch (cause) {
+      throw new Error(`Cannot compile Preset ${source.href}`, { cause });
+    }
   }
+  return null;
+}
+
+/** Mod registration is process-global, so presets are compiled sequentially. */
+export async function loadPresets(
+  directory: string | URL,
+  { recursive = false }: { recursive?: boolean } = {},
+): Promise<CompiledProfile[]> {
+  const entries = await readdir(directory, { withFileTypes: true, recursive });
+  const profiles: CompiledProfile[] = [];
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const profile = await loadPreset(join(entry.parentPath, entry.name));
+    if (profile) profiles.push(profile);
+  }
+  return profiles;
 }

@@ -4,7 +4,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { CURRENT_VERSION, VERSIONS } from "@gi-tcg/core";
-import { compilePreset, loadPreset, officialProfile } from "./compiler";
+import {
+  compilePreset,
+  loadPreset,
+  loadPresets,
+  officialProfile,
+} from "./compiler";
 import { configBase, loadReference, resolveReference } from "./reference";
 import { ProfilesService } from "./profiles.service";
 
@@ -119,7 +124,7 @@ describe("Profile compiler", () => {
       },
       source,
     );
-    expect(result.profile.officialDeckCompatible).toBe(true);
+    expect(result!.profile.officialDeckCompatible).toBe(true);
   });
 
   test("all official versions and default alias compile", async () => {
@@ -136,24 +141,22 @@ describe("Profile compiler", () => {
 
   test("bundled Lianyu rules compile with official deck compatibility", async () => {
     const result = await loadPreset(
-      "./lianyu-s1/preset.json",
-      new URL("../../presets/config.json", import.meta.url),
+      new URL("../../presets/lianyu-s1/", import.meta.url),
     );
-    expect(result.profile.id).toBe("piovium/lianyu-s1");
-    expect(result.profile.mods.length).toBe(1);
-    expect(result.profile.versionBehavior.discardMaxCostHandsAbortPreview).toBe(
-      false,
-    );
+    expect(result!.profile.id).toBe("piovium/lianyu-s1");
+    expect(result!.profile.mods.length).toBe(1);
     expect(
-      result.data.characters.get(1101)?.varConfigs.maxHealth.initialValue,
+      result!.profile.versionBehavior.discardMaxCostHandsAbortPreview,
+    ).toBe(false);
+    expect(
+      result!.data.characters.get(1101)?.varConfigs.maxHealth.initialValue,
     ).toBe(12);
   });
 
   test("bundled Moyu rules preserve the final tournament version table and patches", async () => {
-    const { data, profile } = await loadPreset(
-      "./moyu-s7/preset.json",
-      new URL("../../presets/config.json", import.meta.url),
-    );
+    const { data, profile } = (await loadPreset(
+      new URL("../../presets/moyu-s7/", import.meta.url),
+    ))!;
     expect(profile.baseVersion).toBe("v5.8.0");
     expect(data.characters.get(1101)?.varConfigs.maxHealth.initialValue).toBe(
       12,
@@ -200,19 +203,47 @@ describe("Preset references", () => {
       join(dir, "node_modules", "rules", "plugin.json"),
       '{"$schema_version":1}',
     );
-    const compiled = await loadPreset("./preset.yaml", configBase(dir));
-    expect(compiled.profile.versionMap).toEqual({ 1101: "v3.3.0" });
+    const compiled = await loadPreset(dir);
+    expect(compiled!.profile.versionMap).toEqual({ 1101: "v3.3.0" });
+    await rm(join(dir, "preset.yaml"));
     await writeFile(
       join(dir, "preset.ts"),
       'export default async () => ({ $schema_version: 1, id: "test/dynamic" });',
     );
-    expect((await loadPreset("./preset.ts", configBase(dir))).profile.id).toBe(
+    expect((await loadPreset(pathToFileURL(dir)))!.profile.id).toBe(
       "test/dynamic",
     );
     await writeFile(join(dir, "plugin.toml"), '"$schema_version" = 1');
     expect(
       (await loadReference("./plugin.toml", configBase(dir))).value,
     ).toEqual({ $schema_version: 1 });
+  });
+
+  test("discovers directories, supports recursion and stops on invalid presets", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "gi-profile-"));
+    dirs.push(dir);
+    await mkdir(join(dir, "empty"));
+    await mkdir(join(dir, "rules", "nested"), { recursive: true });
+    expect(await loadPreset(join(dir, "empty"))).toBeNull();
+    expect(await loadPreset(join(dir, "missing"))).toBeNull();
+    await writeFile(join(dir, "rules", "preset.json"), JSON.stringify(preset));
+    await writeFile(
+      join(dir, "rules", "nested", "preset.yml"),
+      "$schema_version: 1\nid: test/nested",
+    );
+    expect((await loadPresets(dir)).map(({ profile }) => profile.id)).toEqual([
+      "test/rules",
+    ]);
+    expect(
+      (await loadPresets(pathToFileURL(dir), { recursive: true }))
+        .map(({ profile }) => profile.id)
+        .sort(),
+    ).toEqual(["test/nested", "test/rules"]);
+    await writeFile(join(dir, "rules", "preset.json"), "{}");
+    // A malformed first candidate must not fall back to another format.
+    await writeFile(join(dir, "rules", "preset.yaml"), JSON.stringify(preset));
+    await expect(loadPresets(dir)).rejects.toThrow("Cannot compile Preset");
+    await expect(loadPresets(join(dir, "missing"))).rejects.toThrow();
   });
 
   test("remote relatives stay remote and local dependencies are rejected", async () => {
@@ -228,15 +259,14 @@ describe("Preset references", () => {
     ]) {
       expect(() => resolveReference(ref, parent)).toThrow();
     }
-    const fetch = vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        url: parent.href,
-        text: async () => "$schema_version: 1\nid: test/remote",
-      });
+    const fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      url: parent.href,
+      text: async () => "$schema_version: 1\nid: test/remote",
+    });
     vi.stubGlobal("fetch", fetch);
-    expect((await loadPreset(parent.href, source)).profile.id).toBe(
+    const loaded = await loadReference(parent.href, source);
+    expect((await compilePreset(loaded.value, loaded.source)).profile.id).toBe(
       "test/remote",
     );
     await expect(
