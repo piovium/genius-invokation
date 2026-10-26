@@ -4,7 +4,7 @@ import {
   DiceType,
   type SkillHandle,
   type SummonHandle,
-} from "@gi-tcg/core/data";
+} from "#custom-data-loader";
 
 const [LiutianArchery, TrailOfTheQilin, FrostflakeArrow] = [
   11011, 11012, 11013,

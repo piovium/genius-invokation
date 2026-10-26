@@ -1,4 +1,4 @@
-import { DiceType } from "@gi-tcg/core/data";
+import { DiceType } from "#custom-data-loader";
 
 define card {
   id 311309 as PortablePowerSaw;
