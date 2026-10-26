@@ -764,13 +764,23 @@ export class CharacterSkillViewModel extends InitiativeSkillViewModel
         this: AR.This<Meta>,
         type: "normal" | "elemental" | "burst",
       ): AR.DoneRewriteMeta<
-        Omit<Meta, "isInitiativeSkill"> & { readonly isInitiativeSkill: true }
+        Computed<
+          Omit<Meta, "isInitiativeSkill"> & {
+            readonly isInitiativeSkill: true;
+          },
+          CharacterSkillVMMeta
+        >
       >;
       <Meta extends CharacterSkillVMMeta>(
         this: AR.This<Meta>,
         type: "passive",
       ): AR.WithRewriteMeta<
-        Omit<Meta, "isInitiativeSkill"> & { readonly isInitiativeSkill: false },
+        Computed<
+          Omit<Meta, "isInitiativeSkill"> & {
+            readonly isInitiativeSkill: false;
+          },
+          CharacterSkillVMMeta
+        >,
         typeof EntityViewModel,
         DefaultEntityVMMeta<"character">
       >;
