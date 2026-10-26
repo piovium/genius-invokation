@@ -171,6 +171,33 @@ describe("Profile compiler", () => {
         ?.initiativeSkillConfig?.requiredCost.get(8),
     ).toBe(2);
     expect(profile.assets.overrideData.find((o) => o.id === 1101)?.hp).toBe(12);
+    // Keep only authored version choices; dependencies are resolved at compile time.
+    expect(profile.versionMap).not.toHaveProperty("11011");
+    expect(profile.assets.version).toMatchObject({
+      11011: "v3.3.0",
+      1609: "v5.1.0",
+      116091: "v5.1.0",
+      116095: "v5.8.0",
+      302205: "v4.4.0",
+      303205: "v3.3.0",
+      303231: "v4.6.0",
+      303232: "v4.2.0",
+      50332024: "v4.2.0",
+    });
+    const overrides = new Map(
+      profile.assets.overrideData.map((o) => [o.id, o]),
+    );
+    expect(overrides.get(-104)?.description).toContain("下3次草/雷伤害+1");
+    expect(overrides.get(311309)?.description).toContain("原本元素骰费用最高");
+    // A mod description must not replace the formatted raw skill description.
+    expect(overrides.get(11014)).not.toHaveProperty("rawDescription");
+    const skills = overrides.get(1101)?.skills as {
+      id: number;
+      keyMap: unknown;
+    }[];
+    expect(skills.find((s) => s.id === 11014)?.keyMap).toEqual(
+      overrides.get(11014)?.keyMap,
+    );
     expect(profile.officialDeckCompatible).toBe(true);
   });
 });
