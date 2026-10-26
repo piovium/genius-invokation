@@ -15,6 +15,7 @@
 
 import { defineSimpleViewModel, type AR } from "@gi-tcg/gts-runtime";
 import { type, type TypeInfer } from "@gi-tcg/utils";
+import type { Computed } from "../../utils";
 
 const GtsAppendOptions = type({
   /** 重复创建时的累积值上限，默认取 range 上限 */
@@ -84,7 +85,9 @@ export const UsageVM = UsageBaseVM
       <const Meta extends UsageVMMeta, const Name extends string>(
         this: AR.This<Meta>,
         name: Name,
-      ): AR.DoneRewriteMeta<Omit<Meta, "name"> & { name: Name }>;
+      ): AR.DoneRewriteMeta<
+        Computed<Omit<Meta, "name"> & { name: Name }, UsageVMMeta>
+      >;
     }>((model, [name]) => {
       model.name = name;
     }),
