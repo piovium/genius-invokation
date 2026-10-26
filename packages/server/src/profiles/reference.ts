@@ -6,8 +6,8 @@ import { parse as parseYaml } from "yaml";
 import JSON5 from "json5";
 import { parse as parseToml } from "smol-toml";
 
-export interface LoadedReference {
-  value: unknown;
+export interface LoadedReference<T = unknown> {
+  value: T;
   source: URL;
 }
 const isRemote = (url: URL) =>
@@ -73,7 +73,6 @@ export function configBase(directory: string): URL {
 export async function loadReference(
   reference: string,
   parent: URL,
-  allowGts = false,
 ): Promise<LoadedReference> {
   let source = resolveReference(reference, parent);
   const extension = extname(source.pathname).toLowerCase();
@@ -114,9 +113,6 @@ export async function loadReference(
       value = parseToml(text);
       break;
     case ".gts":
-      if (!allowGts) {
-        throw new Error("GTS is only supported for Mod sources");
-      }
       value = { fileUri: source.href, content: text };
       break;
     default:

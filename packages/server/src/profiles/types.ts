@@ -6,15 +6,15 @@ import type {
 } from "@gi-tcg/core";
 import type { AssetsManagerOption } from "@gi-tcg/assets-manager";
 import type { z } from "zod";
-import type { modSchema, pluginSchema, presetSchema } from "./schema";
+import type { modSchema, inlinePluginSchema, presetSchema } from "./schema";
 
 export type ProfileGameConfig = Omit<
   GameConfig,
   "randomSeed" | "hostWho" | "hostRelatedExecution"
 >;
 export interface ModSource extends z.infer<typeof modSchema> {}
-export interface PluginConfig extends z.input<typeof pluginSchema> {}
-export interface Preset extends z.input<typeof presetSchema> {}
+export interface PluginConfig extends z.output<typeof inlinePluginSchema> {}
+export interface Preset extends z.output<typeof presetSchema> {}
 
 export interface Profile {
   id: string;

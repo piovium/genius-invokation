@@ -20,15 +20,16 @@ import type {
   Profile,
   ProfileGameConfig,
 } from "./types";
-import { loadReference } from "./reference";
+import { loadReference, type LoadedReference } from "./reference";
 import {
   presetSchema,
+  inlinePluginSchema,
   pluginSchema,
-  externalPluginSchema,
   versionMapSchema,
   modSchema,
   overridesSchema,
 } from "./schema";
+import type { z } from "zod";
 
 const DEFAULT_GAME_CONFIG: ProfileGameConfig = (({
   randomSeed,
@@ -87,6 +88,26 @@ export function officialProfile(baseVersion: Version): CompiledProfile {
   );
 }
 
+async function loadReferenceOrInline<T>(
+  entry: unknown,
+  parent: URL,
+  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+  inlineSchema = schema,
+): Promise<LoadedReference<T>> {
+  if (typeof entry === "string") {
+    const { value, source } = await loadReference(entry, parent);
+    return {
+      value: schema.parse(value),
+      source,
+    };
+  } else {
+    return {
+      value: inlineSchema.parse(entry),
+      source: parent,
+    };
+  }
+}
+
 export async function compilePreset(
   input: unknown,
   source: URL,
@@ -101,34 +122,33 @@ export async function compilePreset(
   };
   const versionMap: Record<number, Version> = {};
   const mods: ModSource[] = [];
-  const overrides: OverrideData[] = [];
+  const explicitOverrides: OverrideData[] = [];
   for (const entry of preset.plugins ?? []) {
-    const loaded =
-      typeof entry === "string"
-        ? await loadReference(entry, source)
-        : { value: entry, source };
-    const plugin = (
-      typeof entry === "string" ? externalPluginSchema : pluginSchema
-    ).parse(loaded.value);
+    const { value: plugin, source: pluginSource } = await loadReferenceOrInline(
+      entry,
+      source,
+      pluginSchema,
+      inlinePluginSchema,
+    );
     for (const entry of plugin.version_maps ?? []) {
-      const value =
-        typeof entry === "string"
-          ? (await loadReference(entry, loaded.source)).value
-          : entry;
-      for (const [id, selected] of Object.entries(
-        versionMapSchema.parse(value),
-      )) {
-        if (versionMap[Number(id)] && versionMap[Number(id)] !== selected)
+      const { value } = await loadReferenceOrInline(
+        entry,
+        pluginSource,
+        versionMapSchema,
+      );
+      for (const [id, selected] of Object.entries(value)) {
+        if (versionMap[Number(id)] && versionMap[Number(id)] !== selected) {
           throw new Error(`Conflicting versions for ${id}`);
+        }
         versionMap[Number(id)] = selected;
       }
     }
     for (const entry of plugin.mods ?? []) {
-      const value =
-        typeof entry === "string"
-          ? (await loadReference(entry, loaded.source, true)).value
-          : entry;
-      const mod = modSchema.parse(value);
+      const { value: mod } = await loadReferenceOrInline(
+        entry,
+        pluginSource,
+        modSchema,
+      );
       mods.push({
         content: mod.content,
         fileUri:
@@ -136,11 +156,12 @@ export async function compilePreset(
       });
     }
     for (const entry of plugin.static_data_overrides ?? []) {
-      const value =
-        typeof entry === "string"
-          ? (await loadReference(entry, loaded.source)).value
-          : entry;
-      overrides.push(...(overridesSchema.parse(value) as OverrideData[]));
+      const { value } = await loadReferenceOrInline(
+        entry,
+        pluginSource,
+        overridesSchema,
+      );
+      explicitOverrides.push(...value);
     }
   }
   const resolver = createOfficialVersionResolver(
@@ -148,7 +169,8 @@ export async function compilePreset(
     versionMap,
     analyzeResult,
   );
-  const loader = new CustomDataLoader().setVersion(resolver);
+  const loader = new CustomDataLoader();
+  loader.setVersion(resolver);
   for (const mod of mods) {
     try {
       await loader.loadMod(mod.content);
@@ -156,13 +178,15 @@ export async function compilePreset(
       throw new Error(`Cannot load Mod ${mod.fileUri}`, { cause });
     }
   }
-  const [data, assets] = loader.done();
-  if (!assets.officialDeckCompatible) {
+  const [data, { officialDeckCompatible, customData = [], overrideData = [] }] =
+    loader.done();
+  if (!officialDeckCompatible) {
     throw new Error(`Profile ${preset.id} is not officialDeckCompatible`);
   }
   const merged = new Map<number, OverrideData>();
-  for (const item of [...(assets.overrideData ?? []), ...overrides])
+  for (const item of [...overrideData, ...explicitOverrides]) {
     merged.set(item.id, { ...merged.get(item.id), ...item });
+  }
   return finishProfile(
     {
       id: preset.id,
@@ -175,9 +199,9 @@ export async function compilePreset(
       mods,
       assets: {
         version: { ...resolver.versionMap },
-        customData: assets.customData ?? [],
+        customData,
         overrideData: [...merged.values()],
-        officialDeckCompatible: true,
+        officialDeckCompatible,
       },
     },
     data,

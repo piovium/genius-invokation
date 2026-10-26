@@ -71,7 +71,7 @@ export const overridesSchema = z.union([
     .transform(({ overrides }) => overrides),
   overrideSchema.transform((override) => [override]),
 ]);
-export const pluginSchema = z
+export const inlinePluginSchema = z
   .object({
     $schema_version: z.literal(1).optional(),
     name: z.string().optional(),
@@ -82,7 +82,7 @@ export const pluginSchema = z
       .optional(),
   })
   .strict();
-export const externalPluginSchema = pluginSchema.extend({
+export const pluginSchema = inlinePluginSchema.extend({
   $schema_version: z.literal(1),
 });
 export const presetSchema = z
@@ -93,6 +93,6 @@ export const presetSchema = z
     version: versionSchema.optional(),
     version_behavior: behaviorSchema.optional(),
     config: configSchema.optional(),
-    plugins: z.array(z.union([z.string(), pluginSchema])).optional(),
+    plugins: z.array(z.union([z.string(), inlinePluginSchema])).optional(),
   })
   .strict();
