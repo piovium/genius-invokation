@@ -10,7 +10,6 @@
     "dev": "gnx ./src/dev.ts",
     "start": "NODE_ENV=production node --experimental-vm-modules --enable-source-maps --import ./scripts/ts_preload.js src/main.ts",
     "check": "tsc --noEmit",
-    "test": "vitest run --execArgv=--experimental-vm-modules",
     "debug": "gnx ./src/dev.ts --inspect",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/migrate.ts"
