@@ -180,8 +180,8 @@ export function RoomDialog(props: RoomDialogProps) {
       setProfile(props.joiningRoomInfo.config.profile);
     } else {
       const saved = savedProfile();
-      if (saved) {
-        setProfileById(saved);
+      if (saved && setProfileById(saved)) {
+        void 0;
       } else if (list) {
         setProfileById(list.defaultProfileId);
       }
