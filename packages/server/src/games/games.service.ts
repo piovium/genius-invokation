@@ -22,16 +22,17 @@ import {
   type PlayerOnGames,
 } from "../db/schema";
 import type { PaginationDto, PaginationResult } from "../utils";
+import type { Profile } from "../profiles/types";
 
 export interface AddGameOption {
   playerIds: number[];
   coreVersion: string;
   gameVersion: string;
-  profile: import("../profiles/types").Profile;
+  profile: Profile;
   data: string;
   winnerId: number | null;
 }
-type GameNoData = Omit<GameModel, "data" | "profile">;
+type SerializableGame = Omit<GameModel, "data" | "profile">;
 const {
   data: logData,
   profile: profileData,
@@ -60,7 +61,7 @@ export class GamesService {
   async getAllGames({
     skip = 0,
     take = 10,
-  }: PaginationDto): Promise<PaginationResult<GameNoData>> {
+  }: PaginationDto): Promise<PaginationResult<SerializableGame>> {
     return dbService.db.transaction(async (tx) => {
       const data = await tx
         .select(summaryColumns)
@@ -116,7 +117,7 @@ export class GamesService {
   async gamesHasUser(
     userId: number,
     { skip = 0, take = 10 }: PaginationDto,
-  ): Promise<PaginationResult<PlayerOnGames & { game: GameNoData }>> {
+  ): Promise<PaginationResult<PlayerOnGames & { game: SerializableGame }>> {
     return dbService.db.transaction(async (tx) => {
       const data = await tx
         .select({ ...getColumns(playersOnGames), game: summaryColumns })

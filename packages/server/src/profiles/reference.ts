@@ -1,7 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { extname, isAbsolute, resolve as resolvePath } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { resolve as resolveModule } from "import-meta-resolve";
 import { createJiti } from "jiti";
 import { parse as parseYaml } from "yaml";
 import JSON5 from "json5";
@@ -11,32 +10,59 @@ export interface LoadedReference {
   value: unknown;
   source: URL;
 }
-const remote = (url: URL) =>
+const isRemote = (url: URL) =>
   url.protocol === "https:" || url.protocol === "http:";
 
-/** Every nested reference retains the declaring document's URL. */
+const hasProtocol = (reference: string) =>
+  /^[a-z][a-z\d+.-]*:/i.test(reference);
+
+const isRelativePath = (reference: string) => /^\.{1,2}[\\/]/.test(reference);
+
 export function resolveReference(reference: string, parent: URL): URL {
+  if (isRemote(parent)) {
+    return resolveRemoteReference(reference, parent);
+  }
+
   let url: URL;
-  if (remote(parent) && reference.startsWith("/")) {
-    url = new URL(reference, parent);
-  } else if (isAbsolute(reference)) {
-    if (remote(parent))
-      throw new Error("Remote configuration cannot reference local files");
+  if (isAbsolute(reference)) {
     url = pathToFileURL(reference);
-  } else if (/^[a-z][a-z\d+.-]*:/i.test(reference)) {
+  } else if (hasProtocol(reference)) {
     url = new URL(reference);
-  } else if (/^\.{1,2}[\\/]/.test(reference)) {
+  } else if (isRelativePath(reference)) {
     url = new URL(reference.replaceAll("\\", "/"), parent);
   } else {
-    if (remote(parent))
-      throw new Error("Remote configuration cannot resolve local packages");
-    url = new URL(resolveModule(reference, parent.href));
+    // package name
+    url = new URL(import.meta.resolve(reference, parent.href));
   }
-  if (remote(parent) && !remote(url))
-    throw new Error("Remote configuration cannot reference local files");
-  if (url.protocol === "file:") return pathToFileURL(fileURLToPath(url));
-  if (!remote(url))
+  if (url.protocol === "file:") {
+    // normalize
+    return pathToFileURL(fileURLToPath(url));
+  }
+  if (!isRemote(url)) {
     throw new Error(`Unsupported configuration protocol: ${url.protocol}`);
+  }
+  return url;
+}
+
+function resolveRemoteReference(reference: string, parent: URL): URL {
+  let url: URL;
+  if (reference.startsWith("/")) {
+    url = new URL(reference, parent);
+  } else if (isAbsolute(reference)) {
+    throw new Error("Remote configuration cannot reference local files");
+  } else if (hasProtocol(reference)) {
+    url = new URL(reference);
+  } else if (isRelativePath(reference)) {
+    url = new URL(reference.replaceAll("\\", "/"), parent);
+  } else {
+    // package name
+    throw new Error("Remote configuration cannot resolve local packages");
+  }
+  if (!isRemote(url)) {
+    throw new Error(
+      `Unsupported remote configuration protocol: ${url.protocol}`,
+    );
+  }
   return url;
 }
 
@@ -52,18 +78,22 @@ export async function loadReference(
   let source = resolveReference(reference, parent);
   const extension = extname(source.pathname).toLowerCase();
   if (/^\.[cm]?[jt]s$/.test(extension)) {
-    if (remote(source))
+    if (isRemote(source)) {
       throw new Error("Remote executable configuration is not supported");
+    }
     const jiti = createJiti(parent.href);
     let value = await jiti.import(fileURLToPath(source), { default: true });
-    if (typeof value === "function") value = await value();
+    if (typeof value === "function") {
+      value = await value();
+    }
     return { value, source };
   }
   let text: string;
-  if (remote(source)) {
+  if (isRemote(source)) {
     const response = await fetch(source);
-    if (!response.ok)
+    if (!response.ok) {
       throw new Error(`Cannot load ${source}: HTTP ${response.status}`);
+    }
     source = new URL(response.url);
     text = await response.text();
   } else {
@@ -84,7 +114,9 @@ export async function loadReference(
       value = parseToml(text);
       break;
     case ".gts":
-      if (!allowGts) throw new Error("GTS is only supported for Mod sources");
+      if (!allowGts) {
+        throw new Error("GTS is only supported for Mod sources");
+      }
       value = { fileUri: source.href, content: text };
       break;
     default:

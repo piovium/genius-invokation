@@ -8,6 +8,7 @@ import {
   primaryKey,
   foreignKey,
 } from "drizzle-orm/pg-core";
+import type { Profile } from "../profiles/types";
 
 // Preserve Prisma's physical names, timestamp precision and referential actions.
 const createdAt = () =>
@@ -24,7 +25,7 @@ export const games = pgTable("Game", {
   coreVersion: text().notNull(),
   gameVersion: text().notNull(),
   data: jsonb().notNull(),
-  profile: jsonb().$type<import("../profiles/types").Profile>(),
+  profile: jsonb().$type<Profile>(),
   winnerId: integer(),
   createdAt: createdAt(),
 });

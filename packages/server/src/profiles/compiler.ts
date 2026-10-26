@@ -7,6 +7,7 @@ import {
   createOfficialVersionResolver,
   getVersionBehavior,
   mergeGameConfigWithDefault,
+  type GameData,
   type Version,
 } from "@gi-tcg/core";
 import getData from "@gi-tcg/data";
@@ -29,11 +30,13 @@ import {
   overridesSchema,
 } from "./schema";
 
-function defaults(): ProfileGameConfig {
-  const { randomSeed, hostWho, hostRelatedExecution, ...config } =
-    mergeGameConfigWithDefault();
-  return config;
-}
+const DEFAULT_GAME_CONFIG: ProfileGameConfig = (({
+  randomSeed,
+  hostWho,
+  hostRelatedExecution,
+  ...config
+}) => config)(mergeGameConfigWithDefault());
+
 function freeze<T>(value: T): T {
   if (value && typeof value === "object") {
     Object.values(value).forEach(freeze);
@@ -43,7 +46,7 @@ function freeze<T>(value: T): T {
 }
 export function finishProfile(
   profile: Profile,
-  data: CompiledProfile["data"],
+  data: GameData,
 ): CompiledProfile {
   // Hash the same representation served to clients and stored in archives.
   const serialized = JSON.stringify(profile);
@@ -62,17 +65,14 @@ export function finishProfile(
   };
 }
 
-export function officialProfile(
-  baseVersion: Version,
-  id = `official/${baseVersion}`,
-): CompiledProfile {
+export function officialProfile(baseVersion: Version): CompiledProfile {
   return finishProfile(
     {
-      id,
-      name: id === "official/latest" ? "Official (latest)" : baseVersion,
+      id: `official/${baseVersion}`,
+      name: `Official ${baseVersion}`,
       baseVersion,
       officialDeckCompatible: true,
-      gameConfig: defaults(),
+      gameConfig: { ...DEFAULT_GAME_CONFIG },
       versionBehavior: getVersionBehavior(baseVersion),
       versionMap: {},
       mods: [],
@@ -93,7 +93,7 @@ export async function compilePreset(
 ): Promise<CompiledProfile> {
   const preset = presetSchema.parse(input);
   const baseVersion = preset.version ?? CURRENT_VERSION;
-  const gameConfig = { ...defaults(), ...preset.config };
+  const gameConfig = { ...DEFAULT_GAME_CONFIG, ...preset.config };
   const { base, ...behavior } = preset.version_behavior ?? {};
   const versionBehavior = {
     ...getVersionBehavior(base ?? baseVersion),
@@ -131,7 +131,8 @@ export async function compilePreset(
       const mod = modSchema.parse(value);
       mods.push({
         content: mod.content,
-        fileUri: mod.fileUri ?? `profile://${preset.id}/mod-${mods.length}.gts`,
+        fileUri:
+          mod.fileUri ?? `inmem+profile://${preset.id}/mod-${mods.length}.gts`,
       });
     }
     for (const entry of plugin.static_data_overrides ?? []) {
@@ -156,8 +157,9 @@ export async function compilePreset(
     }
   }
   const [data, assets] = loader.done();
-  if (!assets.officialDeckCompatible)
+  if (!assets.officialDeckCompatible) {
     throw new Error(`Profile ${preset.id} is not officialDeckCompatible`);
+  }
   const merged = new Map<number, OverrideData>();
   for (const item of [...(assets.overrideData ?? []), ...overrides])
     merged.set(item.id, { ...merged.get(item.id), ...item });
@@ -220,7 +222,6 @@ export async function loadPreset(
   return null;
 }
 
-/** Mod registration is process-global, so presets are compiled sequentially. */
 export async function loadPresets(
   directory: string | URL,
   { recursive = false }: { recursive?: boolean } = {},

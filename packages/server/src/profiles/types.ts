@@ -4,32 +4,18 @@ import type {
   Version,
   VersionBehavior,
 } from "@gi-tcg/core";
-import type { AssetsManagerOption, OverrideData } from "@gi-tcg/assets-manager";
+import type { AssetsManagerOption } from "@gi-tcg/assets-manager";
+import type { z } from "zod";
+import type { modSchema, pluginSchema, presetSchema } from "./schema";
 
 export type ProfileGameConfig = Omit<
   GameConfig,
   "randomSeed" | "hostWho" | "hostRelatedExecution"
 >;
-export interface ModSource {
-  fileUri?: string;
-  content: string;
-}
-export interface PluginConfig {
-  $schema_version?: 1;
-  name?: string;
-  version_maps?: (string | Record<number, Version | "latest">)[];
-  mods?: (string | ModSource)[];
-  static_data_overrides?: (string | OverrideData | OverrideData[])[];
-}
-export interface Preset {
-  $schema_version: 1;
-  id: string;
-  name?: string;
-  version?: Version | "latest";
-  version_behavior?: Partial<VersionBehavior> & { base?: Version | "latest" };
-  config?: Partial<ProfileGameConfig>;
-  plugins?: (string | PluginConfig)[];
-}
+export interface ModSource extends z.infer<typeof modSchema> {}
+export interface PluginConfig extends z.input<typeof pluginSchema> {}
+export interface Preset extends z.input<typeof presetSchema> {}
+
 export interface Profile {
   id: string;
   name: string;
