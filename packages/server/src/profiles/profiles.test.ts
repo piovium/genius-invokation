@@ -133,7 +133,7 @@ describe("Profile compiler", () => {
     expect(service.list().profiles.length).toBeGreaterThanOrEqual(
       VERSIONS.length + 1,
     );
-    expect(service.get().profile.id).toBe("official/latest");
+    expect(service.get().profile.id).toBe(`official/${CURRENT_VERSION}`);
     expect(service.get().profile.baseVersion).toBe(CURRENT_VERSION);
     expect(() => service.get("missing/id")).toThrow();
     expect(officialProfile("v3.3.0").profile.assets.version).toBe("v3.3.0");

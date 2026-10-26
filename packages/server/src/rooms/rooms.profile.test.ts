@@ -52,7 +52,7 @@ test("profile endpoints round-trip namespaced IDs, assets and hash", async () =>
   const list = (await (await api.request("/profiles")).json()) as ReturnType<
     typeof profilesService.list
   >;
-  expect(list.defaultProfileId).toBe("official/latest");
+  expect(list.defaultProfileId).toBe(`official/${CURRENT_VERSION}`);
   const summary = list.profiles.find((p) => p.id === "piovium/lianyu-s1")!;
   const response = await api.request(
     `/profile/${encodeURIComponent(summary.id)}`,
@@ -68,7 +68,7 @@ test("rooms default to latest and enforce requiredVersion against the selected b
   vi.useFakeTimers();
   const rooms = new RoomsService();
   const { room } = await rooms.createRoomFromGuest({ name: "Host", deck });
-  expect(room.profile.id).toBe("official/latest");
+  expect(room.profile.id).toBe(`official/${CURRENT_VERSION}`);
   expect(room.profile.baseVersion).toBe(CURRENT_VERSION);
   vi.mocked(verifyDeck).mockResolvedValueOnce(CURRENT_VERSION);
   await expect(
