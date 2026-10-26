@@ -185,6 +185,7 @@ export class CustomDataLoader {
       }
       return customDataItems[0] ?? null;
     }, officialVersionResolver);
+    let officialDeckCompatible = true;
     const customData: CustomData = {
       characters: [],
       entities: [],
@@ -219,6 +220,8 @@ export class CustomDataLoader {
       if (ch.version.from !== "customData" || this.dataOverrides.has(ch.id)) {
         continue;
       }
+      // TODO custom data can declare "shareId" / "obtainable" for deck compatibility
+      officialDeckCompatible = false;
       const name = this.names.get(ch.id) ?? "";
       customData.characters.push({
         id,
@@ -236,6 +239,9 @@ export class CustomDataLoader {
       collectCustomSkills(et.skills);
       if (et.version.from !== "customData" || this.dataOverrides.has(et.id)) {
         continue;
+      }
+      if (playSkillOfCard(et) && et.obtainable) {
+        officialDeckCompatible = false;
       }
       const name = this.names.get(id) ?? "";
       customData.entities.push({
@@ -276,12 +282,7 @@ export class CustomDataLoader {
     return [
       gameData,
       {
-        officialDeckCompatible:
-          customData.characters.length === 0 &&
-          !customData.entities.some(
-            (entity) =>
-              playSkillOfCard(gameData.entities.get(entity.id)!) !== null,
-          ),
+        officialDeckCompatible,
         customData: [customData],
         overrideData: [...this.dataOverrides.values()],
       },

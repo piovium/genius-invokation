@@ -19,7 +19,7 @@ import * as gtsProviderVm from "../gts/vm";
 
 export const GTS_RUNTIME_MODULE = "@gi-tcg/custom-data-loader/gts/runtime";
 export const GTS_PROVIDER_VM_MODULE = "@gi-tcg/custom-data-loader/gts/vm/vm";
-export const GTS_DATA_MODULE = "@gi-tcg/core/data";
+export const GTS_DATA_MODULE = "#custom-data-loader";
 
 export type ModuleEvaluatorBackend = "node-vm" | "esbuild-wasm";
 

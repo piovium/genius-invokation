@@ -15,7 +15,7 @@ custom provider VM, and the data module to the custom module. Import data
 values explicitly instead of relying on globals.
 
 ```ts
-import { DamageType, DiceType } from "@gi-tcg/core/data";
+import { DamageType, DiceType } from "#custom-data-loader";
 ```
 
 ```ts

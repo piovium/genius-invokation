@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.21.0",
   "type": "module",
+  "imports": {
+    "#custom-data-loader": "@gi-tcg/custom-data-loader/gts/data"
+  },
   "scripts": {
     "dev": "gnx ./src/dev.ts",
     "start": "NODE_ENV=production node --experimental-vm-modules --enable-source-maps --import ./scripts/ts_preload.js src/main.ts",
@@ -61,5 +64,9 @@
     "scripts",
     "tsconfig.json",
     "drizzle"
-  ]
+  ],
+  "gamingTs": {
+    "providerImportSource": "@gi-tcg/custom-data-loader/gts",
+    "runtimeImportSource": "@gi-tcg/custom-data-loader/gts/runtime"
+  }
 }

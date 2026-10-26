@@ -7,7 +7,7 @@ import {
   type SummonHandle,
   type EquipmentHandle,
   type ExtensionHandle,
-} from "@gi-tcg/core/data";
+} from "#custom-data-loader";
 
 const [LiutianArchery, TrailOfTheQilin, FrostflakeArrow, CelestialShower] = [
   11011, 11012, 11013, 11014,

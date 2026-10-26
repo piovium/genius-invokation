@@ -161,8 +161,11 @@ const setupLanguageClientConfig = (): LanguageClientConfig => {
       initializationOptions: {
         fs: {
           ...PROVIDER_VIRTUAL_FILES,
-          "/node_modules/@gi-tcg/core/data.d.ts":
-            'export * from "/provider/data.js";',
+          "/package.json": JSON.stringify({
+            imports: {
+              "#custom-data-loader": "./provider/data.js",
+            },
+          }),
           "/workspace/test2.gts": "export const A = 1",
           "/tsconfig.json": JSON.stringify({
             compilerOptions: {

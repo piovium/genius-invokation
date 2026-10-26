@@ -1,0 +1,13 @@
+$schema_version: 1
+id: piovium/lianyu-s1
+name: 恋雨杯 S1
+version: v7.1.0
+version_behavior:
+  discardMaxCostHandsAbortPreview: false
+plugins:
+- version_maps:
+  - ./versions.jsonc
+  mods:
+  - ./mod.gts
+  static_data_overrides:
+  - ./overrides.yml
