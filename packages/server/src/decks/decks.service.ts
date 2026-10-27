@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { dbService } from "../services";
+import { dbService, profilesService } from "../services";
 import { BadRequestException, NotFoundException } from "../errors";
 import type {
   CreateDeckDto,
@@ -22,8 +22,13 @@ import type {
 } from "./decks.controller";
 import { type Deck } from "@gi-tcg/typings";
 import { decks, type Deck as DeckModel } from "../db/schema";
-import { and, eq, lte, desc, count } from "drizzle-orm";
-import { ASSETS_MANAGER, verifyDeck, type PaginationResult } from "../utils";
+import { and, eq, desc, count } from "drizzle-orm";
+import {
+  ASSETS_MANAGER,
+  verifyDeck,
+  deckMatchesProfile,
+  type PaginationResult,
+} from "../utils";
 import { VERSIONS } from "@gi-tcg/core";
 
 interface DeckWithVersion extends Deck {
@@ -71,14 +76,29 @@ export class DecksService {
 
   async getAllDecks(
     userId: number,
-    { skip = 0, take = 100, requiredVersion }: QueryDeckDto,
+    { skip = 0, take = 100, profileId }: QueryDeckDto,
   ): Promise<PaginationResult<DeckWithDeckModel>> {
-    const where = and(
-      eq(decks.ownerUserId, userId),
-      requiredVersion === undefined
-        ? undefined
-        : lte(decks.requiredVersion, requiredVersion),
-    );
+    const where = eq(decks.ownerUserId, userId);
+    if (typeof profileId !== "undefined") {
+      const profile = profilesService.get(profileId);
+      const models = await dbService.db
+        .select()
+        .from(decks)
+        .where(where)
+        .orderBy(desc(decks.updatedAt));
+      const decoded = models.map((model) => ({
+        ...model,
+        ...this.codeToDeck(model.code),
+      }));
+      const matches = await Promise.all(
+        decoded.map((deck) => deckMatchesProfile(deck, profile)),
+      );
+      const filtered = decoded.filter((_, index) => matches[index]);
+      return {
+        data: filtered.slice(skip, skip + take),
+        count: filtered.length,
+      };
+    }
     const [models, total] = await dbService.db.transaction(async (tx) =>
       Promise.all([
         tx

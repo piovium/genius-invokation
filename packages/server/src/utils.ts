@@ -25,12 +25,14 @@ import { CURRENT_VERSION, VERSIONS, type Version } from "@gi-tcg/core";
 import { compare as semverCompare } from "semver";
 import { createId as createCuid, isCuid } from "@paralleldrive/cuid2";
 import { BadRequestException } from "./errors";
+import type { CompiledProfile } from "./profiles/types";
 
 export enum DeckVerificationErrorCode {
   SizeError = "SizeError",
   NotFoundError = "NotFoundError",
   CountLimitError = "CountLimitError",
   RelationError = "RelationError",
+  VersionError = "VersionError",
 }
 
 export class DeckVerificationError extends Error {
@@ -147,6 +149,31 @@ export async function verifyDeck(deck: Deck): Promise<Version> {
     }
   }
   return maxVersion(versions);
+}
+
+export async function verifyDeckForProfile(
+  deck: Deck,
+  profile: CompiledProfile,
+) {
+  const version = await verifyDeck(deck);
+  if (semverCompare(version, profile.profile.baseVersion) > 0) {
+    throw new DeckVerificationError(
+      DeckVerificationErrorCode.VersionError,
+      `Deck version required ${version}, it's higher game version ${profile.profile.baseVersion}`,
+    );
+  }
+}
+
+export async function deckMatchesProfile(deck: Deck, profile: CompiledProfile) {
+  try {
+    await verifyDeckForProfile(deck, profile);
+    return true;
+  } catch (error) {
+    if (error instanceof DeckVerificationError) {
+      return false;
+    }
+    throw error;
+  }
 }
 
 function maxVersion(versions: Iterable<string | null>): Version {

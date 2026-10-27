@@ -173,6 +173,7 @@ export function RoomDialog(props: RoomDialogProps) {
   const [loadingDecks, setLoadingDecks] = createSignal(true);
   const [selectedDeck, setSelectedDeck] = createSignal<number | null>(null);
   const [entering, setEntering] = createSignal(false);
+  let deckRequest = 0;
 
   createEffect(() => {
     const list = profiles();
@@ -199,38 +200,54 @@ export function RoomDialog(props: RoomDialogProps) {
     return false;
   };
 
-  const updateAvailableDecks = async (version: number) => {
+  const updateAvailableDecks = async (profileId: string) => {
+    const request = ++deckRequest;
     setLoadingDecks(true);
     const { type } = status();
     try {
+      let decks: DeckInfoProps[] = [];
       if (type === "user") {
-        const { data } = await axios.get(`decks?requiredVersion=${version}`);
-        setAvailableDecks(data.data);
+        const { data } = await axios.get("decks", { params: { profileId } });
+        decks = data.data;
       } else if (type === "guest") {
-        setAvailableDecks(
-          guestDecks().filter((deck) => deck.requiredVersion <= version),
+        const guest = guestDecks();
+        const { data } = await axios.post<{ matches: boolean[] }>(
+          "decks/filter",
+          {
+            profileId,
+            decks: guest.map(({ characters, cards }) => ({
+              characters,
+              cards,
+            })),
+          },
         );
+        decks = guest.filter((_, index) => data.matches[index]);
+      }
+      if (request !== deckRequest) {
+        return;
+      }
+      setAvailableDecks(decks);
+      if (!decks.some((deck) => deck.id === selectedDeck())) {
+        setSelectedDeck(null);
       }
     } catch (e) {
+      if (request !== deckRequest) {
+        return;
+      }
       setAvailableDecks([]);
+      setSelectedDeck(null);
       if (e instanceof AxiosError) {
         alert(getErrorMessage(e));
       }
       console.error(e);
     }
-    const currentSelectedDeckId = selectedDeck();
-    if (!availableDecks().some((deck) => deck.id === currentSelectedDeckId)) {
-      setSelectedDeck(null);
-    }
     setLoadingDecks(false);
   };
 
   createEffect(() => {
-    const ver =
-      versionInfo()?.supportedGameVersions.indexOf(profile()?.baseVersion) ??
-      -1;
-    if (ver >= 0) {
-      updateAvailableDecks(ver);
+    const profileId = profile()?.id;
+    if (profileId) {
+      updateAvailableDecks(profileId);
     }
   });
 

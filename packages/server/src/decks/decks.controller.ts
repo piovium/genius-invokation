@@ -18,9 +18,13 @@ import { NotFoundException } from "../errors";
 import { type } from "arktype";
 import { sValidator } from "@hono/standard-validator";
 import { getUserId } from "../auth/user.decorator";
-import { decksService } from "../services";
-import { PaginationDto, QueryInteger, IntParam, stringLength } from "../utils";
-import { VERSIONS } from "@gi-tcg/core";
+import { decksService, profilesService } from "../services";
+import {
+  PaginationDto,
+  IntParam,
+  stringLength,
+  deckMatchesProfile,
+} from "../utils";
 import { AuthGuard } from "../auth/auth.guard";
 
 export const DeckDto = type({
@@ -36,18 +40,26 @@ export const UpdateDeckDto = CreateDeckDto.partial();
 export type UpdateDeckDto = typeof UpdateDeckDto.infer;
 
 export const QueryDeckDto = PaginationDto.merge({
-  "requiredVersion?": QueryInteger.to(
-    type("number >= 0").atMost(VERSIONS.length - 1),
-  ),
+  "profileId?": "string",
 });
 export type QueryDeckDto = typeof QueryDeckDto.infer;
 
 const DeckParam = type({ deckId: IntParam });
+const FilterDecksDto = type({ profileId: "string", decks: DeckDto.array() });
 
 export const DecksController = new Hono()
   .post("/version", sValidator("json", CreateDeckDto), async (c) =>
     c.json(await decksService.deckToCode(c.req.valid("json")), 201),
   )
+  .post("/filter", sValidator("json", FilterDecksDto), async (c) => {
+    const { profileId, decks } = c.req.valid("json");
+    const profile = profilesService.get(profileId);
+    return c.json({
+      matches: await Promise.all(
+        decks.map((deck) => deckMatchesProfile(deck, profile)),
+      ),
+    });
+  })
   .use(AuthGuard)
   .post("/", sValidator("json", CreateDeckDto), async (c) => {
     const userId = await getUserId(c);
