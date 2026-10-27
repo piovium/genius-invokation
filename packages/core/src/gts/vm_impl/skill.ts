@@ -661,12 +661,15 @@ export const InitiativeSkillViewModel = defineViewModel(
         this: NotCharacterPassiveThis<Meta>,
         query: InferResult<Q> extends TargetQueryTypeInfo ? Q : never,
       ): AR.DoneRewriteMeta<
-        Omit<Meta, "targetTypes"> & {
-          readonly targetTypes: readonly [
-            ...Meta["targetTypes"],
-            InferResult<Q> extends { type: infer T } ? T : never,
-          ];
-        }
+        Computed<
+          Omit<Meta, "targetTypes"> & {
+            readonly targetTypes: readonly [
+              ...Meta["targetTypes"],
+              InferResult<Q> extends { type: infer T } ? T : never,
+            ];
+          },
+          InitiativeSkillVMMeta
+        >
       >;
 
       <Meta extends InitiativeSkillVMMeta, Ret extends AnyState[]>(
@@ -677,16 +680,19 @@ export const InitiativeSkillViewModel = defineViewModel(
           >,
         ) => Ret,
       ): AR.DoneRewriteMeta<
-        Omit<Meta, "targetTypes"> & {
-          readonly targetTypes: readonly [
-            ...Meta["targetTypes"],
-            Ret[number]["definition"] extends {
-              type: infer T extends TargetQueryTypeInfo["type"];
-            }
-              ? T
-              : never,
-          ];
-        }
+        Computed<
+          Omit<Meta, "targetTypes"> & {
+            readonly targetTypes: readonly [
+              ...Meta["targetTypes"],
+              Ret[number]["definition"] extends {
+                type: infer T extends TargetQueryTypeInfo["type"];
+              }
+                ? T
+                : never,
+            ];
+          },
+          InitiativeSkillVMMeta
+        >
       >;
     }>((model, [query]: any) => {
       if (toExpression in query) {
@@ -764,13 +770,23 @@ export class CharacterSkillViewModel extends InitiativeSkillViewModel
         this: AR.This<Meta>,
         type: "normal" | "elemental" | "burst",
       ): AR.DoneRewriteMeta<
-        Omit<Meta, "isInitiativeSkill"> & { readonly isInitiativeSkill: true }
+        Computed<
+          Omit<Meta, "isInitiativeSkill"> & {
+            readonly isInitiativeSkill: true;
+          },
+          CharacterSkillVMMeta
+        >
       >;
       <Meta extends CharacterSkillVMMeta>(
         this: AR.This<Meta>,
         type: "passive",
       ): AR.WithRewriteMeta<
-        Omit<Meta, "isInitiativeSkill"> & { readonly isInitiativeSkill: false },
+        Computed<
+          Omit<Meta, "isInitiativeSkill"> & {
+            readonly isInitiativeSkill: false;
+          },
+          CharacterSkillVMMeta
+        >,
         typeof EntityViewModel,
         DefaultEntityVMMeta<"character">
       >;

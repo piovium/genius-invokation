@@ -29,6 +29,7 @@ import {
   type CharacterVMMeta,
   type DefaultEntityVMMeta,
   type EntityVMMeta,
+  type WithIdVMMeta,
 } from "@gi-tcg/core/gts/vm";
 import {
   registerAttachment,
@@ -70,10 +71,6 @@ const CUSTOM_DATA_VERSION_INFO: VersionInfo = {
 function registerMetadata(md: CustomMetadata) {
   getCustomDataRegistration().registerMetadata(md);
 }
-
-type WithIdVMMeta<Meta, Id extends number> = Omit<Meta, "id"> & {
-  readonly id: Id;
-};
 
 export class CustomCharacterModel extends CharacterModel {
   readonly metadata = CustomMetadata.create();

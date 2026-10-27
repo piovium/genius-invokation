@@ -21,6 +21,7 @@ export {
   EntityViewModel,
   type DefaultEntityVMMeta,
   type EntityVMMeta,
+  type WithIdVMMeta,
 } from "./vm_impl/entity";
 export {
   CharacterSkillModel,
