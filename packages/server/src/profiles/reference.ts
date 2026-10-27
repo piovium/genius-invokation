@@ -14,12 +14,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { readFile } from "node:fs/promises";
-import { extname, isAbsolute, resolve as resolvePath } from "node:path";
+import { extname, isAbsolute } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createJiti } from "jiti";
 import { parse as parseYaml } from "yaml";
 import JSON5 from "json5";
 import { parse as parseToml } from "smol-toml";
+import type { z } from "zod";
 
 export interface LoadedReference<T = unknown> {
   value: T;
@@ -81,11 +82,7 @@ function resolveRemoteReference(reference: string, parent: URL): URL {
   return url;
 }
 
-export function configBase(directory: string): URL {
-  return pathToFileURL(resolvePath(directory, "server.config.ts"));
-}
-
-export async function loadReference(
+async function loadExternalReference(
   reference: string,
   parent: URL,
 ): Promise<LoadedReference> {
@@ -134,4 +131,24 @@ export async function loadReference(
       throw new Error(`Unsupported configuration format: ${source}`);
   }
   return { value, source };
+}
+
+export async function loadReference<T>(
+  entry: unknown,
+  parent: URL,
+  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+  inlineSchema = schema,
+): Promise<LoadedReference<T>> {
+  if (typeof entry === "string") {
+    const { value, source } = await loadExternalReference(entry, parent);
+    return {
+      value: schema.parse(value),
+      source,
+    };
+  } else {
+    return {
+      value: inlineSchema.parse(entry),
+      source: parent,
+    };
+  }
 }

@@ -32,10 +32,11 @@ import type { OverrideData } from "@gi-tcg/assets-manager";
 import type {
   CompiledProfile,
   ModSource,
+  Preset,
   Profile,
   ProfileGameConfig,
 } from "./types";
-import { loadReference, type LoadedReference } from "./reference";
+import { loadReference } from "./reference";
 import {
   presetSchema,
   inlinePluginSchema,
@@ -44,7 +45,6 @@ import {
   modSchema,
   overridesSchema,
 } from "./schema";
-import type { z } from "zod";
 
 const DEFAULT_GAME_CONFIG: ProfileGameConfig = (({
   randomSeed,
@@ -103,31 +103,10 @@ export function officialProfile(baseVersion: Version): CompiledProfile {
   );
 }
 
-async function loadReferenceOrInline<T>(
-  entry: unknown,
-  parent: URL,
-  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
-  inlineSchema = schema,
-): Promise<LoadedReference<T>> {
-  if (typeof entry === "string") {
-    const { value, source } = await loadReference(entry, parent);
-    return {
-      value: schema.parse(value),
-      source,
-    };
-  } else {
-    return {
-      value: inlineSchema.parse(entry),
-      source: parent,
-    };
-  }
-}
-
 export async function compilePreset(
-  input: unknown,
+  preset: Preset,
   source: URL,
 ): Promise<CompiledProfile> {
-  const preset = presetSchema.parse(input);
   const baseVersion = preset.version ?? CURRENT_VERSION;
   const gameConfig = { ...DEFAULT_GAME_CONFIG, ...preset.config };
   const { base, ...behavior } = preset.version_behavior ?? {};
@@ -139,14 +118,14 @@ export async function compilePreset(
   const mods: ModSource[] = [];
   const explicitOverrides: OverrideData[] = [];
   for (const entry of preset.plugins ?? []) {
-    const { value: plugin, source: pluginSource } = await loadReferenceOrInline(
+    const { value: plugin, source: pluginSource } = await loadReference(
       entry,
       source,
       pluginSchema,
       inlinePluginSchema,
     );
     for (const entry of plugin.version_maps ?? []) {
-      const { value } = await loadReferenceOrInline(
+      const { value } = await loadReference(
         entry,
         pluginSource,
         versionMapSchema,
@@ -159,7 +138,7 @@ export async function compilePreset(
       }
     }
     for (const entry of plugin.mods ?? []) {
-      const { value: mod } = await loadReferenceOrInline(
+      const { value: mod } = await loadReference(
         entry,
         pluginSource,
         modSchema,
@@ -171,7 +150,7 @@ export async function compilePreset(
       });
     }
     for (const entry of plugin.static_data_overrides ?? []) {
-      const { value } = await loadReferenceOrInline(
+      const { value } = await loadReference(
         entry,
         pluginSource,
         overridesSchema,
@@ -255,7 +234,7 @@ export async function loadPreset(
       throw cause;
     }
     try {
-      const { value } = await loadReference(source.href, source);
+      const { value } = await loadReference(source.href, source, presetSchema);
       return await compilePreset(value, source);
     } catch (cause) {
       throw new Error(`Cannot compile Preset ${source.href}`, { cause });
@@ -266,7 +245,7 @@ export async function loadPreset(
 
 export async function loadPresets(
   directory: string | URL,
-  { recursive = false }: { recursive?: boolean } = {},
+  { recursive = false } = {},
 ): Promise<CompiledProfile[]> {
   const entries = await readdir(directory, { withFileTypes: true, recursive });
   const profiles: CompiledProfile[] = [];
