@@ -2,7 +2,7 @@
 
 Use conventional commit-style messages and PR titles: `type(scope): summary`.
 
-Valid types are `feat`, `fix`, `docs`, `chore`, `refactor`, and `test`. Scopes are optional; use the affected package or area when helpful, e.g. `core`, `data`, `web-ui-core`, or `server`. Multiple scopes can be specified using comma, e.g. `core, data`.
+Valid types are `feat`, `fix`, `docs`, `chore`, `refactor`, `style`, and `test`. Scopes are optional; use the affected package or area when helpful, e.g. `core`, `data`, `web-ui-core`, or `server`. Multiple scopes can be specified using comma, e.g. `core, data`.
 
 Examples: `fix(web-ui-core): simplify declare end button styling`, `docs: update contributing guide`, `chore(typings): regenerate types`.
 
@@ -16,7 +16,7 @@ Examples: `fix(web-ui-core): simplify declare end button styling`, `docs: update
 - Before adding complexity for a speculative or vanishingly unlikely race or security edge case, explain the concrete failure mode, likelihood, and complexity cost to the user and get their buy-in. Do not silently expand scope for theoretical robustness.
 - Avoid `try`/`catch` where possible
 - Avoid unnecessary `any`; only write `as any` if the typing is correct but failed due to TypeScript's limitations.
-- Use Native APIs when possible, e.g. use `glob` from `node:fs` instead of 3rd-party `glob`.
+- Prefer native APIs in new or modified code when possible, e.g. use `glob` from `node:fs` instead of 3rd-party `glob`. Existing third-party usage does not require unrelated migration.
 - Rely on type inference when possible; avoid explicit type annotations or interfaces unless necessary for exports or clarity
 - Prefer functional array methods (flatMap, filter, map) over for loops; use type guards on filter to maintain type inference downstream
 - Prefer scoped constant rather than global identifier, e.g. `typeof foo === "undefined"` instead of `foo === undefined`, `Number.POSITIVE_INFINITY` instead of `Infinity`.
@@ -36,7 +36,7 @@ const journal = await readFile(journalPath);
 ### Imports
 
 - Never use type-position `import("...")` references such as `Required<import("@gi-tcg/core").GameData>`.
-- Never use indexed type such as `Foo["bar"][number]` unless that type do not have an accessible name from the use point.
+- Never use indexed type such as `Foo["bar"][number]` unless that type does not have an accessible name from the use point.
 
 ### Variables
 
@@ -80,14 +80,14 @@ function requireConfig(input: unknown) {
 
 - Avoid mocks as much as possible, you shouldn't be using globalThis.\* at all unless it's the only option.
 - Test actual implementation, do not duplicate logic into tests.
-- Tests cannot directly run from repo root; run from package directories such as `packages/core`.
+- Run `pnpm test` from the repository root to run tests across packages, or from a package directory such as `packages/core` for focused tests.
 - Tests of card's implementation should be written under `packages/test/__tests__`, and should be implemented in asserting exact, observable behavior (game state), instead of internal logs.
-- Do not introduce tests for a zero-test-coveraged package, doing so requires user's explicit allowance.
+- Do not introduce tests for a package with zero test coverage without the user's explicit allowance.
 
 ## Checks
 
-- Run `pnpm check` from the repository root as the canonical full lint and type-check verification.
-- During focused iteration, run `pnpm check` from the affected package directory (for example, `packages/core`). Never run `tsc` directly.
+- Run `pnpm -r check` from the repository root to run the available package check scripts. Packages without a `check` script are skipped, so this is not full lint and type-check coverage. There is no root `check` script.
+- During focused iteration, run `pnpm check` from the affected package directory if it defines a `check` script (for example, `packages/core`). Never run `tsc` directly.
 
 ## Documentations
 
