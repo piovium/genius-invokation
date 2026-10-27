@@ -19,6 +19,9 @@ import { profilesService } from "../services";
 export const ProfilesController = new Hono()
   .get("/", (c) => c.json(profilesService.list()))
   .get("/:id", (c) => {
-    const { profile, summary } = profilesService.get(c.req.param("id"));
-    return c.json({ ...profile, profileHash: summary.profileHash });
+    const {
+      profile: { assets },
+      summary,
+    } = profilesService.get(c.req.param("id"));
+    return c.json({ ...summary, assets });
   });

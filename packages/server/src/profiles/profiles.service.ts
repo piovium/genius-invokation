@@ -36,7 +36,9 @@ export class ProfilesService {
 
   get(id = this.defaultProfileId) {
     const profile = this.profiles.get(id);
-    if (!profile) throw new NotFoundException(`Profile ${id} not found`);
+    if (!profile) {
+      throw new NotFoundException(`Profile ${id} not found`);
+    }
     return profile;
   }
   list() {
