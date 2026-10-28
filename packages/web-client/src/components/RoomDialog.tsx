@@ -446,7 +446,7 @@ export function RoomDialog(props: RoomDialogProps) {
               <For
                 each={availableDecks()}
                 fallback={
-                  <li class="text-gray-500">{t("noDeckForVersion")}</li>
+                  <li class="text-gray-500">{t("noDeckForProfile")}</li>
                 }
               >
                 {(deck) => (
