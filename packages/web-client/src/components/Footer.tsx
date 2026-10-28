@@ -14,18 +14,20 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { IS_BETA } from "@gi-tcg/config";
-import { onMount, Show } from "solid-js";
+import { createResource, onMount, Show } from "solid-js";
 import dayjs from "dayjs";
 import localize from "dayjs/plugin/localizedFormat";
 import "dayjs/locale/zh-cn";
 import "dayjs/locale/en";
-import { useVersionContext } from "../App";
 import { useI18n } from "../i18n";
+import axios from "axios";
 
 dayjs.extend(localize);
 
 export function Footer() {
-  const { versionInfo } = useVersionContext();
+  const [versionInfo] = createResource(() =>
+    axios.get("version").then((res) => res.data),
+  );
   const { t, locale } = useI18n();
   onMount(() => {
     dayjs.locale(locale().toLocaleLowerCase());
@@ -77,11 +79,7 @@ export function Footer() {
         </div>
       </Show>
       <div>
-        <a
-          class="text-blue-400"
-          href={t("playerGroupLink")}
-          target="_blank"
-        >
+        <a class="text-blue-400" href={t("playerGroupLink")} target="_blank">
           {t("joinPlayerGroup")}
         </a>
       </div>

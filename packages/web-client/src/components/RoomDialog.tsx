@@ -19,6 +19,7 @@ import {
   Show,
   For,
   createEffect,
+  onCleanup,
   JSX,
   splitProps,
 } from "solid-js";
@@ -29,7 +30,6 @@ import { DeckInfoProps } from "./DeckBriefInfo";
 import { getErrorMessage, roomIdToCode } from "../utils";
 import { useNavigate } from "@solidjs/router";
 import { useAuth } from "../auth";
-import { useVersionContext } from "../App";
 import { useGuestDecks, useGuestInfo } from "../guest";
 import type { ProfileList, ProfileSummary } from "../profiles";
 import { useI18n } from "../i18n";
@@ -146,7 +146,7 @@ const TIME_CONFIGS: TimeConfig[] = [
 ];
 
 export function RoomDialog(props: RoomDialogProps) {
-  const { t, assetsManager } = useI18n();
+  const { t } = useI18n();
   const { status } = useAuth();
   const [guestInfo, setGuestInfo] = useGuestInfo();
   const [guestDecks] = useGuestDecks();
@@ -156,7 +156,6 @@ export function RoomDialog(props: RoomDialogProps) {
   const closeDialog = () => {
     dialogEl.close();
   };
-  const { versionInfo } = useVersionContext();
   const [savedProfile, setSavedProfile] = makePersisted(
     createSignal<string | null>(null),
     { name: "room-profile" },
@@ -173,7 +172,6 @@ export function RoomDialog(props: RoomDialogProps) {
   const [loadingDecks, setLoadingDecks] = createSignal(true);
   const [selectedDeck, setSelectedDeck] = createSignal<number | null>(null);
   const [entering, setEntering] = createSignal(false);
-  let deckRequest = 0;
 
   createEffect(() => {
     const list = profiles();
@@ -200,14 +198,19 @@ export function RoomDialog(props: RoomDialogProps) {
     return false;
   };
 
-  const updateAvailableDecks = async (profileId: string) => {
-    const request = ++deckRequest;
+  const updateAvailableDecks = async (
+    profileId: string,
+    signal?: AbortSignal,
+  ) => {
     setLoadingDecks(true);
     const { type } = status();
     try {
       let decks: DeckInfoProps[] = [];
       if (type === "user") {
-        const { data } = await axios.get("decks", { params: { profileId } });
+        const { data } = await axios.get("decks", {
+          params: { profileId },
+          signal,
+        });
         decks = data.data;
       } else if (type === "guest") {
         const guest = guestDecks();
@@ -220,18 +223,16 @@ export function RoomDialog(props: RoomDialogProps) {
               cards,
             })),
           },
+          { signal },
         );
         decks = guest.filter((_, index) => data.matches[index]);
-      }
-      if (request !== deckRequest) {
-        return;
       }
       setAvailableDecks(decks);
       if (!decks.some((deck) => deck.id === selectedDeck())) {
         setSelectedDeck(null);
       }
     } catch (e) {
-      if (request !== deckRequest) {
+      if (signal?.aborted) {
         return;
       }
       setAvailableDecks([]);
@@ -247,7 +248,9 @@ export function RoomDialog(props: RoomDialogProps) {
   createEffect(() => {
     const profileId = profile()?.id;
     if (profileId) {
-      updateAvailableDecks(profileId);
+      const controller = new AbortController();
+      onCleanup(() => controller.abort());
+      updateAvailableDecks(profileId, controller.signal);
     }
   });
 
@@ -327,121 +330,113 @@ export function RoomDialog(props: RoomDialogProps) {
           data-disabled={!editable()}
         >
           <div class="flex flex-col w-full md:w-130" data-editable={editable()}>
-            <Show when={versionInfo()}>
-              <div class="mb-3 flex flex-row gap-4 items-center">
-                <h4 class="text-lg">{t("roomProfile")}</h4>
-                <select
-                  class="disabled:pointer-events-none appearance-none"
-                  value={profile()?.id}
-                  onChange={(e) => setProfileById(e.target.value)}
-                  disabled={!editable()}
-                >
-                  <For
-                    each={
-                      props.joiningRoomInfo
-                        ? [props.joiningRoomInfo.config.profile]
-                        : (profiles()?.profiles ?? [])
-                    }
-                  >
-                    {(profile) => (
-                      <option value={profile.id}>{profile.name}</option>
-                    )}
-                  </For>
-                </select>
-              </div>
-              <h4 class="text-lg mb-3">{t("thinkingTime")}</h4>
-              <div class="w-full grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] md:grid-cols-3 gap-2 mb-3 data-[disabled=true]:pointer-events-none">
+            <div class="mb-3 flex flex-row gap-4 items-center">
+              <h4 class="text-lg">{t("roomProfile")}</h4>
+              <select
+                class="disabled:pointer-events-none appearance-none"
+                value={profile()?.id}
+                onChange={(e) => setProfileById(e.target.value)}
+                disabled={!editable()}
+              >
                 <For
                   each={
                     props.joiningRoomInfo
-                      ? [props.joiningRoomInfo.config]
-                      : TIME_CONFIGS
+                      ? [props.joiningRoomInfo.config.profile]
+                      : (profiles()?.profiles ?? [])
                   }
                 >
-                  {(config) => (
-                    <div
-                      class="b-1 b-gray-400 rounded-lg p-2 md:p-12px group data-[active=true]:b-slate-500 data-[active=true]:b-2 md:data-[active=true]:p-11px cursor-pointer data-[active=true]:cursor-default select-none transition-colors"
-                      data-active={
-                        !!props.joiningRoomInfo || config === timeConfig()
-                      }
-                      onClick={() => setTimeConfig(config)}
-                    >
-                      <h5 class="font-bold text-gray-400 group-data-[active=true]:text-black transition-colors">
-                        {config.nameKey
-                          ? t(config.nameKey)
-                          : `${config.roundTotalActionTime} + ${config.actionTime}`}
-                      </h5>
-                      <h5 class="text-gray-400 group-data-[active=true]:text-gray-600 transition-colors md:mb-1 font-size-80%">
-                        {config.estimationTime &&
-                          t("estimatedEachRound", {
-                            minutes: config.estimationTime,
-                          })}
-                      </h5>
-                      <ul class="hidden md:block pl-3 list-disc text-gray-400 font-size-80% text-sm group-data-[active=true]:text-slate-500 transition-colors">
-                        <li>
-                          {t("initTotalActionTime", {
-                            seconds: config.initTotalActionTime,
-                          })}
-                        </li>
-                        <li>
-                          {t("rerollTime", { seconds: config.rerollTime })}
-                        </li>
-                        <li>
-                          {t("roundTotalActionTime", {
-                            seconds: config.roundTotalActionTime,
-                          })}
-                        </li>
-                        <li>
-                          {t("actionTime", { seconds: config.actionTime })}
-                        </li>
-                      </ul>
-                    </div>
+                  {(profile) => (
+                    <option value={profile.id}>{profile.name}</option>
                   )}
                 </For>
-              </div>
+              </select>
+            </div>
+            <h4 class="text-lg mb-3">{t("thinkingTime")}</h4>
+            <div class="w-full grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] md:grid-cols-3 gap-2 mb-3 data-[disabled=true]:pointer-events-none">
+              <For
+                each={
+                  props.joiningRoomInfo
+                    ? [props.joiningRoomInfo.config]
+                    : TIME_CONFIGS
+                }
+              >
+                {(config) => (
+                  <div
+                    class="b-1 b-gray-400 rounded-lg p-2 md:p-12px group data-[active=true]:b-slate-500 data-[active=true]:b-2 md:data-[active=true]:p-11px cursor-pointer data-[active=true]:cursor-default select-none transition-colors"
+                    data-active={
+                      !!props.joiningRoomInfo || config === timeConfig()
+                    }
+                    onClick={() => setTimeConfig(config)}
+                  >
+                    <h5 class="font-bold text-gray-400 group-data-[active=true]:text-black transition-colors">
+                      {config.nameKey
+                        ? t(config.nameKey)
+                        : `${config.roundTotalActionTime} + ${config.actionTime}`}
+                    </h5>
+                    <h5 class="text-gray-400 group-data-[active=true]:text-gray-600 transition-colors md:mb-1 font-size-80%">
+                      {config.estimationTime &&
+                        t("estimatedEachRound", {
+                          minutes: config.estimationTime,
+                        })}
+                    </h5>
+                    <ul class="hidden md:block pl-3 list-disc text-gray-400 font-size-80% text-sm group-data-[active=true]:text-slate-500 transition-colors">
+                      <li>
+                        {t("initTotalActionTime", {
+                          seconds: config.initTotalActionTime,
+                        })}
+                      </li>
+                      <li>{t("rerollTime", { seconds: config.rerollTime })}</li>
+                      <li>
+                        {t("roundTotalActionTime", {
+                          seconds: config.roundTotalActionTime,
+                        })}
+                      </li>
+                      <li>{t("actionTime", { seconds: config.actionTime })}</li>
+                    </ul>
+                  </div>
+                )}
+              </For>
+            </div>
+            <div class="mb-3 flex flex-row gap-4 items-center">
+              <h4 class="text-lg">{t("publicRoom")}</h4>
+              <ToggleSwitch
+                checked={
+                  props.joiningRoomInfo
+                    ? !props.joiningRoomInfo.config.private
+                    : isPublic()
+                }
+                onChange={(e) => setIsPublic(e.target.checked)}
+                disabled={!editable()}
+              />
+            </div>
+            <div class="mb-3 flex flex-row gap-4 items-center">
+              <h4 class="text-lg">{t("watchable")}</h4>
+              <ToggleSwitch
+                checked={props.joiningRoomInfo?.config.watchable ?? watchable()}
+                onChange={(e) => setWatchable(e.target.checked)}
+                disabled={!editable()}
+              />
+            </div>
+            <Show when={editable() && !guestInfo()}>
               <div class="mb-3 flex flex-row gap-4 items-center">
-                <h4 class="text-lg">{t("publicRoom")}</h4>
+                <h4 class="text-lg">{t("allowGuestJoin")}</h4>
                 <ToggleSwitch
-                  checked={
-                    props.joiningRoomInfo
-                      ? !props.joiningRoomInfo.config.private
-                      : isPublic()
-                  }
-                  onChange={(e) => setIsPublic(e.target.checked)}
-                  disabled={!editable()}
+                  checked={allowGuest()}
+                  onChange={(e) => setAllowGuest(e.target.checked)}
                 />
               </div>
-              <div class="mb-3 flex flex-row gap-4 items-center">
-                <h4 class="text-lg">{t("watchable")}</h4>
-                <ToggleSwitch
-                  checked={
-                    props.joiningRoomInfo?.config.watchable ?? watchable()
-                  }
-                  onChange={(e) => setWatchable(e.target.checked)}
-                  disabled={!editable()}
-                />
+            </Show>
+            <Show when={editable() ? allowGuest() : guestInfo()}>
+              <div class="mb-3 alert alert-border-warning">
+                <p class="alert-description break-all">
+                  {t("guestRecordWarning", {
+                    suggestion:
+                      editable() && !guestInfo()
+                        ? t("disableGuestJoin")
+                        : t("useGithubLogin"),
+                  })}
+                </p>
               </div>
-              <Show when={editable() && !guestInfo()}>
-                <div class="mb-3 flex flex-row gap-4 items-center">
-                  <h4 class="text-lg">{t("allowGuestJoin")}</h4>
-                  <ToggleSwitch
-                    checked={allowGuest()}
-                    onChange={(e) => setAllowGuest(e.target.checked)}
-                  />
-                </div>
-              </Show>
-              <Show when={editable() ? allowGuest() : guestInfo()}>
-                <div class="mb-3 alert alert-border-warning">
-                  <p class="alert-description break-all">
-                    {t("guestRecordWarning", {
-                      suggestion:
-                        editable() && !guestInfo()
-                          ? t("disableGuestJoin")
-                          : t("useGithubLogin"),
-                    })}
-                  </p>
-                </div>
-              </Show>
             </Show>
           </div>
           <div class="b-r-gray-200 b-1" />
