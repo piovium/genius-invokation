@@ -59,7 +59,8 @@ export const decks = pgTable(
   {
     id: serial().primaryKey(),
     name: text().notNull(),
-    code: text().notNull(),
+    characters: jsonb().$type<number[]>().notNull(),
+    cards: jsonb().$type<number[]>().notNull(),
     requiredVersion: integer().notNull(),
     ownerUserId: integer().notNull(),
     createdAt: createdAt(),
