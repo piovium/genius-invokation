@@ -86,8 +86,8 @@ function requireConfig(input: unknown) {
 
 ## Checks
 
-- Run `pnpm -r check` from the repository root to run the available package check scripts. Packages without a `check` script are skipped, so this is not full lint and type-check coverage. There is no root `check` script.
 - During focused iteration, run `pnpm check` from the affected package directory if it defines a `check` script (for example, `packages/core`). Never run `tsc` directly.
+- Run `pnpm -r check` from the repository root to run a repository-wide check. A full `pnpm build` might be required: missing or stale package builds can cause mismatched types. Packages without a `check` script are skipped, so this is not full lint and type-check coverage.
 
 ## Documentations
 
