@@ -24,10 +24,11 @@ import axios from "axios";
 
 dayjs.extend(localize);
 
+const [versionInfo] = createResource(() =>
+  axios.get("version").then((res) => res.data),
+);
+
 export function Footer() {
-  const [versionInfo] = createResource(() =>
-    axios.get("version").then((res) => res.data),
-  );
   const { t, locale } = useI18n();
   onMount(() => {
     dayjs.locale(locale().toLocaleLowerCase());
