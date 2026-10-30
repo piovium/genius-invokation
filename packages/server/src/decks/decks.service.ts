@@ -57,21 +57,22 @@ export class DecksService {
     }
   }
 
-  private codeToDeck(code: string): Deck {
-    const deck = ASSETS_MANAGER.decode(code);
-    return {
-      // code,
-      ...deck,
-    };
-  }
-
-  async createDeck(userId: number, deck: CreateDeckDto): Promise<DeckModel> {
+  async createDeck(
+    userId: number,
+    deck: CreateDeckDto,
+  ): Promise<DeckWithDeckModel> {
     const { code, requiredVersion } = await this.deckToCode(deck);
     const [model] = await dbService.db
       .insert(decks)
-      .values({ name: deck.name, code, ownerUserId: userId, requiredVersion })
+      .values({
+        name: deck.name,
+        characters: deck.characters,
+        cards: deck.cards,
+        ownerUserId: userId,
+        requiredVersion,
+      })
       .returning();
-    return model!;
+    return { ...model!, code };
   }
 
   async getAllDecks(
@@ -111,14 +112,10 @@ export class DecksService {
         tx.select({ count: count() }).from(decks).where(where),
       ]),
     );
-    const data = models.map((model) => {
-      const { characters, cards } = this.codeToDeck(model.code);
-      return {
-        ...model,
-        characters,
-        cards,
-      };
-    });
+    const data = models.map((model) => ({
+      ...model,
+      code: ASSETS_MANAGER.encode(model),
+    }));
     return { data, count: total[0]!.count };
   }
 
@@ -134,40 +131,43 @@ export class DecksService {
     if (!model) {
       return null;
     }
-    const { characters, cards } = this.codeToDeck(model.code);
     return {
       ...model,
-      characters,
-      cards,
+      code: ASSETS_MANAGER.encode(model),
     };
   }
 
   async updateDeck(userId: number, deckId: number, deck: UpdateDeckDto) {
-    let code: string | undefined;
-    let requiredVersion: number | undefined;
-    if (!deck.characters || !deck.cards) {
-      if (!deck.characters && !deck.cards) {
-        code = void 0;
-      } else {
-        throw new BadRequestException(
-          `characters and cards must be provided together`,
-        );
-      }
-    } else {
-      ({ code, requiredVersion } = await this.deckToCode({
-        characters: deck.characters,
-        cards: deck.cards,
-      }));
+    if (!!deck.characters !== !!deck.cards) {
+      throw new BadRequestException(
+        `characters and cards must be provided together`,
+      );
     }
+    const { code, requiredVersion } =
+      deck.characters && deck.cards
+        ? await this.deckToCode({
+            characters: deck.characters,
+            cards: deck.cards,
+          })
+        : {};
     const [model] = await dbService.db
       .update(decks)
-      .set({ name: deck.name, code, requiredVersion, updatedAt: new Date() })
+      .set({
+        name: deck.name,
+        characters: deck.characters,
+        cards: deck.cards,
+        requiredVersion,
+        updatedAt: new Date(),
+      })
       .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
       .returning();
     if (!model) {
       throw new NotFoundException("Deck not found");
     }
-    return model;
+    return {
+      ...model,
+      code: code ?? ASSETS_MANAGER.encode(model),
+    };
   }
 
   async deleteDeck(userId: number, deckId: number) {

@@ -29,13 +29,13 @@ define card {
       usage perRound, 2;
       :discardMaxCostHands(1);
       :e.decreaseDamage(1);
-      :addVariable("stoic", 1);
+      :variables.stoic += 1;
     };
     on increaseSkillDamage {
-      when :( :getVariable("stoic") > 0 );
+      when :( :variables.stoic > 0 );
       :e.increaseDamage(1);
-      :drawCards(:getVariable("stoic"));
-      :setVariable("stoic", 0);
+      :drawCards(:variables.stoic);
+      :variables.stoic = 0;
     };
   };
 };
@@ -62,13 +62,13 @@ define card {
       usage perRound, 2;
       :discardMaxCostHands(1);
       :e.decreaseDamage(1);
-      :addVariable("solidarity", 1);
+      :variables.solidarity += 1;
     };
     on increaseSkillDamage {
-      when :( :getVariable("solidarity") > 0 );
+      when :( :variables.solidarity > 0 );
       :e.increaseDamage(1);
-      :drawCards(:getVariable("solidarity"));
-      :setVariable("solidarity", 0);
+      :drawCards(:variables.solidarity);
+      :variables.solidarity = 0;
     };
   };
 };
