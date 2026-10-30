@@ -109,7 +109,7 @@ export default {
   disableGuestJoin: "关闭“允许游客加入”",
   useGithubLogin: "使用 GitHub 登录",
   chooseDeck: "选择出战牌组",
-  noDeckForVersion: "暂无该版本可用牌组",
+  noDeckForProfile: "暂无该规则可用牌组",
   selectDeckFirst: "请先选择牌组",
   joiningRoom: "正在加入房间…",
   room: "房间 {{code}}",

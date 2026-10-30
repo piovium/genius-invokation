@@ -111,7 +111,7 @@ export default {
   disableGuestJoin: "disable guest access",
   useGithubLogin: "sign in with GitHub",
   chooseDeck: "Choose a deck",
-  noDeckForVersion: "No decks available for this version",
+  noDeckForProfile: "No decks available for this profile",
   selectDeckFirst: "Choose a deck first",
   joiningRoom: "Joining room...",
   room: "Room {{code}}",

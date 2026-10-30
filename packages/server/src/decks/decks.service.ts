@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { dbService } from "../services";
+import { dbService, profilesService } from "../services";
 import { BadRequestException, NotFoundException } from "../errors";
 import type {
   CreateDeckDto,
@@ -22,8 +22,13 @@ import type {
 } from "./decks.controller";
 import { type Deck } from "@gi-tcg/typings";
 import { decks, type Deck as DeckModel } from "../db/schema";
-import { and, eq, lte, desc, count } from "drizzle-orm";
-import { ASSETS_MANAGER, verifyDeck, type PaginationResult } from "../utils";
+import { and, eq, desc, count } from "drizzle-orm";
+import {
+  ASSETS_MANAGER,
+  buildDeckMatchesProfileDbFilter,
+  verifyDeck,
+  type PaginationResult,
+} from "../utils";
 import { VERSIONS } from "@gi-tcg/core";
 
 interface DeckWithVersion extends Deck {
@@ -72,13 +77,13 @@ export class DecksService {
 
   async getAllDecks(
     userId: number,
-    { skip = 0, take = 100, requiredVersion }: QueryDeckDto,
+    { skip = 0, take = 100, profileId }: QueryDeckDto,
   ): Promise<PaginationResult<DeckWithDeckModel>> {
     const where = and(
       eq(decks.ownerUserId, userId),
-      requiredVersion === undefined
-        ? undefined
-        : lte(decks.requiredVersion, requiredVersion),
+      typeof profileId === "undefined"
+        ? void 0
+        : buildDeckMatchesProfileDbFilter(profilesService.get(profileId)),
     );
     const [models, total] = await dbService.db.transaction(async (tx) =>
       Promise.all([

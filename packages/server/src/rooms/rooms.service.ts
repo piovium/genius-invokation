@@ -68,7 +68,11 @@ import {
   mergeWith,
   takeUntil,
 } from "rxjs";
-import { createGuestId, DeckVerificationError, verifyDeck } from "../utils";
+import {
+  createGuestId,
+  DeckVerificationError,
+  verifyDeckForProfile,
+} from "../utils";
 import type { RoomMetricsSnapshot } from "../metrics/metrics.service";
 import type {
   CreateRoomDto,
@@ -79,7 +83,6 @@ import type {
 } from "./rooms.controller";
 import { inspect } from "node:util";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import semver from "semver";
 import { redisService as redis } from "../services";
 
 const s3 = process.env.S3_ENDPOINT
@@ -810,12 +813,7 @@ export class RoomsService {
     };
 
     try {
-      const version = await verifyDeck(playerInfo.deck);
-      if (semver.compare(version, roomConfig.profile.baseVersion) > 0) {
-        throw new BadRequestException(
-          `Deck version required ${version}, it's higher game version ${roomConfig.profile.baseVersion}`,
-        );
-      }
+      await verifyDeckForProfile(playerInfo.deck, compiledProfile);
     } catch (e) {
       if (e instanceof DeckVerificationError) {
         throw new BadRequestException(`Deck verification failed: ${e.message}`);
@@ -937,12 +935,7 @@ export class RoomsService {
     }
 
     try {
-      const version = await verifyDeck(playerInfo.deck);
-      if (semver.compare(version, room.config.profile.baseVersion) > 0) {
-        throw new BadRequestException(
-          `Deck version required ${version}, it's higher game version ${room.config.profile.baseVersion}`,
-        );
-      }
+      await verifyDeckForProfile(playerInfo.deck, room.compiledProfile);
     } catch (e) {
       if (e instanceof DeckVerificationError) {
         throw new BadRequestException(`Deck verification failed: ${e.message}`);
