@@ -25,8 +25,8 @@ import { decks, type Deck as DeckModel } from "../db/schema";
 import { and, eq, desc, count } from "drizzle-orm";
 import {
   ASSETS_MANAGER,
+  buildDeckMatchesProfileDbFilter,
   verifyDeck,
-  deckMatchesProfile,
   type PaginationResult,
 } from "../utils";
 import { VERSIONS } from "@gi-tcg/core";
@@ -79,27 +79,12 @@ export class DecksService {
     userId: number,
     { skip = 0, take = 100, profileId }: QueryDeckDto,
   ): Promise<PaginationResult<DeckWithDeckModel>> {
-    const where = eq(decks.ownerUserId, userId);
-    if (typeof profileId !== "undefined") {
-      const profile = profilesService.get(profileId);
-      const models = await dbService.db
-        .select()
-        .from(decks)
-        .where(where)
-        .orderBy(desc(decks.updatedAt));
-      const decoded = models.map((model) => ({
-        ...model,
-        ...this.codeToDeck(model.code),
-      }));
-      const matches = await Promise.all(
-        decoded.map((deck) => deckMatchesProfile(deck, profile)),
-      );
-      const filtered = decoded.filter((_, index) => matches[index]);
-      return {
-        data: filtered.slice(skip, skip + take),
-        count: filtered.length,
-      };
-    }
+    const where = and(
+      eq(decks.ownerUserId, userId),
+      typeof profileId === "undefined"
+        ? void 0
+        : buildDeckMatchesProfileDbFilter(profilesService.get(profileId)),
+    );
     const [models, total] = await dbService.db.transaction(async (tx) =>
       Promise.all([
         tx

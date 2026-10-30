@@ -26,6 +26,8 @@ import { compare as semverCompare } from "semver";
 import { createId as createCuid, isCuid } from "@paralleldrive/cuid2";
 import { BadRequestException } from "./errors";
 import type { CompiledProfile } from "./profiles/types";
+import { decks } from "./db/schema";
+import { lte } from "drizzle-orm";
 
 export enum DeckVerificationErrorCode {
   SizeError = "SizeError",
@@ -162,6 +164,13 @@ export async function verifyDeckForProfile(
       `Deck version required ${version}, it's higher game version ${profile.profile.baseVersion}`,
     );
   }
+}
+
+export function buildDeckMatchesProfileDbFilter(profile: CompiledProfile) {
+  return lte(
+    decks.requiredVersion,
+    VERSIONS.indexOf(profile.profile.baseVersion),
+  );
 }
 
 export async function deckMatchesProfile(deck: Deck, profile: CompiledProfile) {
