@@ -389,6 +389,12 @@ export function exposeMutation(
       };
     }
     case "modifyEntityVar": {
+      if (
+        m.state.definition.type !== "character" &&
+        m.state.definition.visibleVarName !== m.varName
+      ) {
+        return null;
+      }
       const direction: PbModifyDirection =
         m.direction === null
           ? PbModifyDirection.UNSPECIFIED
