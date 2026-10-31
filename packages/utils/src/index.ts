@@ -102,6 +102,13 @@ export function toSortedBy<T, K extends number[] | number>(
     }
     const size = Math.min(projectionA.length, projectionB.length);
     for (let i = 0; i < size; i++) {
+      // Checks NaN; keeps comparisons transitive
+      const aIsNaN = Number.isNaN(projectionA[i]);
+      const bIsNaN = Number.isNaN(projectionB[i]);
+      if (aIsNaN !== bIsNaN) {
+        // NaNs are considered greater than any number excepts itself
+        return aIsNaN ? 1 : -1;
+      }
       if (projectionA[i] < projectionB[i]) {
         return -1;
       }
