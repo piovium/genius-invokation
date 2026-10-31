@@ -35,26 +35,10 @@ const EditDeck = lazy(() => import("./pages/EditDeck"));
 const Room = lazy(() => import("./pages/Room"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-export interface VersionContextValue {
-  versionInfo: Resource<any>;
-}
-
-const VersionContext = createContext<VersionContextValue>({
-  versionInfo: createResource(() => Promise.resolve({}))[0],
-});
-export const useVersionContext = () => useContext(VersionContext)!;
-
 const MobileContext = createContext<Accessor<boolean>>();
 export const useMobile = () => useContext(MobileContext)!;
 
 function App() {
-  const [versionInfo] = createResource(() =>
-    axios.get("version").then((res) => res.data),
-  );
-  const versionContextValue: VersionContextValue = {
-    versionInfo,
-  };
-
   const mobileMediaQuery = window.matchMedia("(max-width: 768px)");
   const [mobile, setMobile] = createSignal(mobileMediaQuery.matches);
   const handleMobileChange = (e: MediaQueryListEvent) => {
@@ -80,18 +64,16 @@ function App() {
   });
 
   return (
-    <VersionContext.Provider value={versionContextValue}>
-      <MobileContext.Provider value={mobile}>
-        <Router base={import.meta.env.BASE_URL.replace(/(.+)\/$/, "$1")}>
-          <Route path="/" component={Home} />
-          <Route path="/user/:id" component={User} />
-          <Route path="/decks/:id" component={EditDeck} />
-          <Route path="/decks" component={Decks} />
-          <Route path="/rooms/:code" component={Room} />
-          <Route path="*" component={NotFound} />
-        </Router>
-      </MobileContext.Provider>
-    </VersionContext.Provider>
+    <MobileContext.Provider value={mobile}>
+      <Router base={import.meta.env.BASE_URL.replace(/(.+)\/$/, "$1")}>
+        <Route path="/" component={Home} />
+        <Route path="/user/:id" component={User} />
+        <Route path="/decks/:id" component={EditDeck} />
+        <Route path="/decks" component={Decks} />
+        <Route path="/rooms/:code" component={Room} />
+        <Route path="*" component={NotFound} />
+      </Router>
+    </MobileContext.Provider>
   );
 }
 
