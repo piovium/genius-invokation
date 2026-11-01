@@ -149,7 +149,7 @@ define card {
     on switchActive {
       when :( :e.switchInfo.to.id === :self.master.id );
       usage perRound, 1;
-      if ($.opp.active) {
+      if (:query($.opp.active)) {
         :characterStatus(ConductiveLisa, $.opp.active);
       }
     };
