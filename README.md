@@ -38,6 +38,19 @@
 - ~测试服卡牌抢先看~
 - 目前**仍有很多 bug**，需要更多测试
 
+## ⚠️ Note for AI Researchers: You Might Be in the Wrong Place
+
+If you are looking to use this project as a high-throughput environment for AI training (e.g., Reinforcement Learning), please be aware of the following architectural limitations before proceeding:
+
+* **Non-Standard Interaction Model**: Our callback-based interaction model differs significantly from standard RL environments. You will likely need to implement a custom adapter layer to bridge the gap.
+* **Performance Bottlenecks**: This project is written in TypeScript. Its single-threaded nature and heap memory model will severely bottleneck your training speed. Although we provide ultra-fast, V8-based cross-language bindings, they cannot bypass these fundamental runtime limitations.
+* **Recommended Workaround**: If your research strictly depends on this project, we recommend using an LLM Agent to port the codebase to a high-performance language, e.g. C++, Rust, or Go. [A provided testcase](http://github.com/ValentineChuu/gitcg-engine-cpp) shows that a ported native version achieves a **5x+ speedup** and unlocks true multi-threaded parallelism.
+
+> [!IMPORTANT]
+> **Licensing & Attribution**
+> 1. **AGPLv3 Compliance**: Code translated or rewritten using LLMs is still considered a derivative work and remains strictly bound by the **AGPLv3 license**. When distributing the ported project, you must open-source it and retain the original attribution to **Piovium Labs**.
+> 2. **Citation**: Even if you do not directly use our codebase, if your research references or builds upon our work, please adhere to standard attribution norms and credit **Piovium Labs** prominently in your publications and/or documentation.
+
 ## [关于开发](./docs/development/README.md)
 
 上述链接可查看（可能是过时的）开发文档和注记。
