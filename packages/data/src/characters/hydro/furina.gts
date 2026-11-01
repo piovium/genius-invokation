@@ -122,9 +122,9 @@ define status {
     usage 1;
     if (:self.master.definition.id === FurinaPneuma) {
       :heal(1, $.my.standby);
-    } else {
+    } else if (:self.master.definition.id === FurinaOusia) {
       :e.increaseDamage(2);
-      :damage(DamageType.Piercing, 1, $.macros.myLeastInjured);
+      // 官方实现的自伤写在普攻里面（而非增伤期间级联出伤）
     }
   };
 };
@@ -209,10 +209,10 @@ define skill {
 
 /**
  * @id 12114
- * @name 
+ * @name
  * @cost
  * @description
- * 
+ *
  */
 define skill {
   id 12114 as Skill12114;
@@ -280,7 +280,11 @@ define skill {
   skillType normal;
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
+  const hasCenterOfAttention = :self.hasStatus(CenterOfAttention);
   :damage(DamageType.Physical, 2);
+  if (hasCenterOfAttention) {
+    :damage(DamageType.Piercing, 1, $.macros.myLeastInjured);
+  }
 };
 /**
  * @id 12122
@@ -303,7 +307,7 @@ define skill {
  * @hp 12
  * @energy 2
  * @description
- * 
+ *
  */
 define character {
   id 1212 as FurinaOusia;
