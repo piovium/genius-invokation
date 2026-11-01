@@ -15,8 +15,31 @@
 
 import { ref, setup, Character, State, Equipment, Card, Summon, CombatStatus, DeclaredEnd, Support, $, DiceCount, Status } from "#test";
 import { RainbowMacaronsInEffect } from "@gi-tcg/data/internal/cards/event/food.gts";
-import { FurinaPneuma, SalonMembers } from "@gi-tcg/data/internal/characters/hydro/furina.gts";
+import { SplendorOfTranquilWaters } from "@gi-tcg/data/internal/cards/equipment/weapon/sword.gts";
+import { CenterOfAttention, FurinaOusia, FurinaPneuma, HearMeLetUsRaiseTheChaliceOfLove, SalonMembers, SoloistsSolicitationOusia } from "@gi-tcg/data/internal/characters/hydro/furina.gts";
 import { test } from "vitest";
+
+// https://github.com/piovium/genius-invokation/issues/1148
+test("furina: charged Splendor heals during a normal attack at 1 HP without crashing", async () => {
+  const target = ref();
+  const c = setup(
+    <State>
+      <Character my active def={FurinaOusia} health={1}>
+        <Equipment def={HearMeLetUsRaiseTheChaliceOfLove} />
+        <Status def={CenterOfAttention} />
+        <Equipment def={SplendorOfTranquilWaters} v={{ lake: 12 }} />
+      </Character>
+      <Character my health={1} maxHealth={12} />
+      <Character my health={1} maxHealth={12} />
+      <Character opp active ref={target} />
+    </State>,
+  );
+
+  await c.me.skill(SoloistsSolicitationOusia);
+  c.expect(target).toHaveVariable({ health: 5 });
+  // 原神实际行为：总是先治疗后自伤，结果是1血存活
+  c.expect($.my.active).toHaveVariable({ health: 1 });
+});
 
 test("furina: summon endPhase damage contains two skill", async () => {
   const macronsInEffect = ref();
