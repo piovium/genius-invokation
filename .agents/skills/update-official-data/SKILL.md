@@ -32,7 +32,7 @@ description: 更新正式服 data：刷新 assets-manager、推进正式版本�
 ## 1. 确定更新前版本并刷新正式服数据
 
 1. 读取正式服 `packages/core/src/base/version.ts`、`packages/data/package.json`、`packages/config/src/index.ts` 及当前 diff，记录更新前正式版本“ `CURRENT_VERSION` ”为 `OLD`。正式服配置应为 `IS_BETA = false`。
-2. 若用户已经推进版本或运行过生成器（通常表现为存在大量 `@outdated`、标记为`since CURRENT_VERSION` 的 `// TODO` 以及存在错误的 `old_versions/OLD_VERSION.ts`），则取最新版本的上一版本为 `OLD`；不能确定时询问。
+2. 若用户已经推进版本或运行过生成器（通常表现为存在大量 `@outdated`、标记为`since CURRENT_VERSION` 的 `// TODO` 以及存在错误的 `old_versions/OLD_VERSION.gts`），则取最新版本的上一版本为 `OLD`；不能确定时询问。
 3. 在 `packages/assets-manager` 执行：
 
    ```sh

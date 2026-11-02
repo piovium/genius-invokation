@@ -409,7 +409,7 @@ define combatStatus {
  * @id 217
  * @name 风元素伤害增加
  * @description
- * 我方下一次造成的风元素伤害增加。（扩散伤害除外）（可叠加，无上限）
+ * 我方下一次造成的风元素伤害增加。（可叠加，无上限）
  */
 define combatStatus {
   id 217 as AnemoDMGBonus;

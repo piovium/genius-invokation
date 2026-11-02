@@ -330,6 +330,7 @@ define card {
     };
     on dealReaction {
       when :( :self.master.isActive() && :e.relatedTo(DamageType.Anemo) );
+      listenTo samePlayer;
       usage perRound, 1;
       :combatStatus(AnemoDMGBonus);
       if (:e.relatedTo(DamageType.Pyro)) {
