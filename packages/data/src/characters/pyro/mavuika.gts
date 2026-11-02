@@ -322,7 +322,7 @@ define skill {
  * @id 1315
  * @name 玛薇卡
  * @hp 10
- * @energy -1
+ * @energy 0
  * @description
  * 至明、至炽、至烈的再临之火。
  */

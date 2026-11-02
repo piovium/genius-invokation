@@ -1370,3 +1370,23 @@ define card {
     };
   };
 };
+
+/**
+ * @id 322035
+ * @name 彩特琳德
+ * @cost
+ * @description
+ * 敌方打出名称不存在于我方本局最初牌组的牌时：治疗我方受伤最多的角色1点。（每回合2次）
+ */
+define card {
+  id 322035 as Zeitlind;
+  since "v7.2.0";
+  support ally {
+    on playCard {
+      when :( :e.who !== :self.who && !:isInInitialPile(:e.card, "my") );
+      listenTo all;
+      usage perRound, 2;
+      :heal(1, $.macros.myMostInjured);
+    };
+  };
+};

@@ -208,6 +208,70 @@ define status {
 };
 
 /**
+ * @id 173
+ * @name 元素附魔：冰
+ * @description
+ * 所附属角色造成的物理伤害变为冰元素伤害。
+ * 持续回合：2
+ */
+define status {
+  id 173 as ElementalInfusionCryo;
+  duration 2;
+  on modifySkillDamageType {
+    when :( :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Cryo);
+  };
+};
+
+/**
+ * @id 174
+ * @name 元素附魔：水
+ * @description
+ * 所附属角色造成的物理伤害变为水元素伤害。
+ * 持续回合：2
+ */
+define status {
+  id 174 as ElementalInfusionHydro;
+  duration 2;
+  on modifySkillDamageType {
+    when :( :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Hydro);
+  };
+};
+
+/**
+ * @id 175
+ * @name 元素附魔：火
+ * @description
+ * 所附属角色造成的物理伤害变为火元素伤害。
+ * 持续回合：2
+ */
+define status {
+  id 175 as ElementalInfusionPyro;
+  duration 2;
+  on modifySkillDamageType {
+    when :( :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Pyro);
+  };
+};
+
+/**
+ * @id 176
+ * @name 元素附魔：雷
+ * @description
+ * 所附属角色造成的物理伤害变为雷元素伤害。
+ * 持续回合：2
+ */
+define status {
+  id 176 as ElementalInfusionElectro;
+  duration 2;
+  on modifySkillDamageType {
+    when :( :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Electro);
+  };
+};
+
+/**
  * @id 209
  * @name 打磨利刃
  * @description
@@ -278,6 +342,81 @@ define summon {
       :damage(DamageType.Geo, 3);
       :variables.effect = 1;
     }
+  };
+};
+
+/**
+ * @id 213
+ * @name 冰元素伤害增加
+ * @description
+ * 我方下一次造成的冰元素伤害增加。（扩散伤害除外）（可叠加，无上限）
+ */
+define combatStatus {
+  id 213 as CryoDMGBonus;
+  on increaseDamage {
+    when :( :e.type === DamageType.Cryo && !:e.damageInfo.fromReaction );
+    usage 1 { append; };
+    :e.increaseDamage(1);
+  };
+};
+
+/**
+ * @id 214
+ * @name 水元素伤害增加
+ * @description
+ * 我方下一次造成的水元素伤害增加。（扩散伤害除外）（可叠加，无上限）
+ */
+define combatStatus {
+  id 214 as HydroDMGBonus;
+  on increaseDamage {
+    when :( :e.type === DamageType.Hydro && !:e.damageInfo.fromReaction );
+    usage 1 { append; };
+    :e.increaseDamage(1);
+  };
+};
+
+/**
+ * @id 215
+ * @name 火元素伤害增加
+ * @description
+ * 我方下一次造成的火元素伤害增加。（扩散伤害除外）（可叠加，无上限）
+ */
+define combatStatus {
+  id 215 as PyroDMGBonus;
+  on increaseDamage {
+    when :( :e.type === DamageType.Pyro && !:e.damageInfo.fromReaction );
+    usage 1 { append; };
+    :e.increaseDamage(1);
+  };
+};
+
+/**
+ * @id 216
+ * @name 雷元素伤害增加
+ * @description
+ * 我方下一次造成的雷元素伤害增加。（扩散伤害除外）（可叠加，无上限）
+ */
+define combatStatus {
+  id 216 as ElectroDMGBonus;
+  on increaseDamage {
+    when :( :e.type === DamageType.Electro && !:e.damageInfo.fromReaction );
+    usage 1 { append; };
+    :e.increaseDamage(1);
+  };
+};
+
+/**
+ * @id 217
+ * @name 风元素伤害增加
+ * @description
+ * 我方下一次造成的风元素伤害增加。（扩散伤害除外）（可叠加，无上限）
+ */
+define combatStatus {
+  id 217 as AnemoDMGBonus;
+  on increaseDamage {
+    when :( :e.type === DamageType.Anemo );
+    usage 1 { append; };
+    :e.increaseDamage(1);
   };
 };
 

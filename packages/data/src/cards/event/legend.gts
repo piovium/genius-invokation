@@ -547,3 +547,47 @@ define combatStatus {
     :dispose();
   };
 };
+
+/**
+ * @id 330015
+ * @name 浮槃之歌
+ * @cost 2*Aligned, 1*Legend
+ * @description
+ * 我方队伍中存在3种不同元素类型的角色时才可打出，将我方3个元素骰转换为万能元素，本局游戏中我方投掷阶段：总是投出3个万能元素骰。我方引发元素反应时：造成的伤害+1。我方引发元素反应后：治疗我方受伤最多角色1点。
+ * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
+ */
+define card {
+  id 330015 as StreamingSong;
+  since "v7.2.0";
+  undiscoverable;
+  cost DiceType.Aligned, 2;
+  legend;
+  filter :(
+    new Set(:queryAll($.my.character.includesDefeated).map((c) => c.element()))
+      .size >= 3
+  );
+  :convertDice(DiceType.Omni, 3);
+  :combatStatus(PledgeOfUnity);
+};
+
+/**
+ * @id 330016
+ * @name 统一盟誓
+ * @description
+ * 投掷阶段：总是投出3个万能元素骰。
+ * 我方引发元素反应时：造成的伤害+1。
+ * 我方引发元素反应后：治疗我方受伤最多角色1点。
+ */
+define combatStatus {
+  id 330016 as PledgeOfUnity;
+  since "v7.2.0";
+  on roll {
+    :e.fixDice(DiceType.Omni, 3);
+  };
+  on increaseDamage {
+    when :( :e.getReaction() );
+    // 官方实际行为是内联治疗
+    :heal(1, $.macros.myMostInjured);
+    :e.increaseDamage(1);
+  };
+};

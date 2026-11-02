@@ -21,7 +21,12 @@ import {
   Reaction,
   type SupportHandle,
 } from "@gi-tcg/core/data";
-import { CatalyzingField, NoTuningAllowed, Shield } from "../../commons.gts";
+import {
+  BurningFlame,
+  CatalyzingField,
+  NoTuningAllowed,
+  Shield,
+} from "../../commons.gts";
 
 /**
  * @id 303041
@@ -396,7 +401,7 @@ define card {
  * @name 冰草祝佑·棘霜
  * @description
  * 投掷阶段：总是投出2个冰元素骰和2个草元素骰。
- * 结束阶段：对敌方附着有冰元素的角色造成2点穿透伤害，然后移除其冰元素附着。
+ * 结束阶段：对敌方附着有冰元素或草元素的角色造成2点穿透伤害，然后移除其冰元素和草元素附着。
  */
 define card {
   id 303081 as RimegrassBlessingThornFrost;
@@ -407,12 +412,15 @@ define card {
       :e.fixDice(DiceType.Dendro, 2);
     };
     on endPhase {
-      const targets = :oppPlayer.characters.filter((ch) =>
-        ([Aura.Cryo, Aura.CryoDendro] as Aura[]).includes(ch.aura),
-      );
-      for (const target of targets) {
-        :damage(DamageType.Piercing, 2, target);
-        :cleanAura(Aura.Cryo, target);
+      // 冰草共存会被打两下是刻意的游戏设计
+      for (const aura of [Aura.Cryo, Aura.Dendro] as Aura[]) {
+        const targets = :oppPlayer.characters.filter((ch) =>
+          [aura, Aura.CryoDendro].includes(ch.aura),
+        );
+        for (const target of targets) {
+          :damage(DamageType.Piercing, 2, target);
+          :cleanAura(aura, target);
+        }
       }
     };
   };
@@ -423,7 +431,7 @@ define card {
  * @name 冰草祝佑·寒蔓
  * @description
  * 投掷阶段：总是投出2个冰元素骰和2个草元素骰。
- * 我方使用技能后，如果敌方出战角色附着草元素：抓1张牌，治疗我方受伤最多的角色1点，然后移除敌方出战角色草元素附着。（每回合2次）
+ * 我方使用技能后，如果敌方出战角色附着冰元素和草元素：移除敌方出战角色冰元素附着，造成2点草元素伤害，抓1张牌，治疗我方受伤最多的角色1点。（每回合2次）
  */
 define card {
   id 303082 as RimegrassBlessingColdVine;
@@ -435,15 +443,12 @@ define card {
       :e.fixDice(DiceType.Dendro, 2);
     };
     on useSkill {
-      when :(
-        ([Aura.Dendro, Aura.CryoDendro] as (Aura | undefined)[]).includes(
-          :query($.opp.active)?.aura,
-        )
-      );
+      when :( :query($.opp.active)?.aura === Aura.CryoDendro );
       usage perRound, 2;
+      :cleanAura(Aura.Cryo, $.opp.active);
+      :damage(DamageType.Dendro, 2);
       :drawCards(1);
       :heal(1, $.macros.myMostInjured);
-      :cleanAura(Aura.Dendro, $.opp.active);
     };
   };
 };
@@ -763,14 +768,14 @@ define card {
  * @name 超载祝佑·霆击
  * @description
  * 投掷阶段：总是投出2个雷元素骰和2个火元素骰。
- * 敌方每切换一次角色后：对敌方出战角色造成1点穿透伤害，然后本回合此牌造成的穿透伤害+1（最多3）。
+ * 敌方每切换一次角色后：对敌方出战角色造成1点穿透伤害，然后本回合此牌造成的穿透伤害+1（最多2）。
  */
 define card {
   id 303122 as ThunderbombBlessingElectro;
   cost DiceType.Electro, 2;
   undiscoverable;
   support {
-    variable damageValue, 1 { range 3; };
+    variable damageValue, 1 { range 2; };
     hint DamageType.Physical, ((st, self) => self.variables.damageValue);
     on roll {
       :e.fixDice(DiceType.Electro, 2);
@@ -818,3 +823,99 @@ define card {
     };
   };
 }
+
+/**
+ * @id 303131
+ * @name 燃烧祝佑·极限火势
+ * @cost 1*Pyro
+ * @description
+ * 投掷阶段：总是投出2个火元素骰和2个草元素骰。
+ * 我方触发燃烧反应后：我方燃烧烈焰的可用次数+1。
+ * 我方打出当前元素骰费用为0的卡牌后：立刻触发我方燃烧烈焰的「结束阶段」效果。（每回合2次）
+ */
+define card {
+  id 303131 as BurningBlessingMaximalFerocity;
+  since "v7.2.0";
+  cost DiceType.Pyro, 1;
+  undiscoverable;
+  support {
+    on roll {
+      :e.fixDice(DiceType.Pyro, 2);
+      :e.fixDice(DiceType.Dendro, 2);
+    };
+    on dealReaction {
+      when :( :e.type === Reaction.Burning );
+      :query($.my.summon.def(BurningFlame))?.addVariable("usage", 1);
+    };
+    on playCard {
+      when :( :e.card.diceCost() === 0 );
+      usage perRound, 2;
+      const burningFlame = :query($.my.summon.def(BurningFlame));
+      if (burningFlame) {
+        :triggerEndPhaseSkill(burningFlame);
+      }
+    };
+  };
+};
+
+/**
+ * @id 3003132
+ * @name 燃烧祝佑·极限协奏
+ * @cost 1*Dendro
+ * @description
+ * 投掷阶段：总是投出2个火元素骰和2个草元素骰。
+ * 我方打出当前元素骰费用不低于2的牌后：此牌累积1点计数（最多累计3点）。
+ * 此牌每有1点计数，我方燃烧烈焰造成的伤害+1。
+ */
+define card {
+  id 3003132 as BurningBlessingSupremeSymphony;
+  since "v7.2.0";
+  cost DiceType.Dendro, 1;
+  undiscoverable;
+  support {
+    variable count, 0 { range 3; };
+    on roll {
+      :e.fixDice(DiceType.Pyro, 2);
+      :e.fixDice(DiceType.Dendro, 2);
+    };
+    on playCard {
+      when :( :e.card.diceCost() >= 2 );
+      :variables.count += 1;
+    };
+    on increaseDamage {
+      when :( :e.source.definition.id === BurningFlame );
+      :e.increaseDamage(:variables.count);
+    };
+  };
+};
+
+/**
+ * @id 331013
+ * @name 元素幻变：燃烧祝佑
+ * @cost 2*Aligned
+ * @description
+ * 元素幻变：火元素草元素
+ * 投掷阶段：总是投出2个火元素骰和2个草元素骰。
+ * 我方触发燃烧反应后：弃置此牌并从燃烧祝佑·极限火势和燃烧祝佑·极限协奏中挑选一项加入手牌。
+ */
+define card {
+  id 331013 as ElementalTransfigurationBurningBlessing;
+  since "v7.2.0";
+  undiscoverable;
+  cost DiceType.Aligned, 2;
+  support {
+    elementalBlessing DiceType.Pyro, DiceType.Dendro;
+    on roll {
+      :e.fixDice(DiceType.Pyro, 2);
+      :e.fixDice(DiceType.Dendro, 2);
+    };
+    on dealReaction {
+      when :( :e.type === Reaction.Burning );
+      :selectAndCreateHandCard([
+        BurningBlessingMaximalFerocity,
+        BurningBlessingSupremeSymphony,
+      ]);
+      :dispose();
+    };
+  };
+};

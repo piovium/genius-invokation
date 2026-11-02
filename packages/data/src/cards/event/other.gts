@@ -35,6 +35,7 @@ import {
   Shield,
 } from "../../commons.gts";
 import { BountifulCore } from "../../characters/hydro/nilou.gts";
+import { HallOfAThousandPillars } from "../support/adventure.gts";
 
 /**
  * @id 303211
@@ -3176,4 +3177,70 @@ define combatStatus {
     :drawCards(2);
     :generateDice("randomElement", 2);
   };
+};
+
+/**
+ * @id 301043
+ * @name 藏品·遗迹重机
+ * @cost 1*Aligned
+ * @description
+ * 用万能元素骰将我方元素骰总数补充至2。我方千柱之殿每有6点冒险经历，补充数+1，最多补充至4。
+ */
+define card {
+  id 301043 as CollectibleRuinGrader;
+  since "v7.2.0";
+  cost DiceType.Aligned, 1;
+  undiscoverable;
+  const exp =
+    :query($.my.support.def(HallOfAThousandPillars))?.variables.exp ?? 0;
+  const diceCount = Math.min(2 + Math.floor(exp / 6), 4) - :player.dice.length;
+  if (diceCount > 0) {
+    :generateDice(DiceType.Omni, diceCount);
+  }
+};
+
+/**
+ * @id 301044
+ * @name 藏品·浮游草蕈兽
+ * @cost 1*Dendro
+ * @description
+ * 在我方牌组中随机生成2张事件牌，然后抓2张牌。我方千柱之殿每有4点冒险经历，额外生成并抓1张，最多额外3张。
+ */
+define card {
+  id 301044 as CollectibleFloatingDendroFungus;
+  since "v7.2.0";
+  cost DiceType.Dendro, 1;
+  undiscoverable;
+  const exp =
+    :query($.my.support.def(HallOfAThousandPillars))?.variables.exp ?? 0;
+  const cardsCount = Math.min(Math.floor(exp / 4), 3) + 2;
+  const excludeTags = ["food", "legend"] as const;
+  const candidates = :allCardDefinitions(
+    (card) =>
+      card.type === "eventCard" &&
+      !excludeTags.some((tag) => card.tags.includes(tag)),
+  );
+  const cards = :randomSubset(candidates, cardsCount);
+  for (const card of cards) {
+    :createPileCards(card.id as CardHandle, 1, "random");
+  }
+  :drawCards(cardsCount);
+};
+
+/**
+ * @id 301045
+ * @name 藏品·膨膨兽
+ * @cost 1*Hydro
+ * @description
+ * 治疗我方受伤最多的角色2点。我方千柱之殿每有4点冒险经历，额外治疗1点，最多额外治疗3点。
+ */
+define card {
+  id 301045 as CollectibleBlubberbeast;
+  since "v7.2.0";
+  cost DiceType.Hydro, 1;
+  undiscoverable;
+  const exp =
+    :query($.my.support.def(HallOfAThousandPillars))?.variables.exp ?? 0;
+  const healAmount = Math.min(Math.floor(exp / 4), 3) + 2;
+  :heal(healAmount, $.macros.myMostInjured);
 };

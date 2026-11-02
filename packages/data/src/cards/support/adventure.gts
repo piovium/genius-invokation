@@ -21,7 +21,13 @@ import {
   BattlePlan,
   EfficientSwitch,
 } from "../../commons.gts";
-import { ReforgeTheHolyBlade, WoodenToySword } from "../event/other.gts";
+import {
+  CollectibleBlubberbeast,
+  CollectibleFloatingDendroFungus,
+  CollectibleRuinGrader,
+  ReforgeTheHolyBlade,
+  WoodenToySword,
+} from "../event/other.gts";
 
 /**
  * @id 321032
@@ -277,6 +283,41 @@ define card {
         visible false;
       };
       :combatStatus(TheChasmInEffect);
+    };
+  };
+};
+
+/**
+ * @id 321042
+ * @name 千柱之殿
+ * @cost
+ * @description
+ * 入场时：生成1张随机藏品。
+ * 结束阶段：收集至多2个我方未使用的元素骰，每收集1个，生成1张随机藏品。
+ */
+define card {
+  id 321042 as HallOfAThousandPillars;
+  since "v7.2.0";
+  undiscoverable;
+  support place {
+    adventureSpot;
+    defineSnippet generateRandomCollectible {
+      const collectibles = [
+        CollectibleRuinGrader,
+        CollectibleFloatingDendroFungus,
+        CollectibleBlubberbeast,
+      ] as const;
+      const randomCard = :random(collectibles);
+      :createHandCard(randomCard as CardHandle);
+    };
+    on staged {
+      :callSnippet.generateRandomCollectible();
+    };
+    on endPhase {
+      const absorbed = :absorbDice("seq", 2);
+      for (let i = 0; i < absorbed.length; i++) {
+        :callSnippet.generateRandomCollectible();
+      }
     };
   };
 };

@@ -49,6 +49,7 @@ import "./characters/anemo/maguu_kenki.gts";
 import "./characters/anemo/sayu.gts";
 import "./characters/anemo/shikanoin_heizou.gts";
 import "./characters/anemo/sucrose.gts";
+import "./characters/anemo/varka.gts";
 import "./characters/anemo/venti.gts";
 import "./characters/anemo/wanderer.gts";
 import "./characters/anemo/xianyun.gts";
@@ -216,6 +217,7 @@ import "./old_versions/v6.5.0.gts";
 import "./old_versions/v6.6.0.gts";
 import "./old_versions/v6.7.0.gts";
 import "./old_versions/v7.0.0.gts";
+import "./old_versions/v7.1.0.gts";
 
 export * from "./end.ts";
 export { default } from "./end.ts";
