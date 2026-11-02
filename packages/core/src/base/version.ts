@@ -55,6 +55,7 @@ export const VERSIONS = [
   "v6.7.0",
   "v7.0.0",
   "v7.1.0",
+  "v7.2.0",
   ...BETA_VERSIONS,
 ] as const;
 

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DiceType, DamageType, $ } from "@gi-tcg/core/data";
+import { DiceType, DamageType, $, Reaction } from "@gi-tcg/core/data";
 import { EfficientSwitch } from "../../commons.gts";
 
 /**
@@ -259,3 +259,85 @@ define character {
   energy 2;
   skills RadiantWingslash, BinaryFormConvergenceAndDivision, PrincipleOfDarknessAsTheStarsSmolder, LightManifestOfTheDivineCalculus;
 }
+
+/**
+ * @id 113176
+ * @name 升华赞歌(生效中）
+ * @description
+ * 本回合敌方受到的火元素伤害+1。（扩散伤害除外）
+ * 可用次数：3
+ */
+define combatStatus {
+  id 113176 as HymnOfSublimationActive;
+  since "v7.2.0";
+  oneDuration;
+  on increaseDamage {
+    when :(
+      :e.type === DamageType.Pyro &&
+        !:e.target.isMine() &&
+        !:e.damageInfo.fromReaction
+    );
+    listenTo all;
+    usage 3;
+    :e.increaseDamage(1);
+  };
+};
+
+/**
+ * @id 113177
+ * @name 升华赞歌(生效中）
+ * @description
+ * 我方杜林在前台时，我方下次造成的蒸发与融化伤害+3。
+ * 可用次数：1
+ */
+define combatStatus {
+  id 113177 as SublimeAnthemActive;
+  since "v7.2.0";
+  on increaseDamage {
+    when :(
+      ([DurinWhite, DurinBlack] as number[]).includes(
+        :query($.my.active.includesDefeated)!.definition.id,
+      ) &&
+        ([Reaction.Vaporize, Reaction.Melt] as (Reaction | null)[]).includes(
+          :e.getReaction(),
+        )
+    );
+    usage 1;
+    :e.increaseDamage(3);
+  };
+};
+
+/**
+ * @id 213172
+ * @name 升华赞歌
+ * @cost 1*Pyro
+ * @description
+ * 快速行动：装备给我方的杜林。
+ * 打出此牌与每个行动阶段开始，我方场上至少有2张魔导牌时：根据我方的杜林当前「元素爆发」获得以下效果：本回合敌方下3次受到的火元素伤害+1。或杜林为出战角色时，我方下次造成的蒸发与融化伤害+3。
+ * （牌组中包含杜林，才能加入牌组）
+ */
+define card {
+  id 213172 as OdeToAscension;
+  since "v7.2.0";
+  cost DiceType.Pyro, 1;
+  tags hexenzirkel;
+  talent [DurinWhite, DurinBlack], none {
+    on staged {
+      if (:queryAll($.my.equipped.tag("hexenzirkel")).length >= 2) {
+        if (:e.targets[0].definition.id === DurinWhite) {
+          :combatStatus(HymnOfSublimationActive);
+        } else if (:e.targets[0].definition.id === DurinBlack) {
+          :combatStatus(SublimeAnthemActive);
+        }
+      }
+    };
+    on actionPhase {
+      when :( :queryAll($.my.equipped.tag("hexenzirkel")).length >= 2 );
+      if (:self.master.definition.id === DurinWhite) {
+        :combatStatus(HymnOfSublimationActive);
+      } else if (:self.master.definition.id === DurinBlack) {
+        :combatStatus(SublimeAnthemActive);
+      }
+    };
+  };
+};

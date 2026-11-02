@@ -253,7 +253,7 @@ define skill {
  * @id 1116
  * @name 丝柯克
  * @hp 10
- * @energy -1
+ * @energy 0
  * @description
  * 星海默然，覆灭无声。
  */
@@ -271,7 +271,7 @@ define character {
  * @id 6605
  * @name 丝柯克
  * @hp 10
- * @energy -1
+ * @energy 0
  * @description
  * 
  */

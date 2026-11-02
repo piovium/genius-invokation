@@ -90,7 +90,7 @@ define skill {
  * @name 前驱气势
  * @cost
  * @description
- * 【被动】我方触发扩散反应，或敌方失去护盾、 伤害抵消状态以及出战状态时，抓1张牌。（每回合2次）
+ * 【被动】我方触发扩散反应，或敌方失去护盾、 伤害抵消状态以及出战状态时，抓1张牌。（每回合1次）
  */
 define skill {
   id 25044 as VanguardMomentum;
@@ -98,7 +98,7 @@ define skill {
     on dealReaction {
       when :( :e.relatedTo(DamageType.Anemo) );
       listenTo samePlayer;
-      usage perRound, 2 { name "usagePerRound1"; };
+      usage perRound, 1 { name "usagePerRound1"; };
       :drawCards(1);
     };
     on entityDispose {
@@ -110,7 +110,7 @@ define skill {
             :e.entity.definition.tags.includes("barrier"))
       );
       listenTo all;
-      usage perRound, 2 { name "usagePerRound1"; };
+      usage perRound, 1 { name "usagePerRound1"; };
       :drawCards(1);
     };
   };
@@ -150,7 +150,7 @@ define skill {
 /**
  * @id 2504
  * @name 黑蛇骑士·斩风之剑
- * @hp 10
+ * @hp 12
  * @energy 2
  * @description
  * 「在宫廷当中颇具地位的近卫军人，『末光之剑』也曾是他们当中的一员。」
@@ -159,7 +159,7 @@ define character {
   id 2504 as BlackSerpentKnightWindcutter;
   since "v6.7.0";
   tags anemo, monster;
-  health 10;
+  health 12;
   energy 2;
   skills HalfswordTechnique,
     RisingSlash,

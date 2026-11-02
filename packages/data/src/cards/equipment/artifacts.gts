@@ -1705,3 +1705,38 @@ define card {
     };
   };
 }
+
+/**
+ * @id 312047
+ * @name 昔时之歌
+ * @cost 2*Void
+ * @description
+ * 我方角色获得圣遗物以外的治疗后：此牌累积1层「渴盼」（最多累积到4层）。回合开始时，每有2层「渴盼」，治疗所附属角色1点。如果有4层「渴盼」，则额外治疗1点，并且装备角色的伤害+1。
+ * （角色最多装备1件「圣遗物」）
+ */
+define card {
+  id 312047 as SongOfDaysPast;
+  since "v7.2.0";
+  cost DiceType.Void, 2;
+  artifact {
+    variable longing, 0 { range 4; };
+    on healed {
+      listenTo samePlayer;
+      when :(
+        !(
+          :e.source.definition.type === "equipment" &&
+          :e.source.definition.tags.includes("artifact")
+        )
+      );
+      :variables.longing += 1;
+    };
+    on actionPhase {
+      const longing = :variables.longing;
+      :heal(Math.floor(longing / 2) + (longing >= 4 ? 1 : 0), :self.master);
+    };
+    on increaseSkillDamage {
+      when :( :variables.longing >= 4 );
+      :e.increaseDamage(1);
+    };
+  };
+};
