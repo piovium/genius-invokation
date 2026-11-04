@@ -16,17 +16,15 @@
 import { Route, Router } from "@solidjs/router";
 import {
   createContext,
-  createResource,
   createSignal,
   onMount,
   onCleanup,
-  Resource,
   useContext,
   type Accessor,
   lazy,
 } from "solid-js";
-import axios from "axios";
 import { useAuth } from "./auth";
+import { GITHUB_AUTH_REDIRECT_URL } from "./config";
 
 const Home = lazy(() => import("./pages/Home"));
 const User = lazy(() => import("./pages/User"));
@@ -47,6 +45,12 @@ function App() {
 
   const { refresh } = useAuth();
   const onReceiveToken = async (e: MessageEvent) => {
+    if (
+      e.origin !== new URL(GITHUB_AUTH_REDIRECT_URL).origin ||
+      e.source !== window.githubOAuthPopup
+    ) {
+      return;
+    }
     if (e.data && e.data.type === "login" && e.data.token) {
       localStorage.setItem("accessToken", e.data.token);
       window.githubOAuthPopup?.close();
