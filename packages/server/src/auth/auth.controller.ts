@@ -26,6 +26,8 @@ export const AuthController = new Hono().get(
   async (c) => {
     const { code } = c.req.valid("query");
     const { accessToken } = await authService.login(code);
+    const originStr =
+      process.env.NODE_ENV === "production" ? "window.location.origin" : '"*"';
     return c.html(
       `<!DOCTYPE html>
 <title>Login Success</title>
@@ -34,7 +36,10 @@ export const AuthController = new Hono().get(
   window.addEventListener("error", (event) => {
     document.body.innerHTML += \`\${event.type}: \${event.message}\\n\`;
   });
-  window.opener.postMessage({ type: "login", token: "${accessToken}" }, "*");
+  window.opener.postMessage(
+    { type: "login", token: "${accessToken}" },
+    ${originStr}
+  );
   window.close();
 </script>`,
     );
