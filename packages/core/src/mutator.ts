@@ -25,7 +25,12 @@ import {
   applyMutation,
   stringifyMutation,
 } from "./base/mutation";
-import { type EntityState, StateSymbol, PlungingStatus, stringifyState } from "./base/state";
+import {
+  type EntityState,
+  StateSymbol,
+  PlungingStatus,
+  stringifyState,
+} from "./base/state";
 import {
   allEntitiesAtArea,
   allSkills,
@@ -882,10 +887,7 @@ export class StateMutator {
       DetailLogType.Other,
       `Damage info: ${damageInfo.log || "(no modification)"}`,
     );
-    const finalHealth = Math.max(
-      0,
-      target.variables.health - damageInfo.value,
-    );
+    const finalHealth = Math.max(0, target.variables.health - damageInfo.value);
     this.mutate({
       type: "modifyEntityVar",
       oldValue: 0,
@@ -981,13 +983,18 @@ export class StateMutator {
     ];
   }
 
-  drawCardsPlain(who: 0 | 1, count: number): ReadonlyEventList {
+  drawCardsPlain(
+    who: 0 | 1,
+    count: number,
+  ): { cards: EntityState[]; events: ReadonlyEventList } {
+    const cards: EntityState[] = [];
     const events = new EventList();
     for (let i = 0; i < count; i++) {
       const card = this.state.players[who].pile[0];
       if (!card) {
-        continue;
+        break;
       }
+      cards.push(card);
       events.push(
         ...this.insertHandCard({
           type: "moveEntity",
@@ -998,7 +1005,7 @@ export class StateMutator {
         }),
       );
     }
-    return events;
+    return { cards, events };
   }
 
   createHandCard(

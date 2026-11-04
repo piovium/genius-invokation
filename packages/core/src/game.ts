@@ -590,7 +590,7 @@ export class Game {
   private async initHands(): Promise<PhaseType> {
     using l = this.mutator.subLog(DetailLogType.Phase, `In initHands phase:`);
     for (const who of [0, 1] as const) {
-      const events = this.mutator.drawCardsPlain(
+      const { events } = this.mutator.drawCardsPlain(
         who,
         this.config.initialHandsCount,
       );
@@ -961,7 +961,7 @@ export class Game {
     );
     await this.handleEvent("onEndPhase", new EventArg(this.state));
     for (const who of [this.state.currentTurn, flip(this.state.currentTurn)]) {
-      const events = this.mutator.drawCardsPlain(who, 2);
+      const { events } = this.mutator.drawCardsPlain(who, 2);
       await this.handleEvents(events);
     }
     await this.handleEvent("onRoundEnd", new EventArg(this.state));

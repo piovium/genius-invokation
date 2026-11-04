@@ -1785,13 +1785,18 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return this.get(state);
   }
 
-  drawCards(count: number, opt?: DrawCardsOpt): void;
-  drawCards(...cards: PlainEntityState[]): void;
+  drawCards(
+    count: number,
+    opt?: DrawCardsOpt,
+  ): RxEntityState<Meta, TypingInfoBase<EntityType>>[];
+  drawCards(
+    ...cards: PlainEntityState[]
+  ): RxEntityState<Meta, TypingInfoBase<EntityType>>[];
   drawCards(
     countOrCard: number | PlainEntityState,
     optOrCard?: DrawCardsOpt | PlainEntityState,
     ...cards: PlainEntityState[]
-  ) {
+  ): RxEntityState<Meta, TypingInfoBase<EntityType>>[] {
     if (typeof countOrCard !== "number") {
       const cardList: PlainEntityState[] = [countOrCard];
       if (typeof optOrCard !== "undefined") {
@@ -1821,7 +1826,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
           reason: "draw",
         });
       }
-      return;
+      return cardList.map((card) => this.get(card));
     }
     const {
       withTag = null,
@@ -1830,6 +1835,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       who: myOrOpt = "my",
     } = (optOrCard ?? {}) as DrawCardsOpt;
     const who = myOrOpt === "my" ? this.self.who : flip(this.self.who);
+    const drawnCards: PlainEntityState[] = [];
     using l = this.mutator.subLog(
       DetailLogType.Primitive,
       `Player ${who} draw ${countOrCard} cards, withTag=${withTag}, withAttachment=${withAttachment}, withDefinition=${withDefinition}`,
@@ -1840,7 +1846,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
       withDefinition === null
     ) {
       // 如果没有限定，则从牌堆顶部摸牌
-      this.callAndEmit("drawCardsPlain", who, countOrCard);
+      const { cards } = this.callAndEmit("drawCardsPlain", who, countOrCard);
+      drawnCards.push(...cards);
     } else {
       const check = (card: PlainEntityState) => {
         if (withDefinition !== null) {
@@ -1864,6 +1871,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
           break;
         }
         const chosen = this.random(candidates);
+        drawnCards.push(chosen);
         this.callAndEmit("insertHandCard", {
           type: "moveEntity",
           from: { who, type: "pile", cardId: chosen.id },
@@ -1873,6 +1881,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         });
       }
     }
+    return drawnCards.map((card) => this.get(card));
   }
 
   createPileCards(
