@@ -45,7 +45,7 @@ define skill {
   skillType elemental;
   prepared;
   const caller = :skillInfo.requestBy!.caller;
-  const damageType = caller.variables.swirled;
+  const damageType = caller.variables.swirled as DamageType;
   if (damageType) {
     :damage(damageType, 2);
   } else {

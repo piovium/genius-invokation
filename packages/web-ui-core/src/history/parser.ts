@@ -302,7 +302,7 @@ export class StateRecorder {
     } else {
       masterDefinitionId = entity.definitionId;
     }
-    const onStage = ![PbEntityArea.HAND, PbEntityArea.PILE].includes(where);
+    const onStage = where !== PbEntityArea.HAND && where !== PbEntityArea.PILE;
     this.initializeEntity(
       { who: who as 0 | 1, onStage, masterDefinitionId },
       entity,
@@ -314,7 +314,8 @@ export class StateRecorder {
     const area = this.area.get(entity!.id);
     if (area) {
       area.who = toWho as 0 | 1;
-      area.onStage = ![PbEntityArea.HAND, PbEntityArea.PILE].includes(toWhere);
+      area.onStage =
+        toWhere !== PbEntityArea.HAND && toWhere !== PbEntityArea.PILE;
       if (toMasterCharacterId) {
         area.masterDefinitionId =
           this.area.get(toMasterCharacterId)?.masterDefinitionId ?? null;

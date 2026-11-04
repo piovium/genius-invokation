@@ -9,6 +9,7 @@ plugins:
       - unrecognizedEnum=false
       - exportCommonSymbols=false
       - removeEnumPrefix=true
+      - enumsAsLiterals=true
       - oneof=unions-value
   # - remote: buf.build/community/protobuf-c:v1.5.0
   #   out: packages/cbinding/src/pb

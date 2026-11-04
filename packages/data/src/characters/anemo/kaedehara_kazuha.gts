@@ -36,7 +36,7 @@ define summon {
   };
   on endPhase {
     usage 3;
-    :damage(:self.variables.hintIcon, 1);
+    :damage(:self.variables.hintIcon as DamageType, 1);
   };
 };
 

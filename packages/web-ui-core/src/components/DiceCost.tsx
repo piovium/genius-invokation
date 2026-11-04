@@ -111,7 +111,7 @@ export const DiceCostAsync = (props: DiceCostAsyncProps) => {
     () => [local.cardDefinitionId, assetsManager()] as const,
     ([id, manager]) => manager.getData(id),
   );
-  const COST_MAP: Record<string, number> = {
+  const COST_MAP: Record<string, DiceType> = {
     GCG_COST_DICE_VOID: DiceType.Void,
     GCG_COST_DICE_CRYO: DiceType.Cryo,
     GCG_COST_DICE_HYDRO: DiceType.Hydro,
@@ -124,7 +124,7 @@ export const DiceCostAsync = (props: DiceCostAsyncProps) => {
     GCG_COST_ENERGY: DiceType.Energy,
     GCG_COST_LEGEND: DiceType.Legend,
   };
-  const renderCost = (data: AnyData) => {
+  const renderCost = (data: AnyData): PbDiceRequirement[] => {
     if ("playCost" in data && data.playCost.length > 0) {
       const staticCost = data.playCost.map((cost) => ({
         type: COST_MAP[cost.type],
@@ -134,11 +134,11 @@ export const DiceCostAsync = (props: DiceCostAsyncProps) => {
         data.playCost.length === 1 &&
         data.playCost[0].type === "GCG_COST_LEGEND"
       ) {
-        return [{ type: 8, count: 0 }, ...staticCost];
+        return [{ type: DiceType.Aligned, count: 0 }, ...staticCost];
       }
       return staticCost;
     } else {
-      return [{ type: 8, count: 0 }];
+      return [{ type: DiceType.Aligned, count: 0 }];
     }
   };
   return (

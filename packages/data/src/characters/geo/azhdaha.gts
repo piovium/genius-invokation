@@ -20,13 +20,13 @@ import {
   type CharacterHandle,
   Aura,
   type,
-  type Pair,
+  pair,
 } from "@gi-tcg/core/data";
 
 define extension {
   idHint 2602 as AbsorbedCountExtension;
   schema ({
-    absorbed: type.declare<Pair<DiceType[]>>().type("pair<number[]>"),
+    absorbed: pair(type.enumerated(...Object.values(DiceType)).array()),
   });
   initialState ({
     absorbed: [[], []],
