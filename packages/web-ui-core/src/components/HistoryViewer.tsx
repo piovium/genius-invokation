@@ -1117,13 +1117,15 @@ interface HistoryBlockData {
     | "triggered"
     | "playCard"
     | "selectCard"
+    | "selectOption"
     | "elementalTuning"
     | "pocket";
   opp: boolean;
   title: string;
   indent: number;
   imageId?: number;
-  imageSize: "normal" | "summon";
+  imageSize: "normal" | "summon" | "text";
+  selectedOption?: string;
   callerId?: number;
   energyChange?: blockEnergyProps;
   status?: number;
@@ -1337,6 +1339,30 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
           name: renderName(block.cardDefinitionId),
           content: (
             <CardDescriptionPart cardDefinitionId={block.cardDefinitionId} />
+          ),
+        },
+        summary: renderSummary(block.children),
+      };
+      break;
+    }
+    case "selectOption": {
+      const isOpp = opp(block.who);
+      result = {
+        type: block.type,
+        opp: isOpp,
+        title: t(
+          isOpp ? "history.oppSelectOptionTitle" : "history.mySelectOptionTitle",
+        ),
+        indent: block.indent,
+        imageSize: "text",
+        selectedOption: block.selectedOption,
+        content: {
+          opp: isOpp,
+          name: block.prompt,
+          content: (
+            <span class="text-3 text-#d4bc8e whitespace-pre-wrap break-words">
+              {block.selectedOption}
+            </span>
           ),
         },
         summary: renderSummary(block.children),
@@ -1664,8 +1690,19 @@ function HistoryBlockBox(props: {
         </For>
       </div>
       <div class="h-24 flex flex-row items-center justify-center gap-1.5">
-        <div class="w-10.5 h-24 grid grid-cols-1 grid-rows-[1fr_6fr_1fr]">
+        <div
+          class="w-10.5 data-[text]:w-36 h-24 grid grid-cols-1 grid-rows-[1fr_6fr_1fr]"
+          bool:data-text={props.data.imageSize === "text"}
+        >
           <Switch>
+            <Match when={props.data.imageSize === "text"}>
+              <div class="grid-area-[2/1] text-3 text-#fff3e0 whitespace-pre-wrap break-words overflow-hidden">
+                <div class="line-clamp-2">{props.data.content.name}</div>
+                <div class="text-#d4bc8e line-clamp-2">
+                  {props.data.selectedOption}
+                </div>
+              </div>
+            </Match>
             <Match when={props.data.imageSize === "normal"}>
               <HistoryCard
                 definitionId={props.data.imageId}
@@ -1904,17 +1941,25 @@ function HistoryBlockDetailPanel(props: {
     >
       <div class="overflow-y-scroll max-h-120 flex flex-col gap-1 history-scrollbar">
         <Show when={renderBlock().type !== "pocket"}>
-          <div class="relative w-full bg-#2d333a rounded-t-md grid grid-cols-[3.625rem_1fr] self-start b-2 b-white/10 shrink-0">
+          <div
+            class="relative w-full bg-#2d333a rounded-t-md grid grid-cols-[3.625rem_1fr] data-[text]:grid-cols-[0_1fr] self-start b-2 b-white/10 shrink-0"
+            bool:data-text={renderBlock().type === "selectOption"}
+          >
             <div
               class="absolute top-1px left-1px w-3.5 h-3.5 rounded-lt bg-#806440 data-[opp]:bg-#48678b history-card-hint"
               bool:data-opp={renderBlock().content.opp}
             />
-            <HistoryCard
-              definitionId={renderBlock().content.imageId}
-              class="grid-area-[1/1] w-10.5 h-18 m-2"
-            />
-            <div class="grid-area-[1/2] py-1.5 pr-2 flex flex-col text-2.5 text-#b2afa8">
-              <div class="text-3.5 text-#fff3e0 font-bold">
+            <Show when={renderBlock().type !== "selectOption"}>
+              <HistoryCard
+                definitionId={renderBlock().content.imageId}
+                class="grid-area-[1/1] w-10.5 h-18 m-2"
+              />
+            </Show>
+            <div
+              class="grid-area-[1/2] py-1.5 pr-2 data-[text]:pl-4 min-w-0 flex flex-col text-2.5 text-#b2afa8"
+              bool:data-text={renderBlock().type === "selectOption"}
+            >
+              <div class="text-3.5 text-#fff3e0 font-bold whitespace-pre-wrap break-words">
                 {renderBlock().content.name}
               </div>
               {renderBlock().content.content}

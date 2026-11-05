@@ -17,6 +17,7 @@
     "@gi-tcg/assets-manager": "workspace:*"
   },
   "devDependencies": {
+    "@gi-tcg/custom-data-loader": "workspace:*",
     "immer": "^11.1.4"
   }
 }

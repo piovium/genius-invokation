@@ -17,7 +17,11 @@
 import { createEffect, createSignal, For, Match, Show, Switch } from "solid-js";
 import { InlineDice } from "./Dice";
 import { StaticCard } from "./SelectCardView";
-import type { PbEntityState, PbPlayerState } from "@gi-tcg/core";
+import type {
+  PbEntityState,
+  PbPlayerState,
+  SelectOptionRequest,
+} from "@gi-tcg/core";
 import type { ChessboardViewType } from "./Chessboard";
 import { useUiContext } from "../hooks/context";
 import { SpecialViewToggleButton } from "./FunctionButtonGroup";
@@ -28,6 +32,7 @@ export interface MiniSpecialViewProps {
   viewType: ChessboardViewType;
   player: PbPlayerState;
   selectCardCandidates: number[];
+  selectOptionRequest?: SelectOptionRequest | null;
   visible: boolean;
   isSelectingItem: (defIdOrState: number | PbEntityState) => boolean;
   onCardClick: (card: number | PbEntityState) => void;
@@ -41,6 +46,8 @@ export function MiniView(props: MiniSpecialViewProps) {
     switch (props.viewType) {
       case "switchHands":
         return t(`${prefix}SwitchingHands`);
+      case "selectOption":
+        return t(`${prefix}SelectingOptions`);
       case "selectCard":
         return t(`${prefix}SelectingCards`);
       default:
@@ -61,6 +68,14 @@ export function MiniView(props: MiniSpecialViewProps) {
     >
       <h3 class="font-bold text-4 line-height-none">{title()}</h3>
       <Switch>
+        <Match when={props.viewType === "selectOption" && props.visible}>
+          <div class="w-full min-h-0 overflow-y-auto px-4 py-2 text-3 whitespace-pre-wrap break-words">
+            <p class="font-bold">{props.selectOptionRequest?.prompt}</p>
+            <For each={props.selectOptionRequest?.options}>
+              {(option) => <p class="mt-2">{option.text}</p>}
+            </For>
+          </div>
+        </Match>
         <Match when={props.viewType === "switchHands"}>
           <div class="flex flex-row w-full justify-around px-5">
             <For each={props.player.handCard}>
@@ -123,6 +138,8 @@ export interface MiniSpecialViewGroupProps {
   oppViewType: ChessboardViewType;
   players: PbPlayerState[];
   mySelectCardCandidates: number[];
+  mySelectOptionRequest?: SelectOptionRequest | null;
+  oppSelectOptionRequest?: SelectOptionRequest | null;
   oppSelectCardCandidates: number[];
   showMyView: boolean;
   showOppView: boolean;
@@ -135,7 +152,9 @@ export function MiniSpecialViewGroup(props: MiniSpecialViewGroupProps) {
   const [miniViewVisible, setMiniViewVisible] = createSignal(false);
   createEffect(() => {
     setMiniViewVisible(
-      props.myViewType === "selectCard" || props.oppViewType === "selectCard",
+      [props.myViewType, props.oppViewType].some(
+        (type) => type === "selectCard" || type === "selectOption",
+      ),
     );
   });
   return (
@@ -150,6 +169,7 @@ export function MiniSpecialViewGroup(props: MiniSpecialViewGroupProps) {
         <MiniView
           player={props.players[props.who]}
           selectCardCandidates={props.mySelectCardCandidates}
+          selectOptionRequest={props.mySelectOptionRequest}
           viewType={props.myViewType}
           visible={miniViewVisible()}
           isSelectingItem={props.isSelectingItem}
@@ -162,6 +182,7 @@ export function MiniSpecialViewGroup(props: MiniSpecialViewGroupProps) {
           opp
           player={props.players[flip(props.who)]}
           selectCardCandidates={props.oppSelectCardCandidates}
+          selectOptionRequest={props.oppSelectOptionRequest}
           viewType={props.oppViewType}
           visible={miniViewVisible()}
           isSelectingItem={props.isSelectingItem}

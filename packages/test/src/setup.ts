@@ -188,6 +188,7 @@ export function DiceCount(props: DiceCount.Prop): JSX.Element {
 
 export namespace State {
   export interface Prop {
+    data?: GameData;
     dataVersion?: Version;
     config?: Partial<GameState["config"]>;
     versionBehavior?: Partial<VersionBehavior>;
@@ -257,7 +258,7 @@ export function setup(state: JSX.Element): TestController {
     throw new Error("The root element must be State");
   }
   const stateProp = state.prop as State.Prop;
-  const data = getData(stateProp.dataVersion);
+  const data = stateProp.data ?? getData(stateProp.dataVersion);
   const players: Draft<[PlayerState, PlayerState]> = [
     emptyPlayerState(0),
     emptyPlayerState(1),

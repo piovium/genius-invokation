@@ -23,6 +23,7 @@ import {
   type ExposedMutation,
   ActionValidity,
   Aura,
+  type SelectOption,
 } from "@gi-tcg/typings";
 import {
   type AnyState,
@@ -1301,6 +1302,27 @@ export class SelectCardEventArg extends PlayerEventArg {
   }
 }
 
+export class SelectOptionEventArg extends PlayerEventArg {
+  constructor(
+    state: GameState,
+    who: 0 | 1,
+    public readonly via: SkillInfo,
+    public readonly prompt: string,
+    public readonly options: readonly Readonly<SelectOption>[],
+    public readonly selectedIndex: number,
+  ) {
+    super(state, who);
+  }
+
+  get selectedKey() {
+    return this.options[this.selectedIndex].key;
+  }
+
+  get selectedOption() {
+    return this.options[this.selectedIndex].text;
+  }
+}
+
 export class CustomEventEventArg<T = unknown> extends EntityEventArg {
   arg: T extends {} ? T & { [NoReactiveSymbol]: true } : T;
   constructor(
@@ -1353,6 +1375,7 @@ export const EVENT_MAP = {
   onChangeVariable: VariableEventArg,
 
   onSelectCard: SelectCardEventArg,
+  onSelectOption: SelectOptionEventArg,
   onAdventure: EntityEventArg,
 
   modifyDamage0: ModifyDamage0EventArg, // 类型
@@ -1429,6 +1452,17 @@ class SelectCardRequestArg extends RequestArg {
   }
 }
 
+class SelectOptionRequestArg extends RequestArg {
+  constructor(
+    via: SkillInfo,
+    public readonly who: 0 | 1,
+    public readonly prompt: string,
+    public readonly options: readonly Readonly<SelectOption>[],
+  ) {
+    super(via);
+  }
+}
+
 class AdventureRequestArg extends RequestArg {
   constructor(
     via: SkillInfo,
@@ -1496,6 +1530,7 @@ class TriggerEndPhaseSkillRequestArg extends RequestArg {
 const REQUEST_MAP = {
   requestSwitchHands: SwitchHandsRequestArg,
   requestSelectCard: SelectCardRequestArg,
+  requestSelectOption: SelectOptionRequestArg,
   requestAdventure: AdventureRequestArg,
   requestReroll: RerollRequestArg,
   requestUseSkill: UseSkillRequestArg,

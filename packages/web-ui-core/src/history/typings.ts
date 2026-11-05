@@ -23,7 +23,8 @@ export type HistoryDetailBlock =
   | TriggeredHistoryBlock
   | PlayCardHistoryBlock
   | ElementalTuningHistoryBlock
-  | SelectCardHistoryBlock;
+  | SelectCardHistoryBlock
+  | SelectOptionHistoryBlock;
 
 export type HistoryHintBlock = ChangePhaseHistoryBlock | ActionHistoryBlock;
 
@@ -179,6 +180,17 @@ export interface SelectCardHistoryBlock {
   indent: number;
   who: 0 | 1;
   cardDefinitionId: number; // 被选择的牌
+  children: HistoryChildren[];
+}
+
+export interface SelectOptionHistoryBlock {
+  type: "selectOption";
+  indent: number;
+  who: 0 | 1;
+  prompt?: string;
+  selectedIndex?: number;
+  selectedKey?: string;
+  selectedOption?: string;
   children: HistoryChildren[];
 }
 

@@ -23,6 +23,8 @@ import {
   type RpcDispatcher,
   type SwitchHandsResponse,
   type SelectCardResponse,
+  type SelectOptionRequest,
+  type SelectOptionResponse,
   type RerollDiceResponse,
   PbEntityArea,
   PbEntityType,
@@ -200,6 +202,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   const [selectCardCandidates, setSelectCardCandidates] = createSignal<
     number[]
   >([]);
+  const [selectOptionRequest, setSelectOptionRequest] =
+    createSignal<SelectOptionRequest | null>(null);
   const [opp, setOpp] = createSignal<OppInfo | null>(null);
 
   const uiQueue = new QueueManager<AnimationMeta>();
@@ -311,6 +315,21 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         },
       );
     },
+    selectOption: async (request) => {
+      await waitForUi(uiQueue.drain(), signal);
+      return waitForResponse<SelectOptionResponse>(
+        "selectOption",
+        signal,
+        () => {
+          setSelectOptionRequest(request);
+          setViewType("selectOption");
+        },
+        () => {
+          setSelectOptionRequest(null);
+          setViewType("normal");
+        },
+      );
+    },
     selectCard: async ({ candidateDefinitionIds }) => {
       // 等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
       await waitForUi(uiQueue.drain(), signal);
@@ -362,6 +381,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     setActionState(null);
     setViewType("normal");
     setSelectCardCandidates([]);
+    setSelectOptionRequest(null);
     setDoingRpc(false);
   };
 
@@ -504,6 +524,12 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     }
     resolveRpc("switchHands", { removedHandIds });
   };
+  const onSelectOption = (selectedIndex: number) => {
+    if (option.disableAction) {
+      return;
+    }
+    resolveRpc("selectOption", { selectedIndex });
+  };
   const onSelectCard = (selectedDefinitionId: number) => {
     if (option.disableAction) {
       return;
@@ -532,6 +558,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         history={history.blocks}
         viewType={viewType()}
         selectCardCandidates={selectCardCandidates()}
+        selectOptionRequest={selectOptionRequest()}
+        onSelectOption={onSelectOption}
         doingRpc={doingRpc()}
         onStepActionState={onStepActionState}
         onRerollDice={onRerollDice}

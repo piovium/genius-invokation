@@ -115,6 +115,31 @@ define status {
 `;
 
 describe("CustomDataLoader GTS", () => {
+  test("loads text option selection and its result listener", async () => {
+    const [data] = (
+      await new CustomDataLoader().loadMod(`
+      define card {
+        id 20000010;
+        name "Question";
+        :selectOption("Choose", [{ key: "yes", text: "Yes" }]);
+      }
+      define combatStatus {
+        id 20000011;
+        name "Answer";
+        variable answered, 0;
+        on selectOption {
+          when :(:e.selectedKey === "yes" && :e.selectedOption === "Yes");
+          :variables.answered += 1;
+        }
+      }
+    `)
+    ).done();
+    expect(data.entities.get(20000010)?.skills).toHaveLength(1);
+    expect(data.entities.get(20000011)?.skills[0].triggerOn).toBe(
+      "onSelectOption",
+    );
+  });
+
   test.each([
     { internalCharacter: true, internalCard: true, compatible: true },
     { internalCharacter: false, internalCard: true, compatible: false },
