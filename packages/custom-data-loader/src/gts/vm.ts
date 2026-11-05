@@ -172,6 +172,11 @@ export class CustomAttachmentModel extends AttachmentModel {
 const CustomCharacterViewModel = CharacterViewModel.extend(
   CustomCharacterModel,
   (h) => ({
+    internal: h.simpleAttribute({
+      uniqueKey: "internal",
+    })(function () {
+      this.metadata.internal = true;
+    }),
     id: h.attribute<{
       <Meta extends CharacterVMMeta, const Id extends number>(
         this: AR.This<Meta>,
@@ -212,6 +217,11 @@ const CustomCharacterViewModel = CharacterViewModel.extend(
 );
 
 const CustomCardViewModel = CardViewModel.extend(CustomCardModel, (h) => ({
+  internal: h.simpleAttribute({
+    uniqueKey: "internal",
+  })(function () {
+    this.metadata.internal = true;
+  }),
   id: h.attribute<{
     <Meta extends EntityVMMeta, const Id extends number>(
       this: AR.This<Meta>,

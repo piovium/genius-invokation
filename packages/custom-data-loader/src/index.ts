@@ -108,6 +108,7 @@ export class CustomDataLoader {
   private playingDescriptions = new Map<number, string>();
   private dynamicDescriptions = new Map<number, string>();
   private images = new Map<number, string>();
+  private internalIds = new Set<number>();
   private dataOverrides = new Map<number, OverrideData>();
   private readonly moduleEvaluator: ModuleEvaluator;
 
@@ -135,6 +136,9 @@ export class CustomDataLoader {
         },
         registerMetadata: (md) => {
           const id = md.id;
+          if (md.internal) {
+            this.internalIds.add(id);
+          }
           const name = md.customName ?? "";
           this.names.set(id, name);
           this.descriptions.set(id, md.customDescription ?? "");
@@ -220,8 +224,9 @@ export class CustomDataLoader {
       if (ch.version.from !== "customData" || this.dataOverrides.has(ch.id)) {
         continue;
       }
-      // TODO custom data can declare "shareId" / "obtainable" for deck compatibility
-      officialDeckCompatible = false;
+      if (!this.internalIds.has(id)) {
+        officialDeckCompatible = false;
+      }
       const name = this.names.get(ch.id) ?? "";
       customData.characters.push({
         id,
@@ -240,7 +245,7 @@ export class CustomDataLoader {
       if (et.version.from !== "customData" || this.dataOverrides.has(et.id)) {
         continue;
       }
-      if (playSkillOfCard(et) && et.obtainable) {
+      if (playSkillOfCard(et) && !this.internalIds.has(id)) {
         officialDeckCompatible = false;
       }
       const name = this.names.get(id) ?? "";

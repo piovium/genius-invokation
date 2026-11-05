@@ -17,6 +17,7 @@ import { GiTcgDataError } from "@gi-tcg/core";
 import { getCurrentView, type View } from "./runtime";
 
 export class CustomMetadata {
+  internal = false;
   customName: string | null = null;
   customDescription: string | null = null;
   customPlayingDescription: string | null = null;

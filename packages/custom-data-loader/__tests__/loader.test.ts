@@ -115,6 +115,43 @@ define status {
 `;
 
 describe("CustomDataLoader GTS", () => {
+  test.each([
+    { internalCharacter: true, internalCard: true, compatible: true },
+    { internalCharacter: false, internalCard: true, compatible: false },
+    { internalCharacter: true, internalCard: false, compatible: false },
+    { internalCharacter: false, internalCard: false, compatible: false },
+  ])(
+    "checks deck compatibility with internal character=$internalCharacter and card=$internalCard",
+    async ({ internalCharacter, internalCard, compatible }) => {
+      const [gameData, options] = (
+        await new CustomDataLoader().loadMod(
+          customGts
+            .replace(
+              "define character {",
+              `define character { ${internalCharacter ? "internal;" : ""}`,
+            )
+            .replace(
+              "define card {",
+              `define card { ${internalCard ? "internal;" : ""}`,
+            ),
+        )
+      ).done();
+
+      expect(options.officialDeckCompatible).toBe(compatible);
+      expect(gameData.characters.has(10_000_002)).toBe(true);
+      expect(gameData.entities.has(10_000_004)).toBe(true);
+      expect(options.customData?.[0].characters).toEqual([
+        expect.objectContaining({ id: 10_000_002, name: "Tester" }),
+      ]);
+      expect(options.customData?.[0].entities).toContainEqual(
+        expect.objectContaining({ id: 10_000_004, name: "Impact" }),
+      );
+      const assets = new AssetsManager(options);
+      expect(assets.getNameSync(10_000_002)).toBe("Tester");
+      expect(assets.getNameSync(10_000_004)).toBe("Impact");
+    },
+  );
+
   test("registers generated definitions and their presentation metadata", async () => {
     const loader = await new CustomDataLoader().loadMod(customGts);
     const [gameData, { customData = [] }] = loader.done();
