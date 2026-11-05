@@ -128,6 +128,8 @@ import { ConfirmButton } from "./ConfirmButton";
 import { TuningArea } from "./TuningArea";
 import { RerollDiceView } from "./RerollDiceView";
 import { SelectCardView } from "./SelectCardView";
+import { SelectOptionView } from "./SelectOptionView";
+import type { SelectOptionRequest } from "@gi-tcg/typings";
 import { SwitchHandsView } from "./SwitchHandsView";
 import { HistoryPanel } from "./HistoryViewer";
 import { CurrentTurnHint } from "./CurrentTurnHint";
@@ -270,6 +272,7 @@ export type ChessboardViewType =
   | "rerollDice"
   | "switchHands"
   | "selectCard"
+  | "selectOption"
   | "rerollDiceEnd"
   | "switchHandsEnd";
 
@@ -306,6 +309,8 @@ export interface ChessboardProps extends ComponentProps<"div"> {
   history: HistoryBlock[];
   viewType: ChessboardViewType;
   selectCardCandidates: number[];
+  selectOptionRequest?: SelectOptionRequest | null;
+  onSelectOption?: (selectedIndex: number) => void;
   doingRpc: boolean;
   onStepActionState?: StepActionStateHandler;
   onRerollDice?: (dice: PbDiceType[]) => void;
@@ -1047,6 +1052,8 @@ export function Chessboard(props: ChessboardProps) {
     "history",
     "viewType",
     "selectCardCandidates",
+    "selectOptionRequest",
+    "onSelectOption",
     "doingRpc",
     "onStepActionState",
     "onRerollDice",
@@ -1450,14 +1457,22 @@ export function Chessboard(props: ChessboardProps) {
 
   const [specialViewVisible, setSpecialViewVisible] = createSignal(true);
   const hasSpecialView = createMemo(() =>
-    ["rerollDice", "rerollDiceEnd", "switchHands", "selectCard"].includes(
-      localProps.viewType,
-    ),
+    [
+      "rerollDice",
+      "rerollDiceEnd",
+      "switchHands",
+      "selectCard",
+      "selectOption",
+    ].includes(localProps.viewType),
   );
   const hasOppSpecialView = createMemo(() =>
-    ["rerollDice", "rerollDiceEnd", "switchHands", "selectCard"].includes(
-      localProps.opp?.viewType ?? "normal",
-    ),
+    [
+      "rerollDice",
+      "rerollDiceEnd",
+      "switchHands",
+      "selectCard",
+      "selectOption",
+    ].includes(localProps.opp?.viewType ?? "normal"),
   );
   const displayUiComponents = createMemo(
     () => !hasSpecialView() || !specialViewVisible(),
@@ -2037,6 +2052,22 @@ export function Chessboard(props: ChessboardProps) {
         </AspectRatioContainer>
         {/* SpecialViews */}
         <Show
+          when={
+            localProps.viewType === "selectOption" &&
+            !localProps.spectatorMode &&
+            localProps.selectOptionRequest
+          }
+          keyed
+        >
+          {(request) => (
+            <SelectOptionView
+              shown={specialViewVisible()}
+              request={request}
+              onConfirm={(index) => localProps.onSelectOption?.(index)}
+            />
+          )}
+        </Show>
+        <Show
           when={props.viewType === "selectCard" && !localProps.spectatorMode}
         >
           <SelectCardView
@@ -2106,6 +2137,8 @@ export function Chessboard(props: ChessboardProps) {
               oppViewType={localProps.opp?.viewType ?? "normal"}
               players={localProps.data.state.player}
               mySelectCardCandidates={localProps.selectCardCandidates}
+              mySelectOptionRequest={localProps.selectOptionRequest}
+              oppSelectOptionRequest={localProps.opp?.selectOptionRequest}
               oppSelectCardCandidates={
                 localProps.opp?.selectCardCandidates ?? []
               }

@@ -24,6 +24,8 @@ from .proto.rpc_pb2 import (
     RerollDiceResponse,
     SelectCardRequest,
     SelectCardResponse,
+    SelectOptionRequest,
+    SelectOptionResponse,
     SwitchHandsRequest,
     SwitchHandsResponse,
     ActionRequest,
@@ -72,6 +74,8 @@ class Player(ABC):
             return Response(choose_active=self.on_choose_active(request.choose_active))
         elif request.HasField("reroll_dice"):
             return Response(reroll_dice=self.on_reroll_dice(request.reroll_dice))
+        elif request.HasField("select_option"):
+            return Response(select_option=self.on_select_option(request.select_option))
         elif request.HasField("select_card"):
             return Response(select_card=self.on_select_card(request.select_card))
         elif request.HasField("switch_hands"):
@@ -79,6 +83,9 @@ class Player(ABC):
         elif request.HasField("action"):
             return Response(action=self.on_action(request.action))
         return Response()
+
+    def on_select_option(self, request: SelectOptionRequest) -> SelectOptionResponse:
+        return SelectOptionResponse(selected_index=0)
 
     @abstractmethod
     def on_choose_active(self, request: ChooseActiveRequest) -> ChooseActiveResponse:

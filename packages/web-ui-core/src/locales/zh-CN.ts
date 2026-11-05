@@ -209,7 +209,9 @@ export default {
     myPlayCardTitle: "我方打出手牌",
     oppPlayCardTitle: "对方打出手牌",
 
+    mySelectOptionTitle: "我方选择了选项",
     mySelectCardTitle: "我方执行挑选",
+    oppSelectOptionTitle: "对方选择了选项",
     oppSelectCardTitle: "对方执行挑选",
 
     myElementalTuningTitle: "我方进行「元素调和」",
@@ -227,7 +229,9 @@ export default {
   mini: {
     mySwitchingHands: "我方正在替换手牌…",
     oppSwitchingHands: "对方正在替换手牌…",
+    mySelectingOptions: "我方正在选择选项…",
     mySelectingCards: "我方正在挑选…",
+    oppSelectingOptions: "对方正在选择选项…",
     oppSelectingCards: "对方正在挑选…",
     myRerolling: "我方正在重投骰子…",
     oppRerolling: "对方正在重投骰子…",
@@ -247,6 +251,7 @@ export default {
     choosingActive: "正在选择出战角色...",
     rerolling: "正在重投骰子...",
     switchingHands: "正在替换手牌...",
+    selectingOptions: "正在选择选项…",
     selectingCards: "正在挑选...",
     declaredEndStatus: "已宣布结束",
   },

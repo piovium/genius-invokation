@@ -45,6 +45,7 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
     [PbPlayerStatus.REROLLING]: t("player.rerolling"),
     [PbPlayerStatus.SWITCHING_HANDS]: t("player.switchingHands"),
     [PbPlayerStatus.SELECTING_CARDS]: t("player.selectingCards"),
+    [PbPlayerStatus.SELECTING_OPTIONS]: t("player.selectingOptions"),
   }));
   return (
     <div

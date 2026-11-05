@@ -151,6 +151,17 @@ export function verifyRpcResponse<M extends RpcMethod>(
       }
       break;
     }
+    case "selectOption": {
+      if (
+        !("selectedIndex" in response) ||
+        !Number.isInteger(response.selectedIndex)
+      ) {
+        throw new Error(
+          "Invalid response of selectOption: selectedIndex is not an integer",
+        );
+      }
+      break;
+    }
     case "selectCard": {
       if (
         !("selectedDefinitionId" in response) ||

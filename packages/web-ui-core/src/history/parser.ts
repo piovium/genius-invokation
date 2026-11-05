@@ -867,6 +867,19 @@ export function updateHistory(
           }
           break;
         }
+        case "selectOptionDone": {
+          mainBlock = {
+            type: "selectOption",
+            who: m.who as 0 | 1,
+            prompt: m.prompt,
+            selectedIndex: m.selectedIndex,
+            selectedKey: m.selectedKey,
+            selectedOption: m.selectedOption,
+            children: [],
+            indent: history.currentIndent,
+          };
+          break;
+        }
         case "selectCardDone": {
           mainBlock = {
             type: "selectCard",

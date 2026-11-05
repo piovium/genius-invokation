@@ -18,6 +18,7 @@ import {
   type CancellablePlayerIO,
   type Notification,
   type RpcDispatcher,
+  type SelectOptionRequest,
 } from "@gi-tcg/core";
 import {
   dispatchRpc,
@@ -42,6 +43,7 @@ export interface OppInfo {
   actionState: ActionState | null;
   viewType: ChessboardViewType;
   selectCardCandidates: number[];
+  selectOptionRequest: SelectOptionRequest | null;
 }
 
 export class OppChessboardController implements IOppChessboardController {
@@ -53,6 +55,7 @@ export class OppChessboardController implements IOppChessboardController {
   #initiativeSkills: PbSkillInfo[] = [];
   #viewType: ChessboardViewType = "normal";
   #selectCardCandidates: number[] = [];
+  #selectOptionRequest: SelectOptionRequest | null = null;
 
   get closed(): boolean {
     return this.#close;
@@ -78,6 +81,7 @@ export class OppChessboardController implements IOppChessboardController {
       actionState: this.#actionState,
       viewType: this.#viewType,
       selectCardCandidates: this.#selectCardCandidates,
+      selectOptionRequest: this.#selectOptionRequest,
     };
   }
 
@@ -85,6 +89,7 @@ export class OppChessboardController implements IOppChessboardController {
     this.#actionState = null;
     this.#viewType = "normal";
     this.#selectCardCandidates = [];
+    this.#selectOptionRequest = null;
   }
 
   private cancelRpc() {
@@ -109,6 +114,12 @@ export class OppChessboardController implements IOppChessboardController {
         return Promise.reject("opp chessboard");
       },
       chooseActive: () => {
+        return Promise.reject("opp chessboard");
+      },
+      selectOption: (request) => {
+        this.#viewType = "selectOption";
+        this.#selectOptionRequest = request;
+        this.onUpdate();
         return Promise.reject("opp chessboard");
       },
       selectCard: ({ candidateDefinitionIds }) => {
