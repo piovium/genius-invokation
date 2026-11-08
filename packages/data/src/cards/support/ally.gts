@@ -1386,6 +1386,7 @@ define card {
       when :( :e.who !== :self.who && !:isInInitialPile(:e.card, "my") );
       listenTo all;
       usage perRound, 2;
+      :abortPreview();
       :heal(1, $.macros.myMostInjured);
     };
   };
