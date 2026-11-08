@@ -336,11 +336,11 @@ export class StateMutator {
       this._mutationsToBePause.push(...withMutations.stateMutations);
       this.config.onResetState?.(newState);
     }
+    this.notify({
+      ...notifyOpt,
+      mutations: withMutations.exposedMutations,
+    });
     if (withMutations.exposedMutations.length > 0) {
-      this.notify({
-        ...notifyOpt,
-        mutations: withMutations.exposedMutations,
-      });
     }
   }
 
