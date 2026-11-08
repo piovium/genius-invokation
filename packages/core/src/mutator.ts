@@ -340,8 +340,6 @@ export class StateMutator {
       ...notifyOpt,
       mutations: withMutations.exposedMutations,
     });
-    if (withMutations.exposedMutations.length > 0) {
-    }
   }
 
   log(type: DetailLogType, value: string): void {
