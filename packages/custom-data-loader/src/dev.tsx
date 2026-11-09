@@ -104,6 +104,42 @@ define card {
   description "对敌方所有角色造成 10 点穿透伤害。";
   cost DiceType.Omni, 1;
   :damage(DamageType.Piercing, 10, $.opp.character);
+}
+
+define combatStatus {
+  name "双重赐福" as DoubleBlessingStatus;
+  description "入场时，先选择治疗或充能，再选择生成万能元素或抓牌；两次增益结算后弃置此状态。";
+  on selfEnter {
+    :selectOption("双重赐福：选择第一种增益", [
+      { key: "heal", text: "复苏：治疗我方出战角色 2 点" },
+      { key: "energy", text: "振奋：我方出战角色获得 1 点充能" },
+    ]);
+    :selectOption("双重赐福：选择第二种增益", [
+      { key: "dice", text: "汇流：生成 2 个万能元素" },
+      { key: "draw", text: "启迪：抓 2 张牌" },
+    ]);
+  }
+  on selectOption {
+    when :(:e.via.caller.id === :self.id);
+    if (:e.selectedKey === "heal") {
+      :heal(2, $.my.active);
+    } else if (:e.selectedKey === "energy") {
+      :gainEnergy(1, $.my.active);
+    } else if (:e.selectedKey === "dice") {
+      :generateDice(DiceType.Omni, 2);
+      :dispose();
+    } else if (:e.selectedKey === "draw") {
+      :drawCards(2);
+      :dispose();
+    }
+  }
+}
+
+define card {
+  name "双重赐福" as DoubleBlessing;
+  description "生成出战状态「双重赐福」：依次选择两种增益，结算后弃置该状态。";
+  cost DiceType.Omni, 1;
+  :combatStatus(DoubleBlessingStatus);
 }`);
 
   // 步骤2：卡组构建器
