@@ -10,19 +10,26 @@ import {
   type EquipmentHandle,
 } from "#custom-data-loader";
 
+// 水丘丘相关
+
 const WhirlingScythe = 22051 as SkillHandle;
 const SlashOfSurgingTides = 22052 as SkillHandle;
 const BubblefloatBlitz = 22053 as SkillHandle;
 const SlashOfSurgingTidesPassive = 22054 as PassiveSkillHandle;
+
+// 雷莹相关
+
 const SurgingThunder = 24044 as SkillHandle;
 const HurtlingBolts = 24041 as SkillHandle;
 const MistyCall = 24042 as SkillHandle;
-const PlamaLawa = 26011 as SkillHandle;
-const MovoLawa = 26012 as SkillHandle;
-const UpaShato = 26013 as SkillHandle;
-const InfusedStonehide = 26014 as PassiveSkillHandle;
 const SurgingThunderStatus = 124043 as StatusHandle;
 const ElectroCicinShield = 124042 as CombatStatusHandle;
+
+// 终末嗟叹之诗
+const ElegyForTheEnd = 311205 as EquipmentHandle;
+
+// 沙海守望·主动出击
+const DesertWatchTakeTheInitiative = 301105 as StatusHandle;
 
 /**
  * @id 2205
@@ -59,22 +66,7 @@ define character {
   skills HurtlingBolts, MistyCall, ThunderingShield, SurgingThunder;
 };
 
-/**
- * @id 2601
- * @name 丘丘岩盔王
- * @hp 8
- * @energy 2
- * @description
- * 绕道而行吧，因为前方是属于「王」的领域。
- */
-define character {
-  id 2601 as StonehideLawachurl;
-  tags geo, monster, hilichurl;
-  health 8;
-  energy 2;
-  skills PlamaLawa, MovoLawa, UpaShato, InfusedStonehide;
-};
-
+// 能量消耗改动
 /**
  * @id 24043
  * @name 霆雷之护
@@ -93,13 +85,13 @@ define skill {
   :characterStatus(SurgingThunderStatus);
 };
 
+// 删去了舍弃触发
 /**
  * @id 16075
- * @name 调和计数
+ * @name 云堇长枪开相计数
  * @cost
  * @description
- * 记录本回合我方进行元素调和的次数，供长枪开相判定增伤。
- * 舍弃手牌不计入；回合结束时清零。
+ *
  */
 define skill {
   id 16075 as CountDiscardOrTune;
@@ -115,45 +107,31 @@ define skill {
   };
 };
 
-// Keep the shared duration and refresh behavior; only the damage condition changes.
+// 根据Q&A，仅存在场上「终末嗟叹之诗」时生效
 /**
  * @id 301102
  * @name 千年的大乐章·别离之歌
  * @description
  * 我方存在装备中的「终末嗟叹之诗」时：我方角色造成的伤害+1。
  * 持续回合：2
- * 没有终末嗟叹之诗时不提供增伤，但不移除此状态。
  */
 define combatStatus {
   id 301102;
   duration 2;
   on increaseSkillDamage {
-    when :( :query($.my.equipped.def(311205 as EquipmentHandle)) );
+    when :( :query($.my.equipped.def(ElegyForTheEnd)) );
     :e.increaseDamage(1);
   };
 };
 
-/**
- * @name 沙海守望
- * @description
- * 本回合内，所附属角色下次造成的伤害额外+1。
- */
-define status {
-  name "沙海守望" as DesertWatch;
-  description "本回合内，所附属角色下次造成的伤害额外+1。";
-  oneDuration;
-  once increaseSkillDamage {
-    :e.increaseDamage(1);
-  };
-};
-
+// 共享可用次数
 /**
  * @id 311306
  * @name 苇海信标
  * @cost 3*Aligned
  * @description
  * 角色造成的伤害+1。
- * 角色使用「元素战技」或受到伤害后：本回合内，角色下次造成的伤害额外+1。（两种条件共用每回合2次）
+ * 角色使用「元素战技」或受到伤害后：本回合内，角色下次造成的伤害额外+1。（每回合2次）
  * （「双手剑」角色才能装备。角色最多装备1件「武器」）
  */
 define card {
@@ -165,39 +143,32 @@ define card {
     };
     on useSkill {
       when :( :e.isSkillType("elemental") );
-      usage perRound, 2 { name triggers; };
-      :characterStatus(DesertWatch, :self.master);
+      usage perRound, 2 { name usagePerRound1; };
+      :characterStatus(DesertWatchTakeTheInitiative, :self.master);
     };
     on damaged {
-      usage perRound, 2 { name triggers; };
-      :characterStatus(DesertWatch, :self.master);
+      usage perRound, 2 { name usagePerRound1; };
+      :characterStatus(DesertWatchTakeTheInitiative, :self.master);
     };
   };
 };
 
-// Three independent pools, one per character's equipped Bell. They remain normal
-// combat shields so Vortex Vanquisher and Geo resonance can replenish them.
+// 钟剑系列：允许独立生成、关联来源并自动弃置
+
 /**
  * @name 叛逆的守护
  * @description
- * 为我方出战角色提供护盾，与来源钟剑独立绑定。
- * 钟剑自身生成的护盾最多叠加到2点；外部效果补充护盾可超过2点。
- * 来源武器移除或装备者被击倒时，移除此护盾。
+ * 为我方出战角色提供护盾。（可叠加，最多叠加到2点）
+ * 生成此出战状态的「钟剑」移除时：弃置自身。
  */
 define combatStatus {
   name "叛逆的守护" as BellShield0;
-  description "为我方出战角色提供护盾。来源钟剑离场时移除此护盾。";
+  description "为我方出战角色提供护盾。（可叠加，最多叠加到2点）\n生成此出战状态的「钟剑」移除时：弃置自身。";
   shield 1, 2;
   variable weaponId, 0;
-  variable ownerId, 0;
   on entityDispose {
     listenTo all;
     when :( :e.entity.id === :variables.weaponId );
-    :dispose();
-  };
-  on defeated {
-    listenTo all;
-    when :( :e.target.id === :variables.ownerId );
     :dispose();
   };
 };
@@ -205,24 +176,17 @@ define combatStatus {
 /**
  * @name 叛逆的守护
  * @description
- * 为我方出战角色提供护盾，与来源钟剑独立绑定。
- * 钟剑自身生成的护盾最多叠加到2点；外部效果补充护盾可超过2点。
- * 来源武器移除或装备者被击倒时，移除此护盾。
+ * 为我方出战角色提供护盾。（可叠加，最多叠加到2点）
+ * 生成此出战状态的「钟剑」移除时：弃置自身。
  */
 define combatStatus {
   name "叛逆的守护" as BellShield1;
-  description "为我方出战角色提供护盾。来源钟剑离场时移除此护盾。";
+  description "为我方出战角色提供护盾。（可叠加，最多叠加到2点）\n生成此出战状态的「钟剑」移除时：弃置自身。";
   shield 1, 2;
   variable weaponId, 0;
-  variable ownerId, 0;
   on entityDispose {
     listenTo all;
     when :( :e.entity.id === :variables.weaponId );
-    :dispose();
-  };
-  on defeated {
-    listenTo all;
-    when :( :e.target.id === :variables.ownerId );
     :dispose();
   };
 };
@@ -230,28 +194,22 @@ define combatStatus {
 /**
  * @name 叛逆的守护
  * @description
- * 为我方出战角色提供护盾，与来源钟剑独立绑定。
- * 钟剑自身生成的护盾最多叠加到2点；外部效果补充护盾可超过2点。
- * 来源武器移除或装备者被击倒时，移除此护盾。
+ * 为我方出战角色提供护盾。（可叠加，最多叠加到2点）
+ * 生成此出战状态的「钟剑」移除时：弃置自身。
  */
 define combatStatus {
   name "叛逆的守护" as BellShield2;
-  description "为我方出战角色提供护盾。来源钟剑离场时移除此护盾。";
+  description "为我方出战角色提供护盾。（可叠加，最多叠加到2点）\n生成此出战状态的「钟剑」移除时：弃置自身。";
   shield 1, 2;
   variable weaponId, 0;
-  variable ownerId, 0;
   on entityDispose {
     listenTo all;
     when :( :e.entity.id === :variables.weaponId );
     :dispose();
   };
-  on defeated {
-    listenTo all;
-    when :( :e.target.id === :variables.ownerId );
-    :dispose();
-  };
 };
-const bellShields = [BellShield0, BellShield1, BellShield2];
+
+const BELL_SHIELDS = [BellShield0, BellShield1, BellShield2];
 
 /**
  * @id 311305
@@ -259,8 +217,7 @@ const bellShields = [BellShield0, BellShield1, BellShield2];
  * @cost 3*Aligned
  * @description
  * 角色造成的伤害+1。
- * 角色使用技能后：生成1点绑定此武器的「护盾」，保护我方出战角色。（每回合1次，自身最多叠加到2点）
- * 不同钟剑的护盾分别记录，装备者被击倒或武器移除时，对应护盾消失。外部效果补充护盾可超过2点。
+ * 角色使用技能后：生成1点绑定此武器的「护盾」，保护我方出战角色。（每回合1次，可叠加到2点）
  * （「双手剑」角色才能装备。角色最多装备1件「武器」）
  */
 define card {
@@ -274,12 +231,14 @@ define card {
       usage perRound, 1;
       const shields = :queryAll($.my.combatStatus);
       const existing = shields.find((s) => s.variables.weaponId === :self.id);
-      const definition =
+      const defId =
         existing?.definition.id ??
-        bellShields.find((id) => !shields.some((s) => s.definition.id === id));
-      if (definition) {
-        :combatStatus(definition as CombatStatusHandle, "my", {
-          overrideVariables: { weaponId: :self.id, ownerId: :self.master.id },
+        BELL_SHIELDS.find((id) => !shields.some((s) => s.definition.id === id));
+      if (defId) {
+        :combatStatus(defId as CombatStatusHandle, "my", {
+          overrideVariables: {
+            weaponId: :self.id,
+          },
         });
       }
     };
@@ -292,7 +251,7 @@ define card {
  * @cost 1*Aligned
  * @description
  * 我方角色每受到1点实际治疗，此牌就累积1个「海染泡沫」。（最多累积6个）
- * 角色造成伤害时：消耗所有「海染泡沫」，每消耗3个都使造成的伤害+1，不足3个的余数也会清空。
+ * 角色造成伤害时：消耗所有「海染泡沫」，每消耗3个都使造成的伤害+1。
  * （角色最多装备1件「圣遗物」）
  */
 define card {
@@ -318,7 +277,7 @@ define card {
  * @description
  * 入场时：治疗所附属角色3点。
  * 我方角色每受到1点实际治疗，此牌就累积1个「海染泡沫」。（最多累积6个）
- * 角色造成伤害时：消耗所有「海染泡沫」，每消耗3个都使造成的伤害+1，不足3个的余数也会清空。
+ * 角色造成伤害时：消耗所有「海染泡沫」，每消耗3个都使造成的伤害+1。
  * （角色最多装备1件「圣遗物」）
  */
 define card {
@@ -340,32 +299,13 @@ define card {
   };
 };
 
-/**
- * @id 321008
- * @name 鸣神大社
- * @cost 2*Aligned
- * @description
- * 我方角色使用技能后：如果元素骰总数为奇数，则生成1个万能元素骰。（每回合2次）
- */
-define card {
-  id 321008;
-  cost DiceType.Aligned, 2;
-  support place {
-    on useSkill {
-      when :( :player.dice.length % 2 === 1 );
-      usage perRound, 2;
-      :generateDice(DiceType.Omni, 1);
-    };
-  };
-};
-
+// 允许玩家选择满血是否治疗
 /**
  * @id 321006
  * @name 西风大教堂
  * @cost 2*Aligned
  * @description
  * 结束阶段：治疗我方出战角色2点。
- * 出战角色满血时，可选择触发治疗并消耗次数，或不触发、保留次数。
  * 可用次数：2
  */
 define card {
@@ -537,7 +477,7 @@ const pairs = elements.flatMap((a, i) =>
     text: `${a}、${b}`,
   })),
 );
-// A persistent responder issues both requests, so the event card may leave play.
+
 /**
  * @name 元素声明
  * @description
