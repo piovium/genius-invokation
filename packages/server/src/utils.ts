@@ -27,7 +27,7 @@ import { createId as createCuid, isCuid } from "@paralleldrive/cuid2";
 import { BadRequestException } from "./errors";
 import type { CompiledProfile } from "./profiles/types";
 import { decks } from "./db/schema";
-import { lte } from "drizzle-orm";
+import { and, lte, sql } from "drizzle-orm";
 
 export enum DeckVerificationErrorCode {
   SizeError = "SizeError",
@@ -35,6 +35,7 @@ export enum DeckVerificationErrorCode {
   CountLimitError = "CountLimitError",
   RelationError = "RelationError",
   VersionError = "VersionError",
+  CardRestrictionError = "CardRestrictionError",
 }
 
 export class DeckVerificationError extends Error {
@@ -164,12 +165,38 @@ export async function verifyDeckForProfile(
       `Deck version required ${version}, it's higher game version ${profile.profile.baseVersion}`,
     );
   }
+  const { whitelist, blacklist } = profile.profile.deck ?? {};
+  const ids = [...deck.characters, ...deck.cards];
+  if (whitelist && ids.some((id) => !whitelist.includes(id))) {
+    throw new DeckVerificationError(
+      DeckVerificationErrorCode.CardRestrictionError,
+      "Deck contains cards outside the profile whitelist",
+    );
+  }
+  if (blacklist && ids.some((id) => blacklist.includes(id))) {
+    throw new DeckVerificationError(
+      DeckVerificationErrorCode.CardRestrictionError,
+      "Deck contains cards in the profile blacklist",
+    );
+  }
 }
 
 export function buildDeckMatchesProfileDbFilter(profile: CompiledProfile) {
-  return lte(
-    decks.requiredVersion,
-    VERSIONS.indexOf(profile.profile.baseVersion),
+  const {
+    baseVersion,
+    deck: { whitelist, blacklist } = {},
+  } = profile.profile;
+  return and(
+    lte(decks.requiredVersion, VERSIONS.indexOf(baseVersion)),
+    whitelist
+      ? sql`(${decks.characters} || ${decks.cards}) <@ ${JSON.stringify(whitelist)}::jsonb`
+      : void 0,
+    blacklist?.length
+      ? sql`not exists (
+          select 1 from jsonb_array_elements(${decks.characters} || ${decks.cards}) as card(id)
+          where ${JSON.stringify(blacklist)}::jsonb @> jsonb_build_array(card.id)
+        )`
+      : void 0,
   );
 }
 

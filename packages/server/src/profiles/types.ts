@@ -31,11 +31,17 @@ export interface ModSource extends z.infer<typeof modSchema> {}
 export interface PluginConfig extends z.output<typeof inlinePluginSchema> {}
 export interface Preset extends z.output<typeof presetSchema> {}
 
+export interface ProfileDeckConfig {
+  blacklist?: number[];
+  whitelist?: number[];
+}
+
 export interface Profile {
   id: string;
   name: string;
   baseVersion: Version;
   officialDeckCompatible: boolean;
+  deck?: ProfileDeckConfig;
   gameConfig: ProfileGameConfig;
   versionBehavior: VersionBehavior;
   versionMap: Record<number, Version>;
