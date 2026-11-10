@@ -102,6 +102,13 @@ export const presetSchema = z
     id: z.string().regex(/^[\w.-]+\/[\w.-]+$/),
     name: z.string().optional(),
     version: versionSchema.optional(),
+    deck: z
+      .object({
+        blacklist: z.array(z.number().int().safe().positive()).optional(),
+        whitelist: z.array(z.number().int().safe().positive()).optional(),
+      })
+      .strict()
+      .optional(),
     version_behavior: behaviorSchema.optional(),
     config: configSchema.optional(),
     plugins: z.array(z.union([z.string(), inlinePluginSchema])).optional(),

@@ -187,6 +187,7 @@ export async function compilePreset(
       name: preset.name ?? preset.id,
       baseVersion,
       officialDeckCompatible: true,
+      deck: preset.deck,
       gameConfig,
       versionBehavior,
       versionMap,
