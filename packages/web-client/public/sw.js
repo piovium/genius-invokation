@@ -133,7 +133,9 @@ const cacheFirst = async (request, preloadResponsePromise, event) => {
 
   // Next try to get the resource from the network
   try {
-    const responseFromNetwork = await fetch(request);
+    const responseFromNetwork = await fetch(request, {
+      cache: "reload",
+    });
     // response may be used only once
     // we need to save clone to put one copy in cache
     // and serve second one
