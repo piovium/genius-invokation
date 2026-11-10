@@ -1225,7 +1225,7 @@ export class Game {
   ) {
     const { selectedIndex } = await this.rpc(who, "selectOption", {
       prompt,
-      options: options.map(({ key, text }) => ({ key, text })),
+      options: [...options],
     });
     if (selectedIndex < 0 || selectedIndex >= options.length) {
       throw new GiTcgIoError(who, "Selected option not in candidates");

@@ -30,7 +30,6 @@ unsafe struct Handlers(IPlayer player)
   [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
   delegate void IoErrorHandler(void* data, byte* msg);
 
-  // Native function pointers do not keep their managed delegates alive.
   static readonly NotificationHandler notificationHandlerDelegate = StaticOnNotification;
   static readonly RpcHandler rpcHandlerDelegate = StaticOnRpc;
   static readonly IoErrorHandler ioErrorHandlerDelegate = StaticOnIoError;

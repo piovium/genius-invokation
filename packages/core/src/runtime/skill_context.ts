@@ -2264,16 +2264,13 @@ export class SkillContext<Meta extends ContextMetaBase> {
     if (options.length === 0) {
       throw new GiTcgDataError("selectOption requires at least one option");
     }
-    if (
-      options.some(
-        (option) => typeof option.key !== "string" || option.key.length === 0,
-      )
-    ) {
+    const keySets = new Set(options.map((option) => option.key));
+    if (keySets.has("")) {
       throw new GiTcgDataError(
         "selectOption requires a non-empty key for every option",
       );
     }
-    if (new Set(options.map((option) => option.key)).size !== options.length) {
+    if (keySets.size !== options.length) {
       throw new GiTcgDataError("selectOption requires unique option keys");
     }
     this.emitEvent(
@@ -2281,7 +2278,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       this.skillInfo,
       this.self.who,
       prompt,
-      options.map(({ key, text }) => ({ key, text })),
+      options,
     );
   }
 
