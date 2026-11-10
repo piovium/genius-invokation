@@ -50,6 +50,7 @@ message ExposedMutation {
     MoveEntityEM move_entity = 28;
     CreateAttachmentEM create_attachment = 29;
     ResetVariablesEM reset_variables = 30;
+    SelectOptionDoneEM select_option_done = 31;
   }
   reserved 17;
 }
@@ -300,6 +301,14 @@ message SwitchHandsDoneEM {
 message SelectCardDoneEM {
   int32 who = 1;
   int32 selected_definition_id = 2;
+}
+
+message SelectOptionDoneEM {
+  int32 who = 1;
+  optional string prompt = 2;
+  optional int32 selected_index = 3;
+  optional string selected_key = 4;
+  optional string selected_option = 5;
 }
 
 message HandleEventEM {

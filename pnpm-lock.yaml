@@ -877,6 +877,9 @@ importers:
         specifier: workspace:*
         version: link:../utils
     devDependencies:
+      '@gi-tcg/custom-data-loader':
+        specifier: workspace:*
+        version: link:../custom-data-loader
       immer:
         specifier: ^11.1.4
         version: 11.1.4

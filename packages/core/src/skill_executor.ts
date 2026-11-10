@@ -28,6 +28,7 @@ import {
   type PlayCardSkillInfo,
   type PlayCardTarget,
   SelectCardEventArg,
+  SelectOptionEventArg,
   type SelectCardInfo,
   type SkillEnvironment,
   type SkillInfo,
@@ -380,6 +381,23 @@ export class SkillExecutor {
         );
         const events = await this.mutator.switchHands(arg.who);
         await this.handleEvent(...events);
+      } else if (name === "requestSelectOption") {
+        const selectedIndex = await this.mutator.selectOption(
+          arg.who,
+          arg.prompt,
+          arg.options,
+        );
+        await this.handleEvent([
+          "onSelectOption",
+          new SelectOptionEventArg(
+            this.state,
+            arg.who,
+            arg.via,
+            arg.prompt,
+            arg.options,
+            selectedIndex,
+          ),
+        ]);
       } else if (name === "requestSelectCard") {
         using l = this.mutator.subLog(
           DetailLogType.Event,

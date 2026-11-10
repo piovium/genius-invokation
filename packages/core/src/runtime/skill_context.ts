@@ -14,7 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { Aura, DamageType, DiceType, Reaction } from "@gi-tcg/typings";
+import {
+  Aura,
+  DamageType,
+  DiceType,
+  Reaction,
+  type SelectOption,
+} from "@gi-tcg/typings";
 import { clampVariable } from "../data/utils";
 
 import {
@@ -2251,6 +2257,31 @@ export class SkillContext<Meta extends ContextMetaBase> {
     });
   }
 
+  selectOption(
+    prompt: string,
+    options: readonly Readonly<SelectOption>[],
+  ): void {
+    if (options.length === 0) {
+      throw new GiTcgDataError("selectOption requires at least one option");
+    }
+    const keySets = new Set(options.map((option) => option.key));
+    if (keySets.has("")) {
+      throw new GiTcgDataError(
+        "selectOption requires a non-empty key for every option",
+      );
+    }
+    if (keySets.size !== options.length) {
+      throw new GiTcgDataError("selectOption requires unique option keys");
+    }
+    this.emitEvent(
+      "requestSelectOption",
+      this.skillInfo,
+      this.self.who,
+      prompt,
+      options,
+    );
+  }
+
   selectAndSummon(summons: (SummonHandle | EntityDefinition)[]) {
     this.emitEvent("requestSelectCard", this.skillInfo, this.self.who, {
       type: "createEntity",
@@ -2371,6 +2402,7 @@ type SkillContextMutativeProps =
   | "rerollDice"
   | "useSkill"
   | "selectAndSummon"
+  | "selectOption"
   | "selectAndCreateHandCard"
   | "adventure"
   | "finishAdventure";

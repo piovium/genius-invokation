@@ -24,6 +24,7 @@ import {
   RpcResponse,
   RpcResponsePayloadOf,
   SelectCardResponse,
+  SelectOptionResponse,
 } from "@gi-tcg/typings";
 import {
   $,
@@ -255,6 +256,27 @@ class IoController {
   findHand(definitionId: number) {
     const player = this.controller.state.players[this.who];
     return player.hands.find((c) => c.definition.id === definitionId);
+  }
+
+  selectOption(selectedIndex: number): IoResultPromise {
+    return IoResultPromise.create(this.controller, () => {
+      const rpc = this.awaitingRpc;
+      if (!rpc || rpc.request.$case !== "selectOption") {
+        throw new Error("Not awaiting selectOption");
+      }
+      if (rpc.who !== this.who) {
+        throw new Error("Not your turn");
+      }
+      if (
+        !Number.isInteger(selectedIndex) ||
+        selectedIndex < 0 ||
+        selectedIndex >= rpc.request.value.options.length
+      ) {
+        throw new Error(`Cannot select option ${selectedIndex}`);
+      }
+      const response: SelectOptionResponse = { selectedIndex };
+      rpc.resolve(response);
+    });
   }
 
   selectCard(id: number): IoResultPromise {

@@ -30,9 +30,13 @@ unsafe struct Handlers(IPlayer player)
   [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
   delegate void IoErrorHandler(void* data, byte* msg);
 
-  public static readonly delegate* unmanaged[Cdecl]<void*, byte*, nuint, void> notification_handler = (delegate* unmanaged[Cdecl]<void*, byte*, nuint, void>)Marshal.GetFunctionPointerForDelegate((NotificationHandler)StaticOnNotification);
-  public static readonly delegate* unmanaged[Cdecl]<void*, byte*, nuint, byte*, nuint*, void> rpc_handler = (delegate* unmanaged[Cdecl]<void*, byte*, nuint, byte*, nuint*, void>)Marshal.GetFunctionPointerForDelegate((RpcHandler)StaticOnRpc);
-  public static readonly delegate* unmanaged[Cdecl]<void*, byte*, void> io_error_handler = (delegate* unmanaged[Cdecl]<void*, byte*, void>)Marshal.GetFunctionPointerForDelegate((IoErrorHandler)StaticOnIoError);
+  static readonly NotificationHandler notificationHandlerDelegate = StaticOnNotification;
+  static readonly RpcHandler rpcHandlerDelegate = StaticOnRpc;
+  static readonly IoErrorHandler ioErrorHandlerDelegate = StaticOnIoError;
+
+  public static readonly delegate* unmanaged[Cdecl]<void*, byte*, nuint, void> notification_handler = (delegate* unmanaged[Cdecl]<void*, byte*, nuint, void>)Marshal.GetFunctionPointerForDelegate(notificationHandlerDelegate);
+  public static readonly delegate* unmanaged[Cdecl]<void*, byte*, nuint, byte*, nuint*, void> rpc_handler = (delegate* unmanaged[Cdecl]<void*, byte*, nuint, byte*, nuint*, void>)Marshal.GetFunctionPointerForDelegate(rpcHandlerDelegate);
+  public static readonly delegate* unmanaged[Cdecl]<void*, byte*, void> io_error_handler = (delegate* unmanaged[Cdecl]<void*, byte*, void>)Marshal.GetFunctionPointerForDelegate(ioErrorHandlerDelegate);
 
   static void StaticOnNotification(void* data, byte* msg_ptr, nuint msg_len)
   {
@@ -80,6 +84,10 @@ unsafe struct Handlers(IPlayer player)
     {
       response.Action = player.OnAction(request.Action);
     }
+    else if (request.SelectOption is not null)
+    {
+      response.SelectOption = player.OnSelectOption(request.SelectOption);
+    }
     else if (request.SelectCard is not null)
     {
       response.SelectCard = player.OnSelectCard(request.SelectCard);
@@ -110,6 +118,7 @@ public interface IPlayer
   Proto.SwitchHandsResponse OnSwitchHands(Proto.SwitchHandsRequest request);
   Proto.ActionResponse OnAction(Proto.ActionRequest request);
   Proto.SelectCardResponse OnSelectCard(Proto.SelectCardRequest request);
+  Proto.SelectOptionResponse OnSelectOption(Proto.SelectOptionRequest request) => new() { SelectedIndex = 0 };
   void OnIoError(string error_msg);
 }
 

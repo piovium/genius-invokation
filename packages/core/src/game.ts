@@ -28,6 +28,7 @@ import {
   unFlattenOneof,
   ActionValidity,
   type Deck,
+  type SelectOption,
 } from "@gi-tcg/typings";
 import {
   getDefaultGameConfig,
@@ -271,6 +272,8 @@ export class Game {
       howToReroll: (who) => this.rpcReroll(who),
       howToSwitchHands: (who) => this.rpcSwitchHands(who),
       howToSelectCard: (who, cards) => this.rpcSelectCard(who, cards),
+      howToSelectOption: (who, prompt, options) =>
+        this.rpcSelectOption(who, prompt, options),
     };
     this.mutator = new StateMutator(initialState, this.mutatorConfig);
     this.players = [new Player(), new Player()];
@@ -519,6 +522,9 @@ export class Game {
         break;
       case "selectCard":
         status = PbPlayerStatus.SELECTING_CARDS;
+        break;
+      case "selectOption":
+        status = PbPlayerStatus.SELECTING_OPTIONS;
         break;
       case "rerollDice":
         status = PbPlayerStatus.REROLLING;
@@ -1210,6 +1216,30 @@ export class Game {
       count: 0,
     });
     return diceToReroll;
+  }
+
+  private async rpcSelectOption(
+    who: 0 | 1,
+    prompt: string,
+    options: readonly Readonly<SelectOption>[],
+  ) {
+    const { selectedIndex } = await this.rpc(who, "selectOption", {
+      prompt,
+      options: [...options],
+    });
+    if (selectedIndex < 0 || selectedIndex >= options.length) {
+      throw new GiTcgIoError(who, "Selected option not in candidates");
+    }
+    this.notifyOne(who, {
+      $case: "selectOptionDone",
+      who,
+      prompt,
+      selectedIndex,
+      selectedKey: options[selectedIndex].key,
+      selectedOption: options[selectedIndex].text,
+    });
+    this.notifyOne(flip(who), { $case: "selectOptionDone", who });
+    return selectedIndex;
   }
 
   private async rpcSelectCard(who: 0 | 1, candidateDefinitionIds: number[]) {

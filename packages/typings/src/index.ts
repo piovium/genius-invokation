@@ -73,6 +73,7 @@ export {
   SwitchHandsDoneEM,
   ChooseActiveDoneEM,
   SelectCardDoneEM,
+  SelectOptionDoneEM,
   HandleEventEM,
   ResetVariablesEM,
 } from "./gen/mutation";
@@ -87,6 +88,9 @@ export {
   RerollDiceResponse,
   SelectCardRequest,
   SelectCardResponse,
+  SelectOption,
+  SelectOptionRequest,
+  SelectOptionResponse,
   SwitchHandsRequest,
   SwitchHandsResponse,
 } from "./gen/rpc";

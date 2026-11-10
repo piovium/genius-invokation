@@ -54,6 +54,7 @@ export type {
   HandleT,
 } from "./type";
 export { typeHint } from "./utils";
+export type { SelectOption } from "@gi-tcg/typings";
 export { DiceType, DamageType, Aura, Reaction } from "@gi-tcg/typings";
 export {
   $,

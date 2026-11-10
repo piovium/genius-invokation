@@ -61,6 +61,16 @@ message SelectCardRequest {
   repeated int32 candidate_definition_ids = 1;
 }
 
+message SelectOption {
+  string key = 1;
+  string text = 2;
+}
+
+message SelectOptionRequest {
+  string prompt = 1;
+  repeated SelectOption options = 2;
+}
+
 message Request {
   oneof request {
     RerollDiceRequest reroll_dice = 1;
@@ -68,6 +78,7 @@ message Request {
     ChooseActiveRequest choose_active = 3;
     ActionRequest action = 4;
     SelectCardRequest select_card = 5;
+    SelectOptionRequest select_option = 6;
   }
 }
 
@@ -93,6 +104,10 @@ message SelectCardResponse {
   sint32 selected_definition_id = 1;
 }
 
+message SelectOptionResponse {
+  int32 selected_index = 1;
+}
+
 message Response {
   oneof response {
     RerollDiceResponse reroll_dice = 1;
@@ -100,5 +115,6 @@ message Response {
     ChooseActiveResponse choose_active = 3;
     ActionResponse action = 4;
     SelectCardResponse select_card = 5;
+    SelectOptionResponse select_option = 6;
   }
 }

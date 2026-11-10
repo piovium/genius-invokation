@@ -348,6 +348,7 @@ class Player implements PlayerIOWithError {
       switchHands: async () => ({
         removedHandIds: [],
       }),
+      selectOption: async () => ({ selectedIndex: 0 }),
       selectCard: async ({ candidateDefinitionIds }) => ({
         selectedDefinitionId: candidateDefinitionIds[0]!,
       }),

@@ -6,6 +6,7 @@ import {
   PbSwitchActiveFromAction,
   Reaction,
   type ExposedMutation,
+  type SelectOption,
 } from "@gi-tcg/typings";
 import type {
   AnyState,
@@ -134,6 +135,11 @@ export interface MutatorConfig {
   readonly howToSwitchHands?: (who: 0 | 1) => Promise<number[]>;
   readonly howToReroll?: (who: 0 | 1) => Promise<number[]>;
   readonly howToSelectCard?: (who: 0 | 1, cards: number[]) => Promise<number>;
+  readonly howToSelectOption?: (
+    who: 0 | 1,
+    prompt: string,
+    options: readonly Readonly<SelectOption>[],
+  ) => Promise<number>;
   readonly howToChooseActive?: (
     who: 0 | 1,
     candidates: number[],
@@ -1577,6 +1583,17 @@ export class StateMutator {
     }
     this.notify();
     return events;
+  }
+
+  async selectOption(
+    who: 0 | 1,
+    prompt: string,
+    options: readonly Readonly<SelectOption>[],
+  ) {
+    if (!this.config.howToSelectOption) {
+      throw new GiTcgIoNotProvideError();
+    }
+    return this.config.howToSelectOption(who, prompt, options);
   }
 
   async selectCard(

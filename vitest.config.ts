@@ -19,6 +19,7 @@ import gts from "@gi-tcg/unplugin-gts/vite";
 export default defineConfig({
   test: {
     watch: false,
+    execArgv: ["--experimental-vm-modules"],
     setupFiles: [`${import.meta.dirname}/vitest.setup.ts`],
     env: {
       NODE_OPTIONS: "--expose-gc",
