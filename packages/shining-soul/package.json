@@ -1,0 +1,52 @@
+{
+  "name": "@gi-tcg/shining-soul",
+  "version": "0.1.0",
+  "description": "Physical card profile for Genius Invokation TCG",
+  "type": "module",
+  "exports": {
+    "./profiles/physical_version": {
+      "development": "./src/profiles/physical_version.ts",
+      "types": "./dist/profiles/physical_version.d.mts",
+      "import": "./dist/profiles/physical_version.mjs"
+    },
+    "./version_maps/physical_version": {
+      "development": "./src/version_maps/physical_version.ts",
+      "types": "./dist/version_maps/physical_version.d.mts",
+      "import": "./dist/version_maps/physical_version.mjs"
+    }
+  },
+  "files": [
+    "dist",
+    "mods"
+  ],
+  "imports": {
+    "#custom-data-loader": "@gi-tcg/custom-data-loader/gts/data"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "check": "gtsc --noEmit"
+  },
+  "gamingTs": {
+    "runtimeImportSource": "@gi-tcg/custom-data-loader/gts/runtime",
+    "providerImportSource": "@gi-tcg/custom-data-loader/gts"
+  },
+  "peerDependencies": {
+    "@gi-tcg/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@gi-tcg/custom-data-loader": "workspace:*",
+    "@gi-tcg/gtsc": "catalog:"
+  },
+  "publishConfig": {
+    "exports": {
+      "./profiles/physical_version": {
+        "types": "./dist/profiles/physical_version.d.mts",
+        "import": "./dist/profiles/physical_version.mjs"
+      },
+      "./version_maps/physical_version": {
+        "types": "./dist/version_maps/physical_version.d.mts",
+        "import": "./dist/version_maps/physical_version.mjs"
+      }
+    }
+  }
+}

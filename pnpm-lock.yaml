@@ -645,6 +645,9 @@ importers:
       '@gi-tcg/data-code-analyzer':
         specifier: workspace:*
         version: link:../data-code-analyzer
+      '@gi-tcg/shining-soul':
+        specifier: workspace:*
+        version: link:../shining-soul
       '@gi-tcg/typings':
         specifier: workspace:*
         version: link:../typings
@@ -742,6 +745,19 @@ importers:
       drizzle-kit:
         specifier: 1.0.0-rc.4
         version: 1.0.0-rc.4
+
+  packages/shining-soul:
+    dependencies:
+      '@gi-tcg/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@gi-tcg/custom-data-loader':
+        specifier: workspace:*
+        version: link:../custom-data-loader
+      '@gi-tcg/gtsc':
+        specifier: 'catalog:'
+        version: 0.8.0(typescript@6.0.3)
 
   packages/standalone:
     dependencies:
@@ -880,6 +896,9 @@ importers:
       '@gi-tcg/custom-data-loader':
         specifier: workspace:*
         version: link:../custom-data-loader
+      '@gi-tcg/shining-soul':
+        specifier: workspace:*
+        version: link:../shining-soul
       immer:
         specifier: ^11.1.4
         version: 11.1.4

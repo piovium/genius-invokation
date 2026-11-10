@@ -1,0 +1,14 @@
+{
+  "include": ["src/**/*.ts", "mods/**/*.gts"],
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ESNext"],
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "verbatimModuleSyntax": true,
+    "types": ["node"]
+  }
+}
