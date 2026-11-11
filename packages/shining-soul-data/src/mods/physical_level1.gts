@@ -1,3 +1,18 @@
+// Copyright (C) 2026 Piovium Labs
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import { $, DiceType, customEvent } from "#custom-data-loader";
 
 // 允许玩家选择满血是否治疗
@@ -11,6 +26,7 @@ import { $, DiceType, customEvent } from "#custom-data-loader";
  */
 define card {
   id 321006;
+  description "结束阶段：治疗我方出战角色2点。满血时可选择是否触发并消耗次数。可用次数：2";
   cost DiceType.Aligned, 2;
   support place {
     usage 2;
@@ -51,6 +67,7 @@ const PhysicalTimaeusShouldDraw = customEvent(
  */
 define card {
   id 322003;
+  description "初始具有2个合成材料，结束阶段增加1个。打出圣遗物时，如可能，支付其总费用数量的材料免费装备（每回合1次）。成功触发后抓1张牌（每张蒂玛乌斯整局1次）。";
   cost DiceType.Aligned, 2;
   support ally {
     variable material, 2;
@@ -88,6 +105,7 @@ const PhysicalWagnerShouldDraw = customEvent("mod/physical/wagner/shouldDraw");
  */
 define card {
   id 322004;
+  description "初始具有2个锻造原胚，结束阶段增加1个。打出武器时，如可能，支付其总费用数量的原胚免费装备（每回合1次）。成功触发后抓1张牌（每张瓦格纳整局1次）。";
   cost DiceType.Aligned, 2;
   support ally {
     variable material, 2;
@@ -219,6 +237,7 @@ const PhysicalLibenCollect = customEvent("mod/physical/liben/collect");
  */
 define card {
   id 322008;
+  description "结束阶段：选择收集未使用的元素骰，本次每种最多1个，累计最多3个（万能为独立骰种）。行动阶段开始时：收集满3个则抓2张牌、生成2个万能元素骰，然后弃置此牌。";
   support ally {
     variable collected, 0;
     variable collectedKinds, 0 { visible false; };

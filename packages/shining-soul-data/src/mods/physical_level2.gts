@@ -1,3 +1,18 @@
+// Copyright (C) 2026 Piovium Labs
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import {
   $,
   DiceType,
@@ -22,6 +37,7 @@ const DesertWatchTakeTheInitiative = 301105 as StatusHandle;
  */
 define combatStatus {
   id 301102;
+  description "我方角色造成的伤害+1（仅在我方存在终末嗟叹之诗时生效）。持续回合：2";
   duration 2;
   on increaseSkillDamage {
     when :( :query($.my.equipped.def(ElegyForTheEnd)) );
@@ -41,6 +57,7 @@ define combatStatus {
  */
 define card {
   id 311306;
+  description "角色造成的伤害+1。角色使用元素战技或受到伤害后：本回合内，角色下次造成的伤害额外+1。（共用每回合2次）";
   cost DiceType.Aligned, 3;
   weapon claymore {
     on increaseSkillDamage {
@@ -127,6 +144,7 @@ const BELL_SHIELDS = [BellShield0, BellShield1, BellShield2];
  */
 define card {
   id 311305;
+  description "角色造成的伤害+1。角色使用技能后：生成1点绑定此武器的出战护盾。（每回合1次，自身最多叠加到2点）不同钟剑的护盾分别记录，装备者倒下或武器移除时对应护盾消失。";
   cost DiceType.Aligned, 3;
   weapon claymore {
     on increaseSkillDamage {

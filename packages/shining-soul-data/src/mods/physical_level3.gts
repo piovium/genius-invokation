@@ -1,3 +1,18 @@
+// Copyright (C) 2026 Piovium Labs
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import {
   DiceType,
   type CombatStatusHandle,
@@ -15,6 +30,7 @@ import {
  */
 define card {
   id 312015;
+  description "我方角色每受到1点实际治疗，累积1个海染泡沫（最多6个）。角色造成伤害时消耗全部泡沫，每3个使伤害+1。";
   cost DiceType.Aligned, 1;
   artifact {
     variable bubble, 0 { range 6; };
@@ -41,6 +57,7 @@ define card {
  */
 define card {
   id 312016;
+  description "入场时治疗所附属角色3点。我方角色每受到1点实际治疗，累积1个海染泡沫（最多6个）。角色造成伤害时消耗全部泡沫，每3个使伤害+1。";
   cost DiceType.Void, 3;
   artifact {
     variable bubble, 0 { range 6; };
@@ -111,6 +128,7 @@ define combatStatus {
  */
 define card {
   id 332015;
+  description "声明冰、水、火、雷中的两种元素，由对方选择其中一种，召唤对应的丘丘人（2次可用次数）。牌组包含至少2个魔物角色才能加入。";
   cost DiceType.Aligned, 2;
   :combatStatus(ElementDeclaration);
 };
@@ -127,6 +145,7 @@ define card {
  */
 define card {
   id 332016;
+  description "声明冰、水、火、雷中的两种元素，由对方选择其中一种，在对方场上生成对应的愚人众伏兵（2次可用次数，每回合1次）。牌组包含至少2个愚人众角色才能加入。";
   cost DiceType.Aligned, 2;
   :combatStatus(ElementDeclaration, "my", {
     overrideVariables: { fatui: 1 },

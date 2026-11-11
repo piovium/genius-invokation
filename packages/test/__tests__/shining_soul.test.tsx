@@ -163,10 +163,10 @@ test("physical Tian preserves usage when all characters have full energy", async
 });
 
 test.each([
-  { answers: [0, 0], intermediate: [0, 1, 2], expected: [0, 1, 2] },
-  { answers: [1, 0], intermediate: [1, 0, 2], expected: [1, 0, 2] },
-  { answers: [1, 1], intermediate: [1, 0, 2], expected: [2, 0, 1] },
-  { answers: [0, 1], intermediate: [0, 1, 2], expected: [1, 1, 1] },
+  { answers: [1, 1], intermediate: [0, 1, 2], expected: [0, 1, 2] },
+  { answers: [0, 1], intermediate: [1, 0, 2], expected: [1, 0, 2] },
+  { answers: [0, 0], intermediate: [1, 0, 2], expected: [2, 0, 1] },
+  { answers: [1, 0], intermediate: [0, 1, 2], expected: [1, 1, 1] },
 ])(
   "physical Calx asks each eligible standby in order: %j",
   async ({ answers, intermediate, expected }) => {
@@ -214,7 +214,7 @@ test.each([
       </State>,
     );
     await c.me.card(CalxsArts);
-    await c.me.selectOption(1);
+    await c.me.selectOption(0);
     expect(
       c.state.players[0].characters.map((ch) => ch.variables.energy),
     ).toEqual([1, energy, 1]);
@@ -235,17 +235,17 @@ test("physical Calx retains overflow when transferring from two characters", asy
     </State>,
   );
   await c.me.card(CalxsArts);
-  await c.me.selectOption(1);
-  await c.me.selectOption(1);
+  await c.me.selectOption(0);
+  await c.me.selectOption(0);
   expect(
     c.state.players[0].characters.map((ch) => ch.variables.energy),
   ).toEqual([3, 0, 1]);
 });
 
 test.each([
-  { answers: [1, 1], expected: [2, 1, 1, 2] },
-  { answers: [0, 1, 1], expected: [2, 2, 1, 1] },
-  { answers: [0, 0, 0], expected: [0, 2, 2, 2] },
+  { answers: [0, 0], expected: [2, 1, 1, 2] },
+  { answers: [1, 0, 0], expected: [2, 2, 1, 1] },
+  { answers: [1, 1, 1], expected: [0, 2, 2, 2] },
 ])(
   "physical Calx stops after two yes answers or exhausting candidates: %j",
   async ({ answers, expected }) => {
