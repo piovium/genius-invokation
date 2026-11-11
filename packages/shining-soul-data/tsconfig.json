@@ -1,5 +1,5 @@
 {
-  "include": ["src/**/*.ts", "mods/**/*.gts"],
+  "include": ["src/**/*.ts", "src/**/*.gts"],
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
