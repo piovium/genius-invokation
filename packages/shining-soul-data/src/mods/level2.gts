@@ -27,6 +27,55 @@ const ElegyForTheEnd = 311205 as EquipmentHandle;
 // 沙海守望·主动出击
 const DesertWatchTakeTheInitiative = 301105 as StatusHandle;
 
+/**
+ * @id 323003
+ * @name 红羽团扇
+ * @cost 2*Aligned
+ * @description
+ * 我方切换角色后：本回合中，我方下次执行「切换角色」行动视为「快速行动」而非「战斗行动」，并且少花费1个元素骰。（每回合1次）
+ */
+define card {
+  id 323003;
+  cost DiceType.Aligned, 2;
+  support item {
+    // 本回合是否切换角色
+    variable switched, 0;
+    // 是否触发减骰**或**快速效果
+    variable triggered, 0 { visible false; };
+    on switchActive {
+      :variables.switched = 1;
+    }
+    on roundEnd {
+      :variables.switched = 0;
+    };
+    on deductOmniDiceSwitch {
+      when :( :variables.switched );
+      usage perRound, 1 {
+        name usagePerRound1;
+        autoDecrease false;
+      };
+      :e.deductOmniCost(1);
+      :variables.triggered = 1;
+    };
+    on beforeFastSwitch {
+      when :( :variables.switched );
+      usage perRound, 1 {
+        name usagePerRound1;
+        autoDecrease false;
+      };
+      :e.setFastAction();
+      :variables.triggered = 1;
+    };
+    on switchActive {
+      when :( :variables.triggered );
+      usage perRound, 1 {
+        name usagePerRound1;
+      };
+      :variables.triggered = 0;
+    };
+  };
+};
+
 // 根据Q&A，仅存在场上「终末嗟叹之诗」时生效
 /**
  * @id 301102
