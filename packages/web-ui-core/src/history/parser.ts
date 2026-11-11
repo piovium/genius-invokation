@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  SelectOptionType,
   type CreateCharacterEM,
   type CreateEntityEM,
   flattenPbOneof,
@@ -871,13 +872,19 @@ export function updateHistory(
           mainBlock = {
             type: "selectOption",
             who: m.who as 0 | 1,
-            prompt: m.prompt,
-            selectedIndex: m.selectedIndex,
-            selectedKey: m.selectedKey,
-            selectedOption: m.selectedOption,
+            selectedImageId: m.selectedImageId,
+            selectedImageType:
+              m.selectedImageType === SelectOptionType.CARD_FACE
+                ? "cardFace"
+                : m.selectedImageType === SelectOptionType.ICON
+                  ? "icon"
+                  : "none",
+            selectedTitle: m.selectedTitle,
+            selectedText: m.selectedText,
             children: [],
             indent: history.currentIndent,
           };
+          console.log("selectOptionDone", m.selectedImageId);
           break;
         }
         case "selectCardDone": {

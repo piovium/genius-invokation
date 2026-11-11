@@ -386,6 +386,7 @@ export class SkillExecutor {
           arg.who,
           arg.prompt,
           arg.options,
+          arg.type,
         );
         await this.handleEvent([
           "onSelectOption",

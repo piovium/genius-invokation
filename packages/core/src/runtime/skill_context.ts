@@ -20,6 +20,7 @@ import {
   DiceType,
   Reaction,
   type SelectOption,
+  SelectOptionType,
 } from "@gi-tcg/typings";
 import { clampVariable } from "../data/utils";
 
@@ -236,6 +237,11 @@ type QueryState<Meta extends ContextMetaBase, Q extends IQuery> = RxEntityState<
 interface PlainSkillInfo {
   readonly definition: SkillDefinition;
   readonly caller: PlainAnyState;
+}
+
+export interface SelectOptionInput extends Omit<SelectOption, "title" | "text"> {
+  title?: string | null;
+  text?: string | null;
 }
 
 /**
@@ -2259,7 +2265,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
 
   selectOption(
     prompt: string,
-    options: readonly Readonly<SelectOption>[],
+    options: readonly Readonly<SelectOptionInput>[],
+    type: "cardFace" | "icon" | "none" = "none",
   ): void {
     if (options.length === 0) {
       throw new GiTcgDataError("selectOption requires at least one option");
@@ -2278,7 +2285,16 @@ export class SkillContext<Meta extends ContextMetaBase> {
       this.skillInfo,
       this.self.who,
       prompt,
-      options,
+      options.map((option) => ({
+        ...option,
+        title: option.title ?? undefined,
+        text: option.text ?? undefined,
+      })),
+      {
+        cardFace: SelectOptionType.CARD_FACE,
+        icon: SelectOptionType.ICON,
+        none: SelectOptionType.NONE,
+      }[type],
     );
   }
 

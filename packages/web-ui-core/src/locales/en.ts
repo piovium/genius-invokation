@@ -222,6 +222,7 @@ export default {
     replaceHandsTitle: "Switch Hand",
     rerollDiceTitle: "Reroll",
     chooseCard: "Choose a card",
+    selectOption: "Choose an option",
     confirmButton: "Confirm",
   },
   phase: {

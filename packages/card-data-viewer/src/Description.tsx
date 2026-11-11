@@ -25,6 +25,7 @@ import {
 import { createStore, produce } from "solid-js/store";
 import { Reference } from "./Entity";
 import { useAssetsManager } from "./context";
+import type { AssetsManager } from "@gi-tcg/assets-manager";
 
 type DescriptionItem = (
   | {
@@ -94,6 +95,8 @@ const descriptionToItems = (
 
 interface DamageDescriptionProps {
   dType: string | undefined;
+  assetsManager?: AssetsManager;
+  interactive?: boolean;
   onRequestExplain?: (id: number) => void;
 }
 
@@ -109,7 +112,8 @@ const DAMAGE_COLORS = [
 ];
 
 function DamageDescription(props: DamageDescriptionProps) {
-  const { assetsManager } = useAssetsManager();
+  const context = useAssetsManager();
+  const assetsManager = () => props.assetsManager ?? context.assetsManager();
   const id = () =>
     [
       "GCG_ELEMENT_PHYSIC",
@@ -125,7 +129,10 @@ function DamageDescription(props: DamageDescriptionProps) {
   const keywordId = () => -(100 + id());
   const [url] = createResource(
     () => [id(), assetsManager()] as const,
-    ([id, manager]) => manager.getImageUrl(id),
+    ([id, manager]) =>
+      props.interactive === false
+        ? manager.getImageUrl(id).catch(() => void 0)
+        : manager.getImageUrl(id),
   );
   return (
     <>
@@ -133,14 +140,23 @@ function DamageDescription(props: DamageDescriptionProps) {
         {(url) => <img src={url()} class="inline-block h-[1.25em]" />}
       </Show>
       <span
-        class="cursor-pointer description-underline"
-        style={{ color: DAMAGE_COLORS[id()] }}
-        onClick={(e) => {
-          e.stopPropagation();
-          props.onRequestExplain?.(keywordId());
+        classList={{
+          "cursor-pointer description-underline": props.interactive !== false,
         }}
+        style={{ color: DAMAGE_COLORS[id()] }}
+        onClick={
+          props.interactive === false
+            ? void 0
+            : (e) => {
+                e.stopPropagation();
+                props.onRequestExplain?.(keywordId());
+              }
+        }
       >
-        <ReferenceName definitionId={keywordId()} />
+        <ReferenceName
+          definitionId={keywordId()}
+          assetsManager={props.assetsManager}
+        />
       </span>
     </>
   );
@@ -259,11 +275,72 @@ export function Description(props: DescriptionProps) {
   );
 }
 
-function ReferenceName(props: { definitionId: number }) {
-  const { assetsManager } = useAssetsManager();
+export interface DescriptionContentProps {
+  assetsManager: AssetsManager;
+  description: string;
+  keyMap?: Record<string, string>;
+}
+
+export function DescriptionContent(props: DescriptionContentProps) {
+  const items = createMemo(() =>
+    descriptionToItems(props.description, props.keyMap),
+  );
+  return (
+    <p class="gi-tcg-description-content">
+      <For each={items()}>
+        {(item) => (
+          <span
+            classList={{
+              "content-dynamic": item.color === "#D3BC8EFF",
+              "content-strong": item.color === "#FFFFFFFF",
+            }}
+          >
+            <Switch>
+              <Match
+                when={(item.type === "text" || item.type === "key") && item}
+                keyed
+              >
+                {(item) => item.content}
+              </Match>
+              <Match when={item.type === "damage" && item} keyed>
+                {(item) => (
+                  <DamageDescription
+                    dType={item.dType}
+                    assetsManager={props.assetsManager}
+                    interactive={false}
+                  />
+                )}
+              </Match>
+              <Match when={item.type === "reference" && item} keyed>
+                {(item) => (
+                  <span class="content-reference">
+                    <ReferenceName
+                      definitionId={item.id}
+                      assetsManager={props.assetsManager}
+                    />
+                  </span>
+                )}
+              </Match>
+            </Switch>
+          </span>
+        )}
+      </For>
+    </p>
+  );
+}
+
+function ReferenceName(props: {
+  definitionId: number;
+  assetsManager?: AssetsManager;
+}) {
+  const context = useAssetsManager();
+  const assetsManager = () => props.assetsManager ?? context.assetsManager();
   const [data] = createResource(
     () => [props.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId),
+    ([defId, manager]) =>
+      props.assetsManager
+        ? manager.getData(defId).catch(() => void 0)
+        : manager.getData(defId),
   );
   return (
     <>

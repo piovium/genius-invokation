@@ -187,10 +187,10 @@ export interface SelectOptionHistoryBlock {
   type: "selectOption";
   indent: number;
   who: 0 | 1;
-  prompt?: string;
-  selectedIndex?: number;
-  selectedKey?: string;
-  selectedOption?: string;
+  selectedImageId?: number;
+  selectedImageType: "cardFace" | "icon" | "none";
+  selectedTitle?: string;
+  selectedText?: string;
   children: HistoryChildren[];
 }
 

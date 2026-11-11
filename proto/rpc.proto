@@ -63,12 +63,15 @@ message SelectCardRequest {
 
 message SelectOption {
   string key = 1;
-  string text = 2;
+  optional string text = 2;
+  optional int32 image_id = 3;
+  optional string title = 4;
 }
 
 message SelectOptionRequest {
   string prompt = 1;
   repeated SelectOption options = 2;
+  SelectOptionType type = 3;
 }
 
 message Request {

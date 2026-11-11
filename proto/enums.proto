@@ -16,6 +16,12 @@
 syntax = "proto3";
 option csharp_namespace = "GiTcg.Proto";
 
+enum SelectOptionType {
+  SELECT_OPTION_TYPE_NONE = 0;
+  SELECT_OPTION_TYPE_CARD_FACE = 1;
+  SELECT_OPTION_TYPE_ICON = 2;
+}
+
 // 描述骰子费用的骰子类型
 enum DiceRequirementType {
   DICE_REQUIREMENT_TYPE_VOID = 0;

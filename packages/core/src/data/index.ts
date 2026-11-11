@@ -55,6 +55,7 @@ export type {
 } from "./type";
 export { typeHint } from "./utils";
 export type { SelectOption } from "@gi-tcg/typings";
+export type { SelectOptionInput } from "../runtime/skill_context";
 export { DiceType, DamageType, Aura, Reaction } from "@gi-tcg/typings";
 export {
   $,

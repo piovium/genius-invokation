@@ -29,6 +29,7 @@ import {
   ActionValidity,
   type Deck,
   type SelectOption,
+  type SelectOptionType,
 } from "@gi-tcg/typings";
 import {
   getDefaultGameConfig,
@@ -272,8 +273,8 @@ export class Game {
       howToReroll: (who) => this.rpcReroll(who),
       howToSwitchHands: (who) => this.rpcSwitchHands(who),
       howToSelectCard: (who, cards) => this.rpcSelectCard(who, cards),
-      howToSelectOption: (who, prompt, options) =>
-        this.rpcSelectOption(who, prompt, options),
+      howToSelectOption: (who, prompt, options, type) =>
+        this.rpcSelectOption(who, prompt, options, type),
     };
     this.mutator = new StateMutator(initialState, this.mutatorConfig);
     this.players = [new Player(), new Player()];
@@ -1222,10 +1223,12 @@ export class Game {
     who: 0 | 1,
     prompt: string,
     options: readonly Readonly<SelectOption>[],
+    type: SelectOptionType,
   ) {
     const { selectedIndex } = await this.rpc(who, "selectOption", {
       prompt,
       options: [...options],
+      type,
     });
     if (selectedIndex < 0 || selectedIndex >= options.length) {
       throw new GiTcgIoError(who, "Selected option not in candidates");
@@ -1233,10 +1236,10 @@ export class Game {
     this.notifyOne(who, {
       $case: "selectOptionDone",
       who,
-      prompt,
-      selectedIndex,
-      selectedKey: options[selectedIndex].key,
-      selectedOption: options[selectedIndex].text,
+      selectedImageId: options[selectedIndex].imageId,
+      selectedImageType: type,
+      selectedTitle: options[selectedIndex].title,
+      selectedText: options[selectedIndex].text,
     });
     this.notifyOne(flip(who), { $case: "selectOptionDone", who });
     return selectedIndex;
