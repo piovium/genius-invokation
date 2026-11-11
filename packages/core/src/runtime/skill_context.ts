@@ -2260,6 +2260,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   selectOption(
     prompt: string,
     options: readonly Readonly<SelectOption>[],
+    who: "my" | "opp" = "my",
   ): void {
     if (options.length === 0) {
       throw new GiTcgDataError("selectOption requires at least one option");
@@ -2276,7 +2277,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     this.emitEvent(
       "requestSelectOption",
       this.skillInfo,
-      this.self.who,
+      who === "my" ? this.self.who : flip(this.self.who),
       prompt,
       options,
     );

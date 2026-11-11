@@ -8,6 +8,7 @@ import {
   type CombatStatusHandle,
   type SummonHandle,
   type EquipmentHandle,
+  customEvent,
 } from "#custom-data-loader";
 
 // 水丘丘相关
@@ -334,6 +335,10 @@ define card {
   };
 };
 
+const PhysicalTimaeusShouldDraw = customEvent(
+  "mod/physical/timaeus/shouldDraw",
+);
+
 /**
  * @id 322003
  * @name 蒂玛乌斯
@@ -349,8 +354,6 @@ define card {
   cost DiceType.Aligned, 2;
   support ally {
     variable material, 2;
-    variable drawn, 0 { visible false; };
-    variable pendingCard, 0 { visible false; };
     on endPhase {
       :variables.material += 1;
     };
@@ -360,16 +363,18 @@ define card {
       );
       usage perRound, 1;
       :variables.material -= :e.diceCostSize();
-      :variables.pendingCard = :e.action.skill.caller.id;
       :e.deductAllCost();
+      :emitCustomEvent(PhysicalTimaeusShouldDraw);
     };
-    on playCard {
-      when :( :variables.drawn === 0 && :e.card.id === :variables.pendingCard );
-      :variables.drawn = 1;
+    on PhysicalTimaeusShouldDraw {
+      listenTo myself;
+      usage 1 { autoDispose false; };
       :drawCards(1);
     };
   };
 };
+
+const PhysicalWagnerShouldDraw = customEvent("mod/physical/wagner/shouldDraw");
 
 /**
  * @id 322004
@@ -386,8 +391,6 @@ define card {
   cost DiceType.Aligned, 2;
   support ally {
     variable material, 2;
-    variable drawn, 0 { visible false; };
-    variable pendingCard, 0 { visible false; };
     on endPhase {
       :variables.material += 1;
     };
@@ -397,67 +400,69 @@ define card {
       );
       usage perRound, 1;
       :variables.material -= :e.diceCostSize();
-      :variables.pendingCard = :e.action.skill.caller.id;
       :e.deductAllCost();
+      :emitCustomEvent(PhysicalWagnerShouldDraw);
     };
-    on playCard {
-      when :( :variables.drawn === 0 && :e.card.id === :variables.pendingCard );
-      :variables.drawn = 1;
+    on PhysicalWagnerShouldDraw {
+      listenTo myself;
+      usage 1 { autoDispose false; };
       :drawCards(1);
     };
   };
 };
 
 const diceNames = ["无色", "冰", "水", "火", "雷", "风", "岩", "草", "万能"];
+const PhysicalLibenCollect = customEvent("mod/physical/liben/collect");
+
 /**
  * @id 322008
  * @name 立本
  * @cost
  * @description
- * 结束阶段：选择收集我方未使用的元素骰，本次每种最多1个，累计最多3个；可以选择不放入。
- * 万能元素骰独立计为一种，跨回合可再次收集相同骰种。
- * 行动阶段开始时：如果此牌已收集3个元素骰，则抓2张牌，生成2个万能元素骰，然后弃置此牌。
+ * 结束阶段：从你元素骰区中选择最多3个元素骰放到此牌上。（每种最多1个）。
+ * 行动阶段开始时：如果此牌上有3个以上的元素骰，则弃置此牌，抓2张牌，获得2个万能元素骰。
  */
 define card {
   id 322008;
   support ally {
     variable collected, 0;
+    variable collectedKinds, 0 { visible false; };
     on endPhase {
-      const kinds = [...new Set(:player.dice)].sort((a, b) => a - b);
-      const combinations = kinds.reduce<number[][]>(
-        (sets, kind) => [
-          ...sets,
-          ...sets
-            .filter((s) => s.length < 3 - :variables.collected)
-            .map((s) => [...s, kind]),
-        ],
-        [[]],
-      );
-      :selectOption(
-        "立本：选择本次放入的元素骰",
-        combinations.map((dice) => ({
-          key: dice.length ? dice.join(",") : "none",
-          text: dice.length
-            ? dice.map((d) => diceNames[d]).join("、")
-            : "不放入",
-        })),
-      );
+      :variables.collectedKinds = 0;
+      :emitCustomEvent(PhysicalLibenCollect);
+    };
+    on PhysicalLibenCollect {
+      listenTo myself;
+      when :( :variables.collected < 3 );
+      const kinds = [...new Set(:player.dice)]
+        // 每个万能骰独立计为一种
+        .filter(
+          (die) =>
+            die === DiceType.Omni || !(:variables.collectedKinds & (1 << die)),
+        )
+        .sort((a, b) => a - b);
+      if (kinds.length > 0) {
+        :selectOption("立本：选择放入1个元素骰，或停止放入", [
+          { key: "none", text: "停止放入" },
+          ...kinds.map((die) => ({ key: String(die), text: diceNames[die] })),
+        ]);
+      }
     };
     on selectOption {
       when :( :e.via.caller.id === :self.id );
       if (:e.selectedKey !== "none") {
-        const selected = :e.selectedKey.split(",").map(Number);
+        const selected = Number(:e.selectedKey);
         const remaining = [...:player.dice];
-        for (const die of selected) {
-          remaining.splice(remaining.indexOf(die), 1);
-        }
+        remaining.splice(remaining.indexOf(selected), 1);
         :mutate({
           type: "resetDice",
           who: :self.who,
           value: remaining,
           reason: "absorb",
         });
-        :variables.collected += selected.length;
+        :variables.collected++;
+        :variables.collectedKinds |= 1 << selected;
+        :emitCustomEvent(PhysicalLibenCollect);
       }
     };
     on actionPhase {
@@ -482,14 +487,13 @@ const pairs = elements.flatMap((a, i) =>
  * @name 元素声明
  * @description
  * 我方声明冰、水、火、雷中的两种不同元素，再由对方选择其中一种。
- * 根据来源卡牌生成我方丘丘人召唤物或对方愚人众伏兵，完成后移除此协调状态。
  */
 define combatStatus {
   name "元素声明" as ElementDeclaration;
   variable fatui, 0;
   variable stage, 0;
   on selfEnter {
-    :selectOption("声明两种元素，由对方选择其中一种", pairs);
+    :selectOption("声明两种元素由对方选择其一：", pairs);
   };
   on selectOption {
     listenTo all;
@@ -497,12 +501,10 @@ define combatStatus {
     if (:variables.stage === 0) {
       :variables.stage = 1;
       const chosen = :e.selectedKey.split(",").map(Number);
-      :emitEvent(
-        "requestSelectOption",
-        :skillInfo,
-        :self.who === 0 ? 1 : 0,
+      :selectOption(
         `对方已声明${chosen.map((i) => elements[i]).join("、")}，请选择一种`,
         chosen.map((i) => ({ key: String(i), text: elements[i] })),
+        "opp",
       );
     } else {
       const element = Number(:e.selectedKey);
@@ -544,5 +546,7 @@ define card {
 define card {
   id 332016;
   cost DiceType.Aligned, 2;
-  :combatStatus(ElementDeclaration, "my", { overrideVariables: { fatui: 1 } });
+  :combatStatus(ElementDeclaration, "my", {
+    overrideVariables: { fatui: 1 },
+  });
 };

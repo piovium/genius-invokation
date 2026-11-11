@@ -103,35 +103,70 @@ test.each([0, 1])(
 test.each([
   {
     collected: 0,
-    choice: 0,
+    choices: [0],
     expected: 0,
     dice: [DiceType.Pyro, DiceType.Omni],
     left: [DiceType.Pyro, DiceType.Omni],
   },
   {
     collected: 0,
-    choice: 3,
+    choices: [1, 1],
     expected: 2,
     dice: [DiceType.Pyro, DiceType.Omni],
     left: [],
   },
   {
     collected: 2,
-    choice: 1,
+    choices: [1],
     expected: 3,
     dice: [DiceType.Pyro, DiceType.Omni],
     left: [DiceType.Omni],
   },
   {
     collected: 0,
-    choice: 1,
+    choices: [1, 0],
     expected: 1,
     dice: [DiceType.Omni, DiceType.Omni],
     left: [DiceType.Omni],
   },
+  {
+    collected: 0,
+    choices: [1, 1],
+    expected: 2,
+    dice: [DiceType.Omni, DiceType.Omni],
+    left: [],
+  },
+  {
+    collected: 0,
+    choices: [1, 1, 1],
+    expected: 3,
+    dice: [DiceType.Omni, DiceType.Omni, DiceType.Omni, DiceType.Omni],
+    left: [DiceType.Omni],
+  },
+  {
+    collected: 0,
+    choices: [1, 1, 1],
+    expected: 3,
+    dice: [DiceType.Pyro, DiceType.Pyro, DiceType.Omni, DiceType.Omni],
+    left: [DiceType.Pyro],
+  },
+  {
+    collected: 0,
+    choices: [1],
+    expected: 1,
+    dice: [DiceType.Pyro, DiceType.Pyro],
+    left: [DiceType.Pyro],
+  },
+  {
+    collected: 0,
+    choices: [],
+    expected: 0,
+    dice: [],
+    left: [],
+  },
 ])(
-  "Liben chooses $choice with $collected previously collected",
-  async ({ collected, choice, expected, dice, left }) => {
+  "Liben chooses $choices from $dice with $collected previously collected",
+  async ({ collected, choices, expected, dice, left }) => {
     const liben = ref();
     const c = setup(
       <State data={data}>
@@ -147,7 +182,12 @@ test.each([
     c.game.mutate({ type: "resetDice", who: 0, value: dice, reason: "absorb" });
     await c.me.end();
     await c.opp.end();
-    await c.me.selectOption(choice);
+    for (const [index, choice] of choices.entries()) {
+      await c.me.selectOption(choice);
+      c.expect(liben).toHaveVariable({
+        collected: collected + index + Number(choice !== 0),
+      });
+    }
     c.expect(liben).toHaveVariable({ collected: expected });
     expect([...c.state.players[0].dice].sort()).toEqual([...left].sort());
   },
@@ -171,6 +211,30 @@ test("two Liben instances consume only their own choices", async () => {
   await c.me.selectOption(1);
   c.expect(second).toHaveVariable({ collected: 1 });
   expect(c.state.players[0].dice).toEqual([]);
+});
+
+test("Liben can collect the same element again next round", async () => {
+  const liben = ref();
+  const c = setup(
+    <State data={data}>
+      <Support my def={322008 as SupportHandle} ref={liben} />
+      <Support my def={321006 as SupportHandle} />
+    </State>,
+  );
+  for (const collected of [1, 2]) {
+    c.game.mutate({
+      type: "resetDice",
+      who: 0,
+      value: [DiceType.Pyro, DiceType.Pyro],
+      reason: "absorb",
+    });
+    await c.me.end();
+    await c.opp.end();
+    await c.me.selectOption(1);
+    c.expect(liben).toHaveVariable({ collected });
+    expect(c.state.players[0].dice).toEqual([DiceType.Pyro]);
+    await c.me.selectOption(0); // Skip Cathedral and start the next round.
+  }
 });
 
 test.each([312015, 312016])(
@@ -459,7 +523,9 @@ test("Liben pays out after choosing three distinct dice", async () => {
   });
   await c.me.end();
   await c.opp.end();
-  await c.me.selectOption(7);
+  await c.me.selectOption(1);
+  await c.me.selectOption(1);
+  await c.me.selectOption(1);
   c.expect(liben).toNotExist();
   c.expect($.my.hand).toBeCount(4); // Two round draw + two from Liben.
   expect(c.state.players[0].dice).toHaveLength(10);
