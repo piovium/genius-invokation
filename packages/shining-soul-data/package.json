@@ -10,7 +10,6 @@
     "#custom-data-loader": "@gi-tcg/custom-data-loader/gts/data"
   },
   "scripts": {
-    "build": "tsdown",
     "check": "gtsc --noEmit"
   },
   "gamingTs": {
