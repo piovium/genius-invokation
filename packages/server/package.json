@@ -22,7 +22,7 @@
     "@gi-tcg/custom-data-loader": "workspace:*",
     "@gi-tcg/data": "workspace:*",
     "@gi-tcg/data-code-analyzer": "workspace:*",
-    "@gi-tcg/shining-soul": "workspace:*",
+    "@gi-tcg/shining-soul-data": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
     "@hono/node-server": "^2.0.2",

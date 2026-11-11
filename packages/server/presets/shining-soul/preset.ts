@@ -1,1 +1,1 @@
-export { default } from "@gi-tcg/shining-soul/profiles/physical_version";
+export { default } from "@gi-tcg/shining-soul-data/presets/physical";

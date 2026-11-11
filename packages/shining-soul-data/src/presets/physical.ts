@@ -5,33 +5,13 @@ import {
   dependencyVersions,
 } from "../version_maps/physical_version";
 
-/** A fresh preset on each load; the obtainable version map is also the card pool. */
-export default async function physicalVersion() {
+export default async function physicalPreset() {
   return {
     $schema_version: 1 as const,
-    id: "shining-soul/physical_version",
+    id: "shining-soul/physical",
     name: "实体牌",
     version: "v7.2.0" as const,
     deck: { whitelist: Object.keys(cardVersions).map(Number) },
-    version_behavior: {
-      base: "v7.2.0" as const,
-      defaultRecreateBehavior: "takeMax" as const,
-      foodOmitInjuredOnly: true,
-      discardMaxCostHandsAbortPreview: true,
-      diceCostApplyAttachments: true,
-    },
-    config: {
-      initialHandsCount: 5,
-      maxHandsCount: 10,
-      maxPileCount: 200,
-      maxRoundsCount: 15,
-      maxSupportsCount: 4,
-      maxSummonsCount: 4,
-      adventureSpotCandidatesCount: 5,
-      initialDiceCount: 8,
-      maxDiceCount: 16,
-      unexpectedInsufficientDice: "skipConsume" as const,
-    },
     plugins: [
       {
         name: "shining-soul",

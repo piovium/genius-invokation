@@ -1,0 +1,27 @@
+{
+  "name": "@gi-tcg/shining-soul-data",
+  "version": "0.1.0",
+  "description": "Physical card profile for Genius Invokation TCG",
+  "type": "module",
+  "exports": {
+    "./presets/physical_version": "./src/presets/physical_version.ts"
+  },
+  "imports": {
+    "#custom-data-loader": "@gi-tcg/custom-data-loader/gts/data"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "check": "gtsc --noEmit"
+  },
+  "gamingTs": {
+    "runtimeImportSource": "@gi-tcg/custom-data-loader/gts/runtime",
+    "providerImportSource": "@gi-tcg/custom-data-loader/gts"
+  },
+  "peerDependencies": {
+    "@gi-tcg/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@gi-tcg/custom-data-loader": "workspace:*",
+    "@gi-tcg/gtsc": "catalog:"
+  }
+}
