@@ -27,6 +27,7 @@ const ElegyForTheEnd = 311205 as EquipmentHandle;
 // 沙海守望·主动出击
 const DesertWatchTakeTheInitiative = 301105 as StatusHandle;
 
+// 实体不生成出战状态
 /**
  * @id 323003
  * @name 红羽团扇
