@@ -61,7 +61,6 @@ export interface GameConfig {
   readonly adventureSpotCandidatesCount: number;
   readonly initialDiceCount: number;
   readonly maxDiceCount: number;
-
   /**
    * modifyAction 级联结算过程中所选骰子已被意外消耗时的处理方式。
    *
@@ -86,6 +85,8 @@ export interface GameConfig {
    * @defaults `false`
    */
   readonly hostRelatedExecution: boolean;
+
+  readonly randomElementIncludesOmni: boolean;
 }
 
 export const getDefaultGameConfig = (): GameConfig => ({
@@ -102,6 +103,7 @@ export const getDefaultGameConfig = (): GameConfig => ({
   unexpectedInsufficientDice: "skipConsume",
   hostWho: 0,
   hostRelatedExecution: false,
+  randomElementIncludesOmni: false,
 });
 
 export type InsufficientDiceBehavior = "throw" | "skipConsume" | "skipAction";

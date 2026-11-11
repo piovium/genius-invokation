@@ -30,6 +30,7 @@ export default async function physicalPreset() {
     id: "shining-soul/physical",
     name: "闪魂·实体牌",
     version: "v7.2.0" as const,
+    config: { randomElementIncludesOmni: true },
     deck: { whitelist: Object.keys(cardVersions).map(Number) },
     plugins: [
       {

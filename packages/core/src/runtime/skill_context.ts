@@ -1719,7 +1719,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
     option: GenerateDiceOption = {},
   ) {
     const maxCount = this.state.config.maxDiceCount - this.player.dice.length;
-    const { randomIncludeOmni = false, randomAllowDuplicate = false } = option;
+    const {
+      randomIncludeOmni = this.state.config.randomElementIncludesOmni,
+      randomAllowDuplicate = false,
+    } = option;
     using l = this.mutator.subLog(
       DetailLogType.Primitive,
       `Generate ${count}${
