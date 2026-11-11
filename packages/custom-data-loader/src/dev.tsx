@@ -120,7 +120,7 @@ define combatStatus {
     ]);
   }
   on selectOption {
-    when :(:e.via.caller.id === :self.id);
+    listenTo myself;
     if (:e.selectedKey === "heal") {
       :heal(2, $.my.active);
     } else if (:e.selectedKey === "energy") {

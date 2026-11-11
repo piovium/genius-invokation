@@ -79,8 +79,7 @@ define combatStatus {
     :selectOption("声明两种元素由对方选择其一：", pairs);
   };
   on selectOption {
-    listenTo all;
-    when :( :e.via.caller.id === :self.id );
+    listenTo myself;
     if (:variables.stage === 0) {
       :variables.stage = 1;
       const chosen = :e.selectedKey.split(",").map(Number);

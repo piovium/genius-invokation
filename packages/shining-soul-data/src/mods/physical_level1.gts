@@ -26,7 +26,7 @@ define card {
       }
     };
     on selectOption {
-      when :( :e.via.caller.id === :self.id );
+      listenTo myself;
       if (:e.selectedKey === "heal") {
         :heal(2, $.my.active);
         :consumeUsage();
@@ -111,6 +111,101 @@ define card {
   };
 };
 
+// 出战角色满充能时，自选充能未满的后台角色
+/**
+ * @id 322011
+ * @name 田铁嘴
+ * @cost 2*Void
+ * @description
+ * 结束阶段：我方一名充能未满的角色获得1点充能。（出战角色优先）
+ * 可用次数：2
+ */
+define card {
+  id 322011;
+  cost DiceType.Void, 2;
+  support ally {
+    usage 2;
+    on endPhase {
+      const active = :query($.my.active.var("energy", "<", "maxEnergy"));
+      const candidates = :queryAll(
+        $.my.standby.var("energy", "<", "maxEnergy"),
+      );
+      if (active) {
+        active.gainEnergy(1);
+        :consumeUsage();
+      } else if (candidates.length > 0) {
+        :selectOption(
+          "田铁嘴：选择获得1点充能的角色",
+          candidates.map((ch) => ({
+            key: String(ch.id),
+            text: `$[A${ch.definition.id}]`,
+          })),
+        );
+      }
+    };
+    on selectOption {
+      listenTo myself;
+      :gainEnergy(1, $.my.character.id(Number(:e.selectedKey)));
+      :consumeUsage();
+    };
+  };
+};
+
+define combatStatus {
+  name "白垩之术·充能转移" as CalxsArtsTransfer;
+  usage 2;
+};
+
+define status {
+  name "白垩之术·询问" as CalxsArtsQuestion;
+  on selfEnter {
+    if (!:query($.my.combatStatus.def(CalxsArtsTransfer))) {
+      :dispose();
+      return;
+    }
+    :selectOption(
+      `白垩之术：是否转移$[A${:self.master.definition.id}]的1点充能到出战角色？`,
+      [
+        { key: "yes", text: "是" },
+        { key: "no", text: "否" },
+      ],
+    );
+  };
+  on selectOption {
+    listenTo myself;
+    if (:e.selectedKey === "yes") {
+      :query($.my.combatStatus.def(CalxsArtsTransfer))?.consumeUsage();
+      :self.master.loseEnergy(1);
+      :gainEnergy(1, $.my.active);
+    }
+    :dispose();
+  };
+  // 最后一个跑的清理临时出战状态
+  on selfDispose {
+    if (!:query($.my.typeStatus.def(CalxsArtsQuestion))) {
+      :query($.my.combatStatus.def(CalxsArtsTransfer))?.dispose();
+    }
+  };
+};
+
+/**
+ * @id 332009
+ * @name 白垩之术
+ * @cost 1*Aligned
+ * @description
+ * 从最多2个我方后台角色身上，转移1点充能到我方出战角色。
+ */
+define card {
+  id 332009;
+  cost DiceType.Aligned, 1;
+  filter :(
+    :query($.my.standby.var("energy", ">", 0)) &&
+      :query($.my.active.var("energy", "<", "maxEnergy"))
+  );
+  :combatStatus(CalxsArtsTransfer);
+  :characterStatus(CalxsArtsQuestion, $.my.standby.var("energy", ">", 0));
+};
+
 const diceNames = ["无色", "冰", "水", "火", "雷", "风", "岩", "草", "万能"];
 const PhysicalLibenCollect = customEvent("mod/physical/liben/collect");
 
@@ -149,7 +244,7 @@ define card {
       }
     };
     on selectOption {
-      when :( :e.via.caller.id === :self.id );
+      listenTo myself;
       if (:e.selectedKey !== "none") {
         const selected = Number(:e.selectedKey);
         const remaining = [...:player.dice];
