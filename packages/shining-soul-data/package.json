@@ -4,7 +4,7 @@
   "description": "Physical card profile for Genius Invokation TCG",
   "type": "module",
   "exports": {
-    "./presets/physical_version": "./src/presets/physical_version.ts"
+    "./presets/physical": "./src/presets/physical.ts"
   },
   "imports": {
     "#custom-data-loader": "@gi-tcg/custom-data-loader/gts/data"

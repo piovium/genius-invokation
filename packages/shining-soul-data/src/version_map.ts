@@ -362,8 +362,6 @@ export const cardVersions = {
   333016: "v6.6.0", // 龙龙饼干
 } satisfies Record<number, Version>;
 
-// 角色与天赋牌使用整组效果不变的共同版本，相关依赖由 core 自动推导。
-// 这里只保留其他行动牌之间的版本传播冲突；下列路径为移除该项时的冲突来源。
 export const dependencyVersions = {
   // 饱腹（无版本差异）
   303300: "v3.7.0",
