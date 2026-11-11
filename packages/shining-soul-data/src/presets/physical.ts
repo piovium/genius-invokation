@@ -18,10 +18,10 @@ import { readFile } from "node:fs/promises";
 import versionMap, { cardVersions } from "../version_map.ts";
 
 const modsPath = [
-  "../mods/physical_level1.gts",
-  "../mods/physical_level2.gts",
-  "../mods/physical_level3.gts",
-  "../mods/physical_level4.gts",
+  "../mods/level1.gts",
+  "../mods/level2.gts",
+  "../mods/level3.gts",
+  "../mods/level4.gts",
 ];
 
 export default async function physicalPreset() {
