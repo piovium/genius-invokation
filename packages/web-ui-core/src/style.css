@@ -758,16 +758,6 @@
     }
   }
 
-  .select-option .gi-tcg-description-content {
-    color: #ebd6c0;
-
-    .content-dynamic,
-    .content-strong,
-    .content-reference {
-      color: #ffffff;
-    }
-  }
-
   /* Merge Chessboard */
   &[data-has-opp-chessboard] {
     .dice-bar-my {

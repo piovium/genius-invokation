@@ -305,12 +305,11 @@ message SelectCardDoneEM {
 
 message SelectOptionDoneEM {
   int32 who = 1;
-  reserved 2, 3, 4;
-  reserved "prompt", "selected_index", "selected_key", "selected_option";
-  optional string selected_text = 5;
-  optional int32 selected_image_id = 6;
-  optional string selected_title = 7;
-  optional SelectOptionType selected_image_type = 8;
+  optional string prompt = 2;
+  optional int32 selected_index = 3;
+  optional string selected_key = 4;
+  reserved 5 to 8;
+  reserved "selected_option", "selected_text", "selected_image_id", "selected_title", "selected_image_type";
 }
 
 message HandleEventEM {

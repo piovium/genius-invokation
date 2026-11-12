@@ -1,9 +1,3 @@
-.gi-tcg-description-content {
-  margin: 0;
-  line-height: normal;
-  white-space: pre-wrap;
-}
-
 .gi-tcg-card-data-viewer {
   display: flex;
   flex-direction: row;

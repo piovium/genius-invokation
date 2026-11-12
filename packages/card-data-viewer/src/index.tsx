@@ -36,11 +36,6 @@ import {
 } from "@gi-tcg/assets-manager";
 import { translator } from "@solid-primitives/i18n";
 
-export {
-  DescriptionContent,
-  type DescriptionContentProps,
-} from "./Description";
-
 export interface RegisterResult {
   readonly CardDataViewer: () => JSX.Element;
   readonly showCharacter: (id: number, opt?: ShowCardDataViewerOption) => void;

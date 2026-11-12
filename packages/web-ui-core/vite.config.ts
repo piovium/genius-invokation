@@ -23,14 +23,6 @@ import dts from "unplugin-dts/vite";
 import svgWithFallback from "./scripts/plugins/svg-with-fallback";
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      "@gi-tcg/custom-data-loader": resolve(
-        __dirname,
-        "../custom-data-loader/src/index.ts",
-      ),
-    },
-  },
   esbuild: {
     supported: {
       using: false,

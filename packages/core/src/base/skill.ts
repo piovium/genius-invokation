@@ -1459,7 +1459,7 @@ class SelectOptionRequestArg extends RequestArg {
     public readonly who: 0 | 1,
     public readonly prompt: string,
     public readonly options: readonly Readonly<SelectOption>[],
-    public readonly type: SelectOptionType,
+    public readonly uiType: SelectOptionType,
   ) {
     super(via);
   }

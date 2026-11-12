@@ -140,7 +140,7 @@ export interface MutatorConfig {
     who: 0 | 1,
     prompt: string,
     options: readonly Readonly<SelectOption>[],
-    type: SelectOptionType,
+    uiType: SelectOptionType,
   ) => Promise<number>;
   readonly howToChooseActive?: (
     who: 0 | 1,
@@ -1591,12 +1591,12 @@ export class StateMutator {
     who: 0 | 1,
     prompt: string,
     options: readonly Readonly<SelectOption>[],
-    type: SelectOptionType = SelectOptionType.NONE,
+    uiType: SelectOptionType = SelectOptionType.NONE,
   ) {
     if (!this.config.howToSelectOption) {
       throw new GiTcgIoNotProvideError();
     }
-    return this.config.howToSelectOption(who, prompt, options, type);
+    return this.config.howToSelectOption(who, prompt, options, uiType);
   }
 
   async selectCard(

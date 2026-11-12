@@ -50,7 +50,6 @@ import TriggerIcon from "../svg/TriggerIcon.svg?fb";
 import CardFrameSummon from "../svg/CardFrameSummon.svg?fb";
 import CardbackNormal from "../svg/CardbackNormal.svg?fb";
 import CardFrameNormal from "../svg/CardFrameNormal.svg?fb";
-import SelectOptionCard from "../svg/SelectOption.svg?fb";
 import { DAMAGE_COLOR } from "./Damage";
 import { REACTION_TEXT_MAP } from "./Reaction";
 import { RichText } from "./RichText";
@@ -1125,7 +1124,8 @@ interface HistoryBlockData {
   title: string;
   indent: number;
   imageId?: number;
-  imageSize: "normal" | "summon" | "icon";
+  imageSize: "normal" | "summon" | "text";
+  selectedKey?: string;
   callerId?: number;
   energyChange?: blockEnergyProps;
   status?: number;
@@ -1351,23 +1351,18 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
         type: block.type,
         opp: isOpp,
         title: t(
-          isOpp
-            ? "history.oppSelectOptionTitle"
-            : "history.mySelectOptionTitle",
+          isOpp ? "history.oppSelectOptionTitle" : "history.mySelectOptionTitle",
         ),
         indent: block.indent,
-        imageId: block.selectedImageId,
-        imageSize: block.selectedImageType === "cardFace" ? "normal" : "icon",
+        imageSize: "text",
+        selectedKey: block.selectedKey,
         content: {
           opp: isOpp,
-          name: block.selectedTitle ?? renderName(block.selectedImageId),
-          imageId: block.selectedImageId,
-          content: block.selectedText ? (
-            <p class="whitespace-pre-wrap">{block.selectedText}</p>
-          ) : (
-            <CardDescriptionPart
-              cardDefinitionId={block.selectedImageId ?? 0}
-            />
+          name: block.prompt,
+          content: (
+            <span class="text-3 text-#d4bc8e whitespace-pre-wrap break-words">
+              {block.selectedKey}
+            </span>
           ),
         },
         summary: renderSummary(block.children),
@@ -1502,24 +1497,6 @@ export function HistorySummon(props: HistoryCardProps) {
         <CardFrameSummon class={`pointer-events-none ${props.class ?? ""}`} />
       </>
     </Show>
-  );
-}
-
-export function HistoryStatusIcon(props: HistoryCardProps) {
-  return (
-    <div
-      class={`pointer-events-none grid children:grid-area-[1/1] ${props.class ?? ""}`}
-    >
-      <SelectOptionCard class="w-full h-full" />
-      <Show when={!!props.definitionId}>
-        <Image
-          imageId={props.definitionId as number}
-          type="icon"
-          fallback={"state"}
-          class="h-25% aspect-square mt-18% justify-self-center"
-        />
-      </Show>
-    </div>
   );
 }
 
@@ -1713,13 +1690,18 @@ function HistoryBlockBox(props: {
         </For>
       </div>
       <div class="h-24 flex flex-row items-center justify-center gap-1.5">
-        <div class="w-10.5 h-24 grid grid-cols-1 grid-rows-[1fr_6fr_1fr]">
+        <div
+          class="w-10.5 data-[text]:w-36 h-24 grid grid-cols-1 grid-rows-[1fr_6fr_1fr]"
+          bool:data-text={props.data.imageSize === "text"}
+        >
           <Switch>
-            <Match when={props.data.imageSize === "icon"}>
-              <HistoryStatusIcon
-                definitionId={props.data.imageId}
-                class="grid-area-[2/1] w-10.5 h-18"
-              />
+            <Match when={props.data.imageSize === "text"}>
+              <div class="grid-area-[2/1] text-3 text-#fff3e0 whitespace-pre-wrap break-words overflow-hidden">
+                <div class="line-clamp-2">{props.data.content.name}</div>
+                <div class="text-#d4bc8e line-clamp-2">
+                  {props.data.selectedKey}
+                </div>
+              </div>
             </Match>
             <Match when={props.data.imageSize === "normal"}>
               <HistoryCard
@@ -1959,26 +1941,24 @@ function HistoryBlockDetailPanel(props: {
     >
       <div class="overflow-y-scroll max-h-120 flex flex-col gap-1 history-scrollbar">
         <Show when={renderBlock().type !== "pocket"}>
-          <div class="relative w-full bg-#2d333a rounded-t-md grid grid-cols-[3.625rem_1fr] self-start b-2 b-white/10 shrink-0">
+          <div
+            class="relative w-full bg-#2d333a rounded-t-md grid grid-cols-[3.625rem_1fr] data-[text]:grid-cols-[0_1fr] self-start b-2 b-white/10 shrink-0"
+            bool:data-text={renderBlock().type === "selectOption"}
+          >
             <div
               class="absolute top-1px left-1px w-3.5 h-3.5 rounded-lt bg-#806440 data-[opp]:bg-#48678b history-card-hint"
               bool:data-opp={renderBlock().content.opp}
             />
-            <Switch>
-              <Match when={renderBlock().imageSize === "icon"}>
-                <HistoryStatusIcon
-                  definitionId={renderBlock().content.imageId}
-                  class="grid-area-[1/1] w-10.5 h-18 m-2"
-                />
-              </Match>
-              <Match when={true}>
-                <HistoryCard
-                  definitionId={renderBlock().content.imageId}
-                  class="grid-area-[1/1] w-10.5 h-18 m-2"
-                />
-              </Match>
-            </Switch>
-            <div class="grid-area-[1/2] py-1.5 pr-2 min-w-0 flex flex-col text-2.5 text-#b2afa8">
+            <Show when={renderBlock().type !== "selectOption"}>
+              <HistoryCard
+                definitionId={renderBlock().content.imageId}
+                class="grid-area-[1/1] w-10.5 h-18 m-2"
+              />
+            </Show>
+            <div
+              class="grid-area-[1/2] py-1.5 pr-2 data-[text]:pl-4 min-w-0 flex flex-col text-2.5 text-#b2afa8"
+              bool:data-text={renderBlock().type === "selectOption"}
+            >
               <div class="text-3.5 text-#fff3e0 font-bold whitespace-pre-wrap break-words">
                 {renderBlock().content.name}
               </div>

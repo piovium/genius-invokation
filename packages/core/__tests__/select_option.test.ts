@@ -30,40 +30,29 @@ test.each([
   SelectOptionType.NONE,
   SelectOptionType.CARD_FACE,
   SelectOptionType.ICON,
-])("preserves option presentation through RPC encoding for type %s", (type) => {
-  const request = {
-    prompt: "Choose",
-    type,
-    options: [
-      { key: "image", text: "", imageId: 1101, title: "Character" },
-      { key: "text", text: "Text only" },
-      { key: "auto", imageId: 1101 },
-      { key: "empty", imageId: 1101, title: "", text: "" },
-      { key: "fallback" },
-    ],
-  };
-  expect(
-    SelectOptionRequest.decode(SelectOptionRequest.encode(request).finish()),
-  ).toEqual(request);
-});
+])(
+  "preserves option presentation through RPC encoding for type %s",
+  (uiType) => {
+    const request = {
+      prompt: "Choose",
+      uiType,
+      options: [
+        { key: "image", text: "", image: "id://1101", title: "Character" },
+        { key: "text", text: "Text only" },
+        { key: "url", text: "URL", image: "https://example.com/card.png" },
+        { key: "empty", image: "id://1101", title: "", text: "" },
+        { key: "uri", text: "URI", image: "data:image/png;base64,AA==" },
+      ],
+    };
+    expect(
+      SelectOptionRequest.decode(SelectOptionRequest.encode(request).finish()),
+    ).toEqual(request);
+  },
+);
 
 test.each([
   { who: 1 },
-  { who: 0, selectedImageType: SelectOptionType.NONE },
-  {
-    who: 0,
-    selectedImageId: 332001,
-    selectedImageType: SelectOptionType.CARD_FACE,
-    selectedTitle: "",
-    selectedText: "",
-  },
-  {
-    who: 0,
-    selectedImageId: 112011,
-    selectedImageType: SelectOptionType.ICON,
-    selectedTitle: "Title",
-    selectedText: "Text",
-  },
+  { who: 0, prompt: "Choose", selectedIndex: 0, selectedKey: "one" },
 ])("preserves selected option notification fields %j", (notification) => {
   expect(
     SelectOptionDoneEM.decode(SelectOptionDoneEM.encode(notification).finish()),

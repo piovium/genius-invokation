@@ -273,8 +273,8 @@ export class Game {
       howToReroll: (who) => this.rpcReroll(who),
       howToSwitchHands: (who) => this.rpcSwitchHands(who),
       howToSelectCard: (who, cards) => this.rpcSelectCard(who, cards),
-      howToSelectOption: (who, prompt, options, type) =>
-        this.rpcSelectOption(who, prompt, options, type),
+      howToSelectOption: (who, prompt, options, uiType) =>
+        this.rpcSelectOption(who, prompt, options, uiType),
     };
     this.mutator = new StateMutator(initialState, this.mutatorConfig);
     this.players = [new Player(), new Player()];
@@ -1223,12 +1223,12 @@ export class Game {
     who: 0 | 1,
     prompt: string,
     options: readonly Readonly<SelectOption>[],
-    type: SelectOptionType,
+    uiType: SelectOptionType,
   ) {
     const { selectedIndex } = await this.rpc(who, "selectOption", {
       prompt,
       options: [...options],
-      type,
+      uiType,
     });
     if (selectedIndex < 0 || selectedIndex >= options.length) {
       throw new GiTcgIoError(who, "Selected option not in candidates");
@@ -1236,10 +1236,9 @@ export class Game {
     this.notifyOne(who, {
       $case: "selectOptionDone",
       who,
-      selectedImageId: options[selectedIndex].imageId,
-      selectedImageType: type,
-      selectedTitle: options[selectedIndex].title,
-      selectedText: options[selectedIndex].text,
+      prompt,
+      selectedIndex,
+      selectedKey: options[selectedIndex].key,
     });
     this.notifyOne(flip(who), { $case: "selectOptionDone", who });
     return selectedIndex;

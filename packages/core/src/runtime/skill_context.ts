@@ -239,11 +239,6 @@ interface PlainSkillInfo {
   readonly caller: PlainAnyState;
 }
 
-export interface SelectOptionInput extends Omit<SelectOption, "title" | "text"> {
-  title?: string | null;
-  text?: string | null;
-}
-
 /**
  * GTS 中，用于描述技能的上下文对象。
  * 使用 `SkillContext.encapsulate` 创建的技能描述函数会在执行时创建一个 `SkillContext` 实例供使用。
@@ -2265,8 +2260,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
 
   selectOption(
     prompt: string,
-    options: readonly Readonly<SelectOptionInput>[],
-    type: "cardFace" | "icon" | "none" = "none",
+    options: readonly Readonly<SelectOption>[],
+    uiType: "cardFace" | "icon" | "none" = "none",
   ): void {
     if (options.length === 0) {
       throw new GiTcgDataError("selectOption requires at least one option");
@@ -2285,16 +2280,12 @@ export class SkillContext<Meta extends ContextMetaBase> {
       this.skillInfo,
       this.self.who,
       prompt,
-      options.map((option) => ({
-        ...option,
-        title: option.title ?? undefined,
-        text: option.text ?? undefined,
-      })),
+      options,
       {
         cardFace: SelectOptionType.CARD_FACE,
         icon: SelectOptionType.ICON,
         none: SelectOptionType.NONE,
-      }[type],
+      }[uiType],
     );
   }
 

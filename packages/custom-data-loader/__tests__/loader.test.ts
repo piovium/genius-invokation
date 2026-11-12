@@ -117,67 +117,74 @@ define status {
 
 describe("CustomDataLoader GTS", () => {
   test.each([
-    { argument: ', "cardFace"', type: SelectOptionType.CARD_FACE },
-    { argument: ', "icon"', type: SelectOptionType.ICON },
-    { argument: ', "none"', type: SelectOptionType.NONE },
-    { argument: "", type: SelectOptionType.NONE },
-  ])("normalizes option presentation with type argument '$argument'", async ({ argument, type }) => {
-    const [data] = (
-      await new CustomDataLoader().loadMod(`
+    { argument: ', "cardFace"', uiType: SelectOptionType.CARD_FACE },
+    { argument: ', "icon"', uiType: SelectOptionType.ICON },
+    { argument: ', "none"', uiType: SelectOptionType.NONE },
+    { argument: "", uiType: SelectOptionType.NONE },
+  ])(
+    "preserves option presentation with uiType argument '$argument'",
+    async ({ argument, uiType }) => {
+      const [data] = (
+        await new CustomDataLoader().loadMod(`
         define card {
           id 20000010;
           name "Question";
           :selectOption("Choose", [
-            { key: "null", title: null, text: null, imageId: 1101 },
-            { key: "empty", title: "", text: "", imageId: 1102 },
-            { key: "omitted" },
+            { key: "reference", text: "$[C1101]", image: "id://1101" },
+            { key: "empty", title: "", text: "", image: "id://1102" },
+            { key: "url", text: "URL", image: "https://example.com/card.png" },
             { key: "text", title: "Title", text: "Text" }
           ]${argument});
         }
       `)
-    ).done();
-    const state = Game.createInitialState({
-      data,
-      decks: [
-        { characters: [], cards: [20000010] },
-        { characters: [], cards: [] },
-      ],
-    });
-    const caller = state.players[0].pile[0];
-    const definition = playSkillOfCard(caller.definition)!;
-    const [, result] = definition.action(
-      state,
-      {
-        caller,
-        definition,
-        requestBy: null,
-        prepared: false,
-        environment: "normal",
-        finalizeMode: "standard",
-      },
-      { targets: [] },
-    );
+      ).done();
+      const state = Game.createInitialState({
+        data,
+        decks: [
+          { characters: [], cards: [20000010] },
+          { characters: [], cards: [] },
+        ],
+      });
+      const caller = state.players[0].pile[0];
+      const definition = playSkillOfCard(caller.definition)!;
+      const [, result] = definition.action(
+        state,
+        {
+          caller,
+          definition,
+          requestBy: null,
+          prepared: false,
+          environment: "normal",
+          finalizeMode: "standard",
+        },
+        { targets: [] },
+      );
 
-    expect(result.error).toBeNull();
-    expect(
-      result.emittedEvents.filter(([name]) => name === "requestSelectOption"),
-    ).toEqual([
-      [
-        "requestSelectOption",
-        expect.objectContaining({
-          who: 0,
-          prompt: "Choose",
-          type,
-          options: [
-            { key: "null", title: undefined, text: undefined, imageId: 1101 },
-            { key: "empty", title: "", text: "", imageId: 1102 },
-            { key: "omitted", title: undefined, text: undefined },
-            { key: "text", title: "Title", text: "Text" },
-          ],
-        }),
-      ],
-    ]);
-  });
+      expect(result.error).toBeNull();
+      expect(
+        result.emittedEvents.filter(([name]) => name === "requestSelectOption"),
+      ).toEqual([
+        [
+          "requestSelectOption",
+          expect.objectContaining({
+            who: 0,
+            prompt: "Choose",
+            uiType,
+            options: [
+              { key: "reference", text: "$[C1101]", image: "id://1101" },
+              { key: "empty", title: "", text: "", image: "id://1102" },
+              {
+                key: "url",
+                text: "URL",
+                image: "https://example.com/card.png",
+              },
+              { key: "text", title: "Title", text: "Text" },
+            ],
+          }),
+        ],
+      ]);
+    },
+  );
 
   test("loads text option selection and its result listener", async () => {
     const [data] = (

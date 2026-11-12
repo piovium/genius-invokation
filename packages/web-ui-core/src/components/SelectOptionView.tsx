@@ -14,7 +14,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
-  createResource,
   createSignal,
   For,
   Show,
@@ -22,7 +21,6 @@ import {
   type ComponentProps,
 } from "solid-js";
 import { type SelectOptionRequest, SelectOptionType } from "@gi-tcg/typings";
-import { DescriptionContent } from "@gi-tcg/card-data-viewer";
 import { Button } from "./Button";
 import { Image } from "./Image";
 import { useUiContext } from "../hooks/context";
@@ -45,14 +43,15 @@ export function SelectOptionView(props: SelectOptionViewProps) {
       <h3 class="h-10 font-bold text-3xl text-white/80">
         {t("view.selectOption")}
       </h3>
-      <p class="h-6 text-white/60 text-4">{props.request.prompt}</p>
+      <p class="h-6 text-white/60 text-4">
+        <SelectOptionText text={props.request.prompt} />
+      </p>
       <div class={`flex flex-row h-36 mt-9 mb-15 justify-evenly w-180`}>
         <For each={props.request.options}>
           {(option, index) => (
             <SelectOption
-              optionKey={option.key}
-              type={props.request.type}
-              imageId={option.imageId}
+              uiType={props.request.uiType}
+              image={option.image}
               title={option.title}
               text={option.text}
               onClick={() => setSelectedIndex(index())}
@@ -78,55 +77,23 @@ export function SelectOptionView(props: SelectOptionViewProps) {
 }
 
 export interface SelectOptionProps extends ComponentProps<"div"> {
-  optionKey: string;
-  type: SelectOptionType;
-  imageId?: number;
+  uiType: SelectOptionType;
+  image?: string;
   title?: string;
-  text?: string;
+  text: string;
 }
 
 export function SelectOption(props: SelectOptionProps) {
   const [local, rest] = splitProps(props, [
-    "optionKey",
-    "type",
-    "imageId",
+    "uiType",
+    "image",
     "title",
     "text",
     "class",
   ]);
-  const { assetsManager } = useUiContext();
-  const [data] = createResource(
-    () =>
-      typeof local.imageId !== "undefined" &&
-      (typeof local.title === "undefined" || typeof local.text === "undefined")
-        ? ([local.imageId, assetsManager()] as const)
-        : false,
-    ([id, manager]) => manager.getData(id).catch(() => undefined),
-  );
-  const description = () => {
-    const value = data();
-    return value && "rawDescription" in value
-      ? value.rawDescription
-      : undefined;
-  };
-  const keyMap = () => {
-    const value = data();
-    return value && "keyMap" in value ? (value.keyMap ?? {}) : undefined;
-  };
-  const text = () => local.text ?? description();
-  const title = () => {
-    const value =
-      local.title ??
-      data()?.name ??
-      (typeof local.imageId === "undefined"
-        ? undefined
-        : assetsManager().getNameSync(local.imageId));
-    return !value && !text() && !(imageType() && local.imageId)
-      ? local.optionKey
-      : value;
-  };
+  const imageId = () => local.image?.match(/^id:\/\/(\d+)$/)?.[1];
   const imageType = () => {
-    switch (local.type) {
+    switch (local.uiType) {
       case SelectOptionType.CARD_FACE:
         return "cardFace" as const;
       case SelectOptionType.ICON:
@@ -142,27 +109,48 @@ export function SelectOption(props: SelectOptionProps) {
     >
       <SelectOptionCard class="w-full h-full select-option-card" />
       <div class="grid grid-rows-[3.2rem_1.6rem_4.2rem] grid-cols-1 w-full h-full justify-items-center z-1">
-        <Show when={local.imageId && imageType()}>
-          <Image
-            imageId={local.imageId!}
-            type={imageType()}
-            fallback={imageType() === "cardFace" ? "card" : "state"}
-            class="rounded-full w-9 h-9 grid-area-[1/1] self-end"
-          />
+        <Show when={local.image && imageType()}>
+          <Show
+            when={imageId()}
+            fallback={
+              <img
+                src={local.image}
+                alt=""
+                draggable={false}
+                class="rounded-full w-9 h-9 object-cover grid-area-[1/1] self-end"
+              />
+            }
+          >
+            {(id) => (
+              <Image
+                imageId={Number(id())}
+                type={imageType()}
+                fallback={imageType() === "cardFace" ? "card" : "state"}
+                class="rounded-full w-9 h-9 grid-area-[1/1] self-end"
+              />
+            )}
+          </Show>
         </Show>
         <span class="grid-area-[2/1] text-#ebccba font-bold text-2.5 self-center">
-          {title()}
+          <SelectOptionText text={local.title ?? ""} />
         </span>
-        <div
-          class="grid-area-[3/1] w-full h-full overflow-y-auto px-1 text-2 whitespace-pre-wrap break-words"
-        >
-          <DescriptionContent
-            assetsManager={assetsManager()}
-            description={text() ?? ""}
-            keyMap={keyMap()}
-          />
+        <div class="grid-area-[3/1] w-full h-full overflow-y-auto px-1 text-2 text-#ebd6c0 whitespace-pre-wrap break-words">
+          <SelectOptionText text={local.text} />
         </div>
       </div>
     </div>
+  );
+}
+
+function SelectOptionText(props: { text: string }) {
+  const { assetsManager } = useUiContext();
+  return (
+    <>
+      {props.text.replace(
+        /\$\[[ACS](\d+)\]/g,
+        (reference, id: string) =>
+          assetsManager().getNameSync(Number(id)) ?? reference,
+      )}
+    </>
   );
 }
