@@ -150,6 +150,11 @@ interface MaxCostHandsOpt {
   filter?: (card: PlainEntityState) => boolean;
 }
 
+interface SelectOptionOpt {
+  who?: "my" | "opp";
+  uiType?: "cardFace" | "icon" | "none";
+}
+
 interface DrawCardsOpt {
   who?: "my" | "opp";
   /** 抽取带有特定标签的牌 */
@@ -2264,8 +2269,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   selectOption(
     prompt: string,
     options: readonly Readonly<SelectOption>[],
-    who: "my" | "opp" = "my",
-    uiType: "cardFace" | "icon" | "none" = "none",
+    opt: SelectOptionOpt = {},
   ): void {
     if (options.length === 0) {
       throw new GiTcgDataError("selectOption requires at least one option");
@@ -2282,14 +2286,14 @@ export class SkillContext<Meta extends ContextMetaBase> {
     this.emitEvent(
       "requestSelectOption",
       this.skillInfo,
-      who === "my" ? this.self.who : flip(this.self.who),
+      opt.who === "opp" ? flip(this.self.who) : this.self.who,
       prompt,
       options,
       {
         cardFace: SelectOptionUiType.CARD_FACE,
         icon: SelectOptionUiType.ICON,
         none: SelectOptionUiType.NONE,
-      }[uiType],
+      }[opt.uiType ?? "none"],
     );
   }
 

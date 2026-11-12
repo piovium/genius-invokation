@@ -118,16 +118,30 @@ define status {
 describe("CustomDataLoader GTS", () => {
   test.each([
     {
-      argument: ', "my", "cardFace"',
+      argument: ', { who: "my", uiType: "cardFace" }',
       uiType: SelectOptionUiType.CARD_FACE,
       who: 0,
     },
-    { argument: ', "my", "icon"', uiType: SelectOptionUiType.ICON, who: 0 },
-    { argument: ', "my", "none"', uiType: SelectOptionUiType.NONE, who: 0 },
+    {
+      argument: ', { uiType: "icon" }',
+      uiType: SelectOptionUiType.ICON,
+      who: 0,
+    },
+    {
+      argument: ', { who: "my", uiType: "none" }',
+      uiType: SelectOptionUiType.NONE,
+      who: 0,
+    },
     { argument: "", uiType: SelectOptionUiType.NONE, who: 0 },
-    { argument: ', "opp", "icon"', uiType: SelectOptionUiType.ICON, who: 1 },
+    { argument: ", {}", uiType: SelectOptionUiType.NONE, who: 0 },
+    { argument: ', { who: "opp" }', uiType: SelectOptionUiType.NONE, who: 1 },
+    {
+      argument: ', { who: "opp", uiType: "icon" }',
+      uiType: SelectOptionUiType.ICON,
+      who: 1,
+    },
   ])(
-    "preserves option presentation with uiType argument '$argument'",
+    "preserves option presentation with settings argument '$argument'",
     async ({ argument, uiType, who }) => {
       const [data] = (
         await new CustomDataLoader().loadMod(`

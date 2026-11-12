@@ -103,7 +103,7 @@ define combatStatus {
       :selectOption(
         `对方已声明${chosen.map((i) => elements[i]).join("、")}，请选择一种`,
         chosen.map((i) => ({ key: String(i), text: elements[i] })),
-        "opp",
+        { who: "opp" },
       );
     } else {
       const element = Number(:e.selectedKey);

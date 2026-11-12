@@ -99,7 +99,7 @@ export function SelectOption(props: SelectOptionProps) {
       case SelectOptionUiType.ICON:
         return "icon" as const;
       default:
-        return undefined;
+        return void 0;
     }
   };
   return (
