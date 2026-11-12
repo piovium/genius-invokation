@@ -24,6 +24,7 @@ import {
   ActionValidity,
   Aura,
   type SelectOption,
+  type SelectOptionUiType,
 } from "@gi-tcg/typings";
 import {
   type AnyState,
@@ -1458,6 +1459,7 @@ class SelectOptionRequestArg extends RequestArg {
     public readonly who: 0 | 1,
     public readonly prompt: string,
     public readonly options: readonly Readonly<SelectOption>[],
+    public readonly uiType: SelectOptionUiType,
   ) {
     super(via);
   }

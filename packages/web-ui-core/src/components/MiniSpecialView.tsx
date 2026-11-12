@@ -17,6 +17,7 @@
 import { createEffect, createSignal, For, Match, Show, Switch } from "solid-js";
 import { InlineDice } from "./Dice";
 import { StaticCard } from "./SelectCardView";
+import { SelectOption } from "./SelectOptionView";
 import type {
   PbEntityState,
   PbPlayerState,
@@ -69,12 +70,23 @@ export function MiniView(props: MiniSpecialViewProps) {
       <h3 class="font-bold text-4 line-height-none">{title()}</h3>
       <Switch>
         <Match when={props.viewType === "selectOption" && props.visible}>
-          <div class="w-full min-h-0 overflow-y-auto px-4 py-2 text-3 whitespace-pre-wrap break-words">
-            <p class="font-bold">{props.selectOptionRequest?.prompt}</p>
-            <For each={props.selectOptionRequest?.options}>
-              {(option) => <p class="mt-2">{option.text}</p>}
-            </For>
-          </div>
+          <Show when={props.selectOptionRequest}>
+            {(request) => (
+              <div class="flex flex-row w-full justify-around px-5">
+                <For each={request().options}>
+                  {(option) => (
+                    <SelectOption
+                      class="scale-50 shrink-0 mx--7"
+                      uiType={request().uiType}
+                      image={option.image}
+                      title={option.title}
+                      text={option.text}
+                    />
+                  )}
+                </For>
+              </div>
+            )}
+          </Show>
         </Match>
         <Match when={props.viewType === "switchHands"}>
           <div class="flex flex-row w-full justify-around px-5">

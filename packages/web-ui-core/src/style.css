@@ -739,6 +739,25 @@
     font-size: 0.68rem;
   }
 
+  /* SelectOption */
+  .select-option:hover {
+    scale: 105%;
+
+    & .select-option-card {
+      filter: brightness(1.1) saturate(1.1);
+    }
+  }
+
+  .select-option[data-selected] {
+    scale: 105%;
+    outline-offset: 1px;
+    outline: 2px solid var(--light-golden);
+
+    & .select-option-card {
+      filter: brightness(1.2) saturate(1.2);
+    }
+  }
+
   /* Merge Chessboard */
   &[data-has-opp-chessboard] {
     .dice-bar-my {
@@ -767,7 +786,6 @@
     display: none;
   }
 }
-
 
 @keyframes fade-out {
   0% {

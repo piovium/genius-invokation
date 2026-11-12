@@ -259,6 +259,7 @@ export default {
     replaceHandsTitle: "替换手牌",
     rerollDiceTitle: "重投骰子",
     chooseCard: "挑选卡牌",
+    selectOption: "选择选项",
     confirmButton: "确定",
   },
   phase: {

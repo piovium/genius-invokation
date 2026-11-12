@@ -874,7 +874,6 @@ export function updateHistory(
             prompt: m.prompt,
             selectedIndex: m.selectedIndex,
             selectedKey: m.selectedKey,
-            selectedOption: m.selectedOption,
             children: [],
             indent: history.currentIndent,
           };

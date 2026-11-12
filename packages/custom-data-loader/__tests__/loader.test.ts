@@ -2,7 +2,8 @@ import {
   AssetsManager,
   type AssetsManagerOption,
 } from "@gi-tcg/assets-manager";
-import { DiceType } from "@gi-tcg/typings";
+import { Game, playSkillOfCard } from "@gi-tcg/core";
+import { DiceType, SelectOptionUiType } from "@gi-tcg/typings";
 import { describe, expect, test, vi } from "vitest";
 
 import { CustomDataLoader } from "../src";
@@ -115,6 +116,95 @@ define status {
 `;
 
 describe("CustomDataLoader GTS", () => {
+  test.each([
+    {
+      argument: ', { who: "my", uiType: "cardFace" }',
+      uiType: SelectOptionUiType.CARD_FACE,
+      who: 0,
+    },
+    {
+      argument: ', { uiType: "icon" }',
+      uiType: SelectOptionUiType.ICON,
+      who: 0,
+    },
+    {
+      argument: ', { who: "my", uiType: "none" }',
+      uiType: SelectOptionUiType.NONE,
+      who: 0,
+    },
+    { argument: "", uiType: SelectOptionUiType.NONE, who: 0 },
+    { argument: ", {}", uiType: SelectOptionUiType.NONE, who: 0 },
+    { argument: ', { who: "opp" }', uiType: SelectOptionUiType.NONE, who: 1 },
+    {
+      argument: ', { who: "opp", uiType: "icon" }',
+      uiType: SelectOptionUiType.ICON,
+      who: 1,
+    },
+  ])(
+    "preserves option presentation with settings argument '$argument'",
+    async ({ argument, uiType, who }) => {
+      const [data] = (
+        await new CustomDataLoader().loadMod(`
+        define card {
+          id 20000010;
+          name "Question";
+          :selectOption("Choose", [
+            { key: "reference", text: "$[C1101]", image: "id://1101" },
+            { key: "empty", title: "", text: "", image: "id://1102" },
+            { key: "url", text: "URL", image: "https://example.com/card.png" },
+            { key: "text", title: "Title", text: "Text" }
+          ]${argument});
+        }
+      `)
+      ).done();
+      const state = Game.createInitialState({
+        data,
+        decks: [
+          { characters: [], cards: [20000010] },
+          { characters: [], cards: [] },
+        ],
+      });
+      const caller = state.players[0].pile[0];
+      const definition = playSkillOfCard(caller.definition)!;
+      const [, result] = definition.action(
+        state,
+        {
+          caller,
+          definition,
+          requestBy: null,
+          prepared: false,
+          environment: "normal",
+          finalizeMode: "standard",
+        },
+        { targets: [] },
+      );
+
+      expect(result.error).toBeNull();
+      expect(
+        result.emittedEvents.filter(([name]) => name === "requestSelectOption"),
+      ).toEqual([
+        [
+          "requestSelectOption",
+          expect.objectContaining({
+            who,
+            prompt: "Choose",
+            uiType,
+            options: [
+              { key: "reference", text: "$[C1101]", image: "id://1101" },
+              { key: "empty", title: "", text: "", image: "id://1102" },
+              {
+                key: "url",
+                text: "URL",
+                image: "https://example.com/card.png",
+              },
+              { key: "text", title: "Title", text: "Text" },
+            ],
+          }),
+        ],
+      ]);
+    },
+  );
+
   test("loads text option selection and its result listener", async () => {
     const [data] = (
       await new CustomDataLoader().loadMod(`

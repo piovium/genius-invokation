@@ -190,7 +190,6 @@ export interface SelectOptionHistoryBlock {
   prompt?: string;
   selectedIndex?: number;
   selectedKey?: string;
-  selectedOption?: string;
   children: HistoryChildren[];
 }
 

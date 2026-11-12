@@ -20,6 +20,7 @@ import {
   DiceType,
   Reaction,
   type SelectOption,
+  SelectOptionUiType,
 } from "@gi-tcg/typings";
 import { clampVariable } from "../data/utils";
 
@@ -147,6 +148,11 @@ type EntityDefinitionFilterFn = (card: EntityDefinition) => boolean;
 interface MaxCostHandsOpt {
   who?: "my" | "opp";
   filter?: (card: PlainEntityState) => boolean;
+}
+
+interface SelectOptionOpt {
+  who?: "my" | "opp";
+  uiType?: "cardFace" | "icon" | "none";
 }
 
 interface DrawCardsOpt {
@@ -2263,7 +2269,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   selectOption(
     prompt: string,
     options: readonly Readonly<SelectOption>[],
-    who: "my" | "opp" = "my",
+    opt: SelectOptionOpt = {},
   ): void {
     if (options.length === 0) {
       throw new GiTcgDataError("selectOption requires at least one option");
@@ -2280,9 +2286,14 @@ export class SkillContext<Meta extends ContextMetaBase> {
     this.emitEvent(
       "requestSelectOption",
       this.skillInfo,
-      who === "my" ? this.self.who : flip(this.self.who),
+      opt.who === "opp" ? flip(this.self.who) : this.self.who,
       prompt,
       options,
+      {
+        cardFace: SelectOptionUiType.CARD_FACE,
+        icon: SelectOptionUiType.ICON,
+        none: SelectOptionUiType.NONE,
+      }[opt.uiType ?? "none"],
     );
   }
 

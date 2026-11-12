@@ -1125,7 +1125,7 @@ interface HistoryBlockData {
   indent: number;
   imageId?: number;
   imageSize: "normal" | "summon" | "text";
-  selectedOption?: string;
+  selectedKey?: string;
   callerId?: number;
   energyChange?: blockEnergyProps;
   status?: number;
@@ -1355,13 +1355,13 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
         ),
         indent: block.indent,
         imageSize: "text",
-        selectedOption: block.selectedOption,
+        selectedKey: block.selectedKey,
         content: {
           opp: isOpp,
           name: block.prompt,
           content: (
             <span class="text-3 text-#d4bc8e whitespace-pre-wrap break-words">
-              {block.selectedOption}
+              {block.selectedKey}
             </span>
           ),
         },
@@ -1699,7 +1699,7 @@ function HistoryBlockBox(props: {
               <div class="grid-area-[2/1] text-3 text-#fff3e0 whitespace-pre-wrap break-words overflow-hidden">
                 <div class="line-clamp-2">{props.data.content.name}</div>
                 <div class="text-#d4bc8e line-clamp-2">
-                  {props.data.selectedOption}
+                  {props.data.selectedKey}
                 </div>
               </div>
             </Match>

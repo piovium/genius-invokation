@@ -7,6 +7,7 @@ import {
   Reaction,
   type ExposedMutation,
   type SelectOption,
+  SelectOptionUiType,
 } from "@gi-tcg/typings";
 import type {
   AnyState,
@@ -139,6 +140,7 @@ export interface MutatorConfig {
     who: 0 | 1,
     prompt: string,
     options: readonly Readonly<SelectOption>[],
+    uiType: SelectOptionUiType,
   ) => Promise<number>;
   readonly howToChooseActive?: (
     who: 0 | 1,
@@ -1589,11 +1591,12 @@ export class StateMutator {
     who: 0 | 1,
     prompt: string,
     options: readonly Readonly<SelectOption>[],
+    uiType: SelectOptionUiType = SelectOptionUiType.NONE,
   ) {
     if (!this.config.howToSelectOption) {
       throw new GiTcgIoNotProvideError();
     }
-    return this.config.howToSelectOption(who, prompt, options);
+    return this.config.howToSelectOption(who, prompt, options, uiType);
   }
 
   async selectCard(
