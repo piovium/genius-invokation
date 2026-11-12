@@ -33,6 +33,7 @@ const configSchema = z
     adventureSpotCandidatesCount: nonnegativeInteger,
     initialDiceCount: nonnegativeInteger,
     maxDiceCount: nonnegativeInteger,
+    randomElementIncludesOmni: z.boolean(),
     unexpectedInsufficientDice: z.enum(["throw", "skipConsume", "skipAction"]),
   } satisfies Record<keyof ProfileGameConfig, z.ZodTypeAny>)
   .strict()

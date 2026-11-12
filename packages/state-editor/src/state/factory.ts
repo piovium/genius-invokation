@@ -137,6 +137,7 @@ export function createDefaultGameState(): GameState {
     unexpectedInsufficientDice: "skipConsume",
     hostWho: 0,
     hostRelatedExecution: false,
+    randomElementIncludesOmni: false,
   } as const satisfies GameConfig;
   const extensions: ExtensionState[] = Array.from(data.extensions.values()).map(
     (definition) => ({

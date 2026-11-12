@@ -117,13 +117,18 @@ define status {
 
 describe("CustomDataLoader GTS", () => {
   test.each([
-    { argument: ', "cardFace"', uiType: SelectOptionType.CARD_FACE },
-    { argument: ', "icon"', uiType: SelectOptionType.ICON },
-    { argument: ', "none"', uiType: SelectOptionType.NONE },
-    { argument: "", uiType: SelectOptionType.NONE },
+    {
+      argument: ', "my", "cardFace"',
+      uiType: SelectOptionType.CARD_FACE,
+      who: 0,
+    },
+    { argument: ', "my", "icon"', uiType: SelectOptionType.ICON, who: 0 },
+    { argument: ', "my", "none"', uiType: SelectOptionType.NONE, who: 0 },
+    { argument: "", uiType: SelectOptionType.NONE, who: 0 },
+    { argument: ', "opp", "icon"', uiType: SelectOptionType.ICON, who: 1 },
   ])(
     "preserves option presentation with uiType argument '$argument'",
-    async ({ argument, uiType }) => {
+    async ({ argument, uiType, who }) => {
       const [data] = (
         await new CustomDataLoader().loadMod(`
         define card {
@@ -167,7 +172,7 @@ describe("CustomDataLoader GTS", () => {
         [
           "requestSelectOption",
           expect.objectContaining({
-            who: 0,
+            who,
             prompt: "Choose",
             uiType,
             options: [

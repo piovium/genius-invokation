@@ -1720,7 +1720,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
     option: GenerateDiceOption = {},
   ) {
     const maxCount = this.state.config.maxDiceCount - this.player.dice.length;
-    const { randomIncludeOmni = false, randomAllowDuplicate = false } = option;
+    const {
+      randomIncludeOmni = this.state.config.randomElementIncludesOmni,
+      randomAllowDuplicate = false,
+    } = option;
     using l = this.mutator.subLog(
       DetailLogType.Primitive,
       `Generate ${count}${
@@ -2261,6 +2264,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   selectOption(
     prompt: string,
     options: readonly Readonly<SelectOption>[],
+    who: "my" | "opp" = "my",
     uiType: "cardFace" | "icon" | "none" = "none",
   ): void {
     if (options.length === 0) {
@@ -2278,7 +2282,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     this.emitEvent(
       "requestSelectOption",
       this.skillInfo,
-      this.self.who,
+      who === "my" ? this.self.who : flip(this.self.who),
       prompt,
       options,
       {

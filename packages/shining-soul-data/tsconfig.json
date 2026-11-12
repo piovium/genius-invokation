@@ -1,0 +1,19 @@
+{
+  "include": ["src/**/*.ts", "src/**/*.gts"],
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ESNext"],
+
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true,
+
+    "types": ["node"]
+  }
+}

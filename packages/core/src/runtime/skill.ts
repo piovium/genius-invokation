@@ -614,7 +614,7 @@ export const detailedEventDictionary = {
     return checkRelative(e.onTimeState, { who: e.who }, r);
   }),
   selectOption: defineDescriptor("onSelectOption", (e, r) => {
-    return checkRelative(e.onTimeState, { who: e.who }, r);
+    return checkRelative(e.onTimeState, e.via.caller.id, r);
   }),
   adventure: defineDescriptor("onAdventure", (e, r) => {
     return checkRelative(e.onTimeState, { who: e.who }, r);
