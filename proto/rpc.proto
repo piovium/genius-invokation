@@ -71,7 +71,7 @@ message SelectOption {
 message SelectOptionRequest {
   string prompt = 1;
   repeated SelectOption options = 2;
-  SelectOptionType ui_type = 3;
+  SelectOptionUiType ui_type = 3;
 }
 
 message Request {

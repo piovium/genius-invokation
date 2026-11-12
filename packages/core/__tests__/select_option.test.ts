@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import {
   SelectOptionDoneEM,
   SelectOptionRequest,
-  SelectOptionType,
+  SelectOptionUiType,
 } from "@gi-tcg/typings";
 import { verifyRpcResponse } from "../src/io";
 import { StateMutator } from "../src/mutator";
@@ -27,9 +27,9 @@ test("accepts an integer option index", () => {
 });
 
 test.each([
-  SelectOptionType.NONE,
-  SelectOptionType.CARD_FACE,
-  SelectOptionType.ICON,
+  SelectOptionUiType.NONE,
+  SelectOptionUiType.CARD_FACE,
+  SelectOptionUiType.ICON,
 ])(
   "preserves option presentation through RPC encoding for type %s",
   (uiType) => {

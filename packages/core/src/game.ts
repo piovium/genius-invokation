@@ -29,7 +29,7 @@ import {
   ActionValidity,
   type Deck,
   type SelectOption,
-  type SelectOptionType,
+  type SelectOptionUiType,
 } from "@gi-tcg/typings";
 import {
   getDefaultGameConfig,
@@ -1223,7 +1223,7 @@ export class Game {
     who: 0 | 1,
     prompt: string,
     options: readonly Readonly<SelectOption>[],
-    uiType: SelectOptionType,
+    uiType: SelectOptionUiType,
   ) {
     const { selectedIndex } = await this.rpc(who, "selectOption", {
       prompt,

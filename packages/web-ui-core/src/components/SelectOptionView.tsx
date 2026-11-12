@@ -20,7 +20,7 @@ import {
   splitProps,
   type ComponentProps,
 } from "solid-js";
-import { type SelectOptionRequest, SelectOptionType } from "@gi-tcg/typings";
+import { type SelectOptionRequest, SelectOptionUiType } from "@gi-tcg/typings";
 import { Button } from "./Button";
 import { Image } from "./Image";
 import { useUiContext } from "../hooks/context";
@@ -77,7 +77,7 @@ export function SelectOptionView(props: SelectOptionViewProps) {
 }
 
 export interface SelectOptionProps extends ComponentProps<"div"> {
-  uiType: SelectOptionType;
+  uiType: SelectOptionUiType;
   image?: string;
   title?: string;
   text: string;
@@ -94,9 +94,9 @@ export function SelectOption(props: SelectOptionProps) {
   const imageId = () => local.image?.match(/^id:\/\/(\d+)$/)?.[1];
   const imageType = () => {
     switch (local.uiType) {
-      case SelectOptionType.CARD_FACE:
+      case SelectOptionUiType.CARD_FACE:
         return "cardFace" as const;
-      case SelectOptionType.ICON:
+      case SelectOptionUiType.ICON:
         return "icon" as const;
       default:
         return undefined;

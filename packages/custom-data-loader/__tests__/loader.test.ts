@@ -3,7 +3,7 @@ import {
   type AssetsManagerOption,
 } from "@gi-tcg/assets-manager";
 import { Game, playSkillOfCard } from "@gi-tcg/core";
-import { DiceType, SelectOptionType } from "@gi-tcg/typings";
+import { DiceType, SelectOptionUiType } from "@gi-tcg/typings";
 import { describe, expect, test, vi } from "vitest";
 
 import { CustomDataLoader } from "../src";
@@ -119,13 +119,13 @@ describe("CustomDataLoader GTS", () => {
   test.each([
     {
       argument: ', "my", "cardFace"',
-      uiType: SelectOptionType.CARD_FACE,
+      uiType: SelectOptionUiType.CARD_FACE,
       who: 0,
     },
-    { argument: ', "my", "icon"', uiType: SelectOptionType.ICON, who: 0 },
-    { argument: ', "my", "none"', uiType: SelectOptionType.NONE, who: 0 },
-    { argument: "", uiType: SelectOptionType.NONE, who: 0 },
-    { argument: ', "opp", "icon"', uiType: SelectOptionType.ICON, who: 1 },
+    { argument: ', "my", "icon"', uiType: SelectOptionUiType.ICON, who: 0 },
+    { argument: ', "my", "none"', uiType: SelectOptionUiType.NONE, who: 0 },
+    { argument: "", uiType: SelectOptionUiType.NONE, who: 0 },
+    { argument: ', "opp", "icon"', uiType: SelectOptionUiType.ICON, who: 1 },
   ])(
     "preserves option presentation with uiType argument '$argument'",
     async ({ argument, uiType, who }) => {

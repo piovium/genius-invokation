@@ -20,7 +20,7 @@ import {
   DiceType,
   Reaction,
   type SelectOption,
-  SelectOptionType,
+  SelectOptionUiType,
 } from "@gi-tcg/typings";
 import { clampVariable } from "../data/utils";
 
@@ -2286,9 +2286,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
       prompt,
       options,
       {
-        cardFace: SelectOptionType.CARD_FACE,
-        icon: SelectOptionType.ICON,
-        none: SelectOptionType.NONE,
+        cardFace: SelectOptionUiType.CARD_FACE,
+        icon: SelectOptionUiType.ICON,
+        none: SelectOptionUiType.NONE,
       }[uiType],
     );
   }
