@@ -23,6 +23,7 @@ export interface DeckDataCharacterInfo {
 
 export interface DeckDataActionCardInfo {
   id: number;
+  diceCost: number;
   type: string;
   tags: string[];
   version: number;
@@ -71,6 +72,11 @@ export function getDeckData(
         ac.id,
         {
           id: ac.id,
+          diceCost: ac.playCost.reduce(
+            (total, cost) =>
+              total + (cost.type.startsWith("GCG_COST_DICE_") ? cost.count : 0),
+            0,
+          ),
           type: ac.type,
           tags: ac.tags,
           version: allVersions.indexOf(ac.sinceVersion ?? "v3.3.0"),

@@ -17,6 +17,7 @@ export default {
   faction: "Affiliation",
   cardType: "Card Type",
   cardTag: "Card Tag",
+  diceCost: "Dice Cost",
   typeModify: "Equipment",
   typeEvent: "Event",
   typeAssist: "Support",

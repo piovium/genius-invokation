@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { For, Show, createMemo, createSignal, createUniqueId, type Accessor } from "solid-js";
+import { For, Show, createMemo, createUniqueId, type Accessor } from "solid-js";
 import FilterIcon from "./Filter.svg";
 import DeleteIcon from "./Delete.svg";
 import { TagIcon } from "./TagIcon";
@@ -23,7 +23,7 @@ export interface FilterSelection {
   name: string;
   selected: Accessor<string | null>;
   onSelect: (value: string | null) => void;
-  option: Record<string, string>;
+  option: string[];
 }
 
 export interface FilterBarProps {
@@ -38,7 +38,7 @@ export function FilterBar(props: FilterBarProps) {
   const filterMenuControlId = createUniqueId();
 
   return (
-    <div class="@3xl:h-auto h-8 w-full flex-row mb-2 relative grid grid-cols-[auto_1fr]">
+    <div class="filter-bar @3xl:h-auto h-8 w-full flex-row mb-2 relative grid grid-cols-[auto_1fr]">
       <input
         id={filterMenuControlId}
         type="checkbox"
@@ -84,7 +84,7 @@ export function FilterBar(props: FilterBarProps) {
           flex-shrink-0 items-center overflow-x-auto overflow-y-hidden scrollbar-hidden
           @3xl:flex-col FM:flex-col 
           @3xl:items-stretch FM:items-stretch
-          @3xl:gap-2 FM:gap-2
+          gap-1 @3xl:gap-2 FM:gap-2
           rounded-r-full FM:rounded-lg FM:rounded-r-lg
           @3xl:rounded-0 @3xl:rounded-r-0 @3xl:FM:rounded-0 @3xl:FM:rounded-r-0`}
       >
@@ -95,12 +95,12 @@ export function FilterBar(props: FilterBarProps) {
                 {fs.name}
               </div>
               <div class="flex-1 flex flex-row gap-1 @3xl:flex-wrap FM:flex-wrap @3xl:w-0">
-                <For each={Object.keys(fs.option)}>
+                <For each={fs.option}>
                   {(tag) => (
                     <button
                       onClick={() => fs.onSelect(tag)}
                       bool:data-selected={fs.selected() === tag}
-                      bool:data-capsule={tag.startsWith("GCG_CARD_")}
+                      bool:data-capsule={!tag.startsWith("GCG_TAG_")}
                       class={`flex-shrink-0 bg-gray-200 
                         w-7 h-7
                         FM:w-10 FM:h-10 @3xl:w-10 @3xl:h-10 
@@ -111,8 +111,8 @@ export function FilterBar(props: FilterBarProps) {
                         opacity-30 b-purple-400
                         data-[selected]:opacity-100
                         FM:data-[selected]:b-3 @3xl:data-[selected]:b-3  
-                        data-[capsule]:w-12
-                        FM:data-[capsule]:w-20 @3xl:data-[capsule]:w-20`}
+                        data-[capsule]:w-auto min-w-7 FM:min-w-10 @3xl:min-w-10 data-[capsule]:px-1
+                        FM:data-[capsule]:w-auto @3xl:data-[capsule]:w-auto`}
                     >
                       <TagIcon tagName={tag} />
                     </button>
@@ -130,27 +130,16 @@ export function FilterBar(props: FilterBarProps) {
         </label>
       </div>
       {/* 当前选择 */}
-      <div class={`
-        @3xl:hidden
-        FM:grid-area-[1/2] grid-area-[1/1/2/2] z-2
-        FM:justify-self-unset justify-self-center
-        absolute bottom-0 translate-y-50% 
-        FM:transform-none FM:relative FM:bottom-unset FM:left-unset
-        flex flex-shrink-0 flex-row gap-1
-        items-center justify-center FM:justify-end
-        h-3 FM:h-auto FM:pr-1
-        `}>
+      <div class="hidden FM:flex flex-shrink-0 flex-row gap-1 items-center justify-end pr-1 grid-area-[1/2] z-2">
         <For each={props.filterSelections}>
           {(fs) => (
             <Show when={fs.selected()}>
               {(tag) => (
                 <div
-                  class={`
-                    flex-shrink-0 bg-white children:opacity-75 
-                    w-3 data-[capsule]:w-7 h-3 
-                    FM:w-7 FM:data-[capsule]:w-12 FM:h-7
-                    flex flex-col items-center justify-center rounded-full text-2`}
-                  bool:data-capsule={tag().startsWith("GCG_CARD_")}
+                  class={`flex-shrink-0 bg-gray-200 w-7 h-7 text-3.5 font-bold
+                    flex flex-col items-center justify-center rounded-full 
+                    data-[capsule]:w-auto min-w-7 data-[capsule]:px-1`}
+                  bool:data-capsule={!tag().startsWith("GCG_TAG_")}
                 >
                   <TagIcon tagName={tag()} />
                 </div>
