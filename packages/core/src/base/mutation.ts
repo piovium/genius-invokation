@@ -132,7 +132,7 @@ export interface MoveEntityM {
     | "createSupport"
     | "unequip"
     | "unsupport"
-    | "other";
+    | "unspecified";
 }
 
 export interface RemoveEntityM {
@@ -145,12 +145,15 @@ export interface RemoveEntityM {
     | "targetOfSupportPlayed"
     | "eventCardPlayed"
     | "eventCardDrawn"
-    | "equipOverridden"
-    | "createSupportOverridden"
     | "elementalTuning"
     | "overflow"
     | "eventCardPlayNoEffect"
-    | "other";
+    | "equipOverridden"
+    | "equipmentReplaced"
+    | "parentMoved"
+    | "costAttachmentNeutralized"
+    | "selectedCardNotPlayed"
+    | "unspecified";
 }
 
 export const DEFAULT_VARIABLE_UPPER_BOUND = 2 ** 31 - 1;
@@ -184,7 +187,7 @@ export type ResetDiceReason =
   | "generate"
   | "convert"
   | "absorb"
-  | "other";
+  | "unspecified";
 
 export interface ResetDiceM {
   readonly type: "resetDice";
