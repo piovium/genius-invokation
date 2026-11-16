@@ -24,9 +24,9 @@ export default defineConfig({
   presets: [presetWind3()],
   variants: [
     ...Object.entries({
-      DP: "deck-page-control",
-      FM: "filter-menu-control",
-    }).map<Variant>(([prefix, cls]) => {
+      DP: ".gi-tcg-deck-builder:has(.deck-page-control:checked)",
+      FM: ".filter-bar:has(> .filter-menu-control:checked)",
+    }).map<Variant>(([prefix, scope]) => {
       return (matcher) => {
         if (!matcher.startsWith(`${prefix}:`)) {
           return matcher;
@@ -34,8 +34,7 @@ export default defineConfig({
         return {
           matcher: matcher.slice(prefix.length + 1),
           layer: "reactive",
-          selector: (s) =>
-            `${s}:is(.gi-tcg-deck-builder:has(.${cls}:checked) *)`,
+          selector: (s) => `${s}:is(${scope} *)`,
         };
       };
     }),

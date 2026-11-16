@@ -31,7 +31,7 @@ function App() {
   });
   const assetsManager = new AssetsManager({
     apiBaseUrl: `https://static-data.piovium.org/`,
-    language: "EN",
+    language: "CHS",
   });
   return (
     <DeckBuilder
@@ -39,7 +39,7 @@ function App() {
       class="mobile"
       deck={deck()}
       onChangeDeck={setDeck}
-      locale="en"
+      locale="zh-CN"
       // version="v3.3.0"
     />
   );

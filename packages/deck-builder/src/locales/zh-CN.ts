@@ -30,6 +30,7 @@ export default {
   faction: "所属阵营",
   cardType: "卡牌类型",
   cardTag: "卡牌标签",
+  diceCost: "元素骰费用",
   typeModify: "装备牌",
   typeEvent: "事件牌",
   typeAssist: "支援牌",

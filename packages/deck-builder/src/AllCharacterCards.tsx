@@ -106,19 +106,19 @@ export function AllCharacterCards(props: AllCardsProps) {
             name: t("elementType"),
             selected: elementTag,
             onSelect: (value) => toggleElementTag(value),
-            option: ELEMENT_TAG_IMG_NAME_MAP,
+            option: Object.keys(ELEMENT_TAG_IMG_NAME_MAP),
           },
           {
             name: t("weaponType"),
             selected: weaponTag,
             onSelect: (value) => toggleWeaponTag(value),
-            option: WEAPON_TAG_IMG_NAME_MAP,
+            option: Object.keys(WEAPON_TAG_IMG_NAME_MAP),
           },
           {
             name: t("faction"),
             selected: nationTag,
             onSelect: (value) => toggleNationTag(value),
-            option: NATION_TAG_IMG_NAME_MAP,
+            option: Object.keys(NATION_TAG_IMG_NAME_MAP),
           },
         ]}
       />
