@@ -47,8 +47,9 @@ define card {
     on damaged {
       when :(
         !:e.target.isMine() &&
-          ([DamageType.Physical, DamageType.Cryo] as DamageType[]).includes(
-            :e.type,
+          :hasPhaseDamage(
+            "my",
+            (e) => ([DamageType.Physical, DamageType.Cryo] as DamageType[]).includes(e.type),
           )
       );
       listenTo all;
