@@ -734,15 +734,19 @@ export class EntityViewModel extends defineViewModel(
       ): AR.With<typeof PrepareVM>;
     }>((model, [skill], subView) => {
       const options = PrepareVM.parse(subView);
-      if (typeof options.hintCount === "number") {
-        model.setVariable("hintCount", options.hintCount, { visible: false });
-      }
       model.tags.push("preparingSkill");
       const replaceSkillModel = new TriggeredSkillModel(
         model,
         "replaceActionBySkill",
       );
       replaceSkillModel.id = model.getSubId();
+      replaceSkillModel.setUsage(options.usage ?? 1, {
+        perRound: false,
+        visible: typeof options.usage === "number",
+      });
+      if (typeof options.hintCount === "number") {
+        model.setVariable("hintCount", options.hintCount, { visible: false });
+      }
       replaceSkillModel.action = function (c) {
         if (options.nextStatus) {
           c.characterStatus(
@@ -752,7 +756,6 @@ export class EntityViewModel extends defineViewModel(
           );
         }
         c.useSkill(skill, { asPrepared: true });
-        c.dispose();
       };
       const switchActiveSkillModel = new TriggeredSkillModel(
         model,

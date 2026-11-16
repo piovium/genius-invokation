@@ -118,15 +118,8 @@ define status {
 define status {
   id 115178 as StatusAzureDevourPreparing;
   since "v7.2.0";
-  tags preparingSkill;
-  // prepare 当前只支持一次，手动实现两次准备技能。
-  on replaceActionBySkill {
+  prepare AzureDevour {
     usage 2;
-    :useSkill(AzureDevour);
-  };
-  on switchActive {
-    when :( :e.switchInfo.from?.id === :self.master.id );
-    :dispose();
   };
 };
 

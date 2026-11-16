@@ -48,6 +48,7 @@ export const GlobalUsageVM = defineSimpleViewModel(GtsGlobalUsageOptions, {
 });
 
 const GtsPrepareOption = type({
+  "usage?": "number",
   "hintCount?": "number",
   "nextStatus?": type.unknown.as<StatusHandle>(),
   "nextStatusCreateOpt?": type.unknown.as<CreateEntityOptions>(),
