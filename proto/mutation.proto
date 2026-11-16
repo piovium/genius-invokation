@@ -155,7 +155,7 @@ enum RemoveEntityReason {
   REMOVE_ENTITY_REASON_EQUIPMENT_REPLACED = 8;
   /** 打出支援牌指定弃置 */
   REMOVE_ENTITY_REASON_TARGET_OF_SUPPORT_PLAYED = 9;
-  /** 击倒移除状态装备 */
+  /** 手牌附着随手牌移除 */
   REMOVE_ENTITY_REASON_PARENT_MOVED = 10;
   /** 抵消费用增加/减少 */
   REMOVE_ENTITY_REASON_COST_ATTACHMENT_NEUTRALIZED = 11;
