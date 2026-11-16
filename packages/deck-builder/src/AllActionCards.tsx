@@ -18,7 +18,7 @@ import { PoolCard } from "./Card";
 import type { AllCardsProps } from "./AllCards";
 import { Key } from "@solid-primitives/keyed";
 import type { DeckDataActionCardInfo } from "@gi-tcg/assets-manager";
-import { CARD_TAG_IMG_NAME_MAP, CARD_TYPE_TEXT_MAP, TagIcon } from "./TagIcon";
+import { CARD_TAG_IMG_NAME_MAP, CARD_TYPE_TEXT_KEYS, CARD_COST_TEXT_KEYS } from "./TagIcon";
 import { FilterBar } from "./FilterBar";
 import { useDeckBuilderContext } from "./DeckBuilder";
 
@@ -28,6 +28,7 @@ export function AllActionCards(props: AllCardsProps) {
   const { t } = useDeckBuilderContext();
   const [acType, setAcType] = createSignal<string | null>(null);
   const [acTag, setAcTag] = createSignal<string | null>(null);
+  const [acCost, setAcCost] = createSignal<string | null>(null);
 
   const count = (id: number) => {
     return props.deck.cards.filter((c) => c === id).length;
@@ -110,6 +111,7 @@ export function AllActionCards(props: AllCardsProps) {
   const shown = (ac: DeckDataActionCardInfo) => {
     const ty = acType();
     const tag = acTag();
+    const cost = acCost();
     if (ac.version > props.version) {
       return false;
     }
@@ -117,6 +119,12 @@ export function AllActionCards(props: AllCardsProps) {
       return false;
     }
     if (tag !== null && !ac.tags.includes(tag)) {
+      return false;
+    }
+    if (
+      cost !== null &&
+      (cost === "4+" ? ac.diceCost < 4 : ac.diceCost !== Number(cost))
+    ) {
       return false;
     }
     return true;
@@ -151,13 +159,19 @@ export function AllActionCards(props: AllCardsProps) {
             name: t("cardType"),
             selected: acType,
             onSelect: (value) => toggleType(value),
-            option: CARD_TYPE_TEXT_MAP,
+            option: CARD_TYPE_TEXT_KEYS,
           },
           {
             name: t("cardTag"),
             selected: acTag,
             onSelect: (value) => toggleTag(value),
-            option: CARD_TAG_IMG_NAME_MAP,
+            option: Object.keys(CARD_TAG_IMG_NAME_MAP),
+          },
+          {
+            name: t("diceCost"),
+            selected: acCost,
+            onSelect: (value) => setAcCost(acCost() === value ? null : value),
+            option: CARD_COST_TEXT_KEYS,
           },
         ]}
       />
