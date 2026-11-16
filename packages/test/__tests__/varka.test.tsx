@@ -6,6 +6,7 @@ import {
   AzureDevourStatus,
   FourWindsAscensionInEffect,
   FourWindsAscensionStatus,
+  StatusAzureDevourPreparing,
   Varka,
   WindboundExecution,
 } from "@gi-tcg/data/internal/characters/anemo/varka.gts";
@@ -30,4 +31,21 @@ test.each([
   c.expect($.my.typeStatus.def(status)).toBeExist();
   c.expect($.my.hand).toBeCount(0);
   c.expect($.my.typeSupport.def(FlowerfeatherClan)).toHaveVariable({ disposedCardCount: 0 });
+});
+
+test("Azure Devour prepares two consecutive skills", async () => {
+  const c = setup(
+    <State>
+      <Character my active def={Varka}>
+        <Status def={StatusAzureDevourPreparing} />
+      </Character>
+      <Character opp active health={10} />
+    </State>,
+  );
+  await c.stepToNextAction();
+  c.expect($.opp.active).toHaveVariable({ health: 8 });
+  c.expect($.my.typeStatus.def(StatusAzureDevourPreparing)).toHaveVariable({ usage: 1 });
+  await c.opp.end();
+  c.expect($.opp.active).toHaveVariable({ health: 6 });
+  c.expect($.my.typeStatus.def(StatusAzureDevourPreparing)).toNotExist();
 });
