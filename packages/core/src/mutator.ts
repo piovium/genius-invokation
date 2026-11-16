@@ -516,7 +516,7 @@ export class StateMutator {
 
   dispose(
     target: AnyState,
-    { reason = "other", direct, via }: InternalDisposeOption,
+    { reason = "unspecified", direct, via }: InternalDisposeOption,
   ): ReadonlyEventList {
     const events = new EventList();
     target = getEntityById(this.state, target.id);
@@ -1229,16 +1229,16 @@ export class StateMutator {
 
     if (oldState) {
       if (moveFrom) {
+        if (opt.moveReason !== "equip") {
+          throw new GiTcgCoreInternalError(
+            `Override existing state by moving entity is only allowed for reason=equip.`,
+          );
+        }
         this.mutate({
           type: "removeEntity",
           from: moveFrom,
           oldState: stateOrDef as EntityState,
-          reason:
-            opt.moveReason === "equip"
-              ? "equipOverridden"
-              : opt.moveReason === "createSupport"
-                ? "createSupportOverridden"
-                : "other",
+          reason: "equipOverridden",
         });
       }
 
@@ -1280,7 +1280,7 @@ export class StateMutator {
             type: "removeEntity",
             from: moveFrom,
             oldState: attachment,
-            reason: "other", // TODO maybe better reason?
+            reason: "parentMoved",
           });
         }
         this.mutate({
@@ -1288,7 +1288,7 @@ export class StateMutator {
           from: moveFrom,
           target: area,
           value: state,
-          reason: opt.moveReason ?? "other",
+          reason: opt.moveReason ?? "unspecified",
         });
         newStateId = state.id;
       } else {

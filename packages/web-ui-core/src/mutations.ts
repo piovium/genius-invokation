@@ -167,7 +167,6 @@ export function parseMutations(
           PbRemoveEntityReason.EVENT_CARD_PLAYED,
           PbRemoveEntityReason.EVENT_CARD_PLAY_NO_EFFECT,
           PbRemoveEntityReason.EQUIP_OVERRIDDEN,
-          PbRemoveEntityReason.CREATE_SUPPORT_OVERRIDDEN,
         ].includes(mutation.value.reason)
       ) {
         playingCard = {

@@ -1286,7 +1286,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   moveEntity(
     state: PlainEntityState,
     area: EntityArea,
-    reason: MoveEntityM["reason"] = "other",
+    reason: MoveEntityM["reason"] = "unspecified",
   ) {
     const { newState } = this.callAndEmit(
       "insertEntityOnStage",
@@ -1362,9 +1362,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
               v.definition.tags.includes(tag),
           );
           if (exist) {
-            // TODO: maybe better reason
             this.dispose(exist, {
-              reason: "overflow",
+              reason: "equipmentReplaced",
               direct: true,
             });
           }
@@ -1474,7 +1473,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
           type: "removeEntity",
           from: existed.area,
           oldState: existed.latest(),
-          reason: "other",
+          reason: "costAttachmentNeutralized",
         });
       }
       value -= existedLayer;

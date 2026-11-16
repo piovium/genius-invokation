@@ -517,8 +517,7 @@ export function updateHistory(
             if (
               m.reason === PbRemoveEntityReason.EVENT_CARD_PLAYED ||
               m.reason === PbRemoveEntityReason.EVENT_CARD_PLAY_NO_EFFECT ||
-              m.reason === PbRemoveEntityReason.EQUIP_OVERRIDDEN ||
-              m.reason === PbRemoveEntityReason.CREATE_SUPPORT_OVERRIDDEN
+              m.reason === PbRemoveEntityReason.EQUIP_OVERRIDDEN
             ) {
               mainBlock = {
                 type: "playCard",

@@ -483,7 +483,7 @@ export class SkillExecutor {
                 type: "removeEntity",
                 from: { who: arg.who, type: "hands", cardId: arg.card.id },
                 oldState: arg.card,
-                reason: "other", // maybe better reason
+                reason: "selectedCardNotPlayed",
               });
             }
           },

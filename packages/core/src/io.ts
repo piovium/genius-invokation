@@ -351,7 +351,7 @@ export function exposeMutation(
         equip: PbMoveEntityReason.EQUIP,
         unequip: PbMoveEntityReason.UNEQUIP,
         unsupport: PbMoveEntityReason.UNSUPPORT,
-        other: PbMoveEntityReason.UNSPECIFIED,
+        unspecified: PbMoveEntityReason.UNSPECIFIED,
       };
       return {
         $case: "moveEntity",
@@ -386,10 +386,12 @@ export function exposeMutation(
           eventCardPlayed: PbRemoveEntityReason.EVENT_CARD_PLAYED,
           eventCardPlayNoEffect: PbRemoveEntityReason.EVENT_CARD_PLAY_NO_EFFECT,
           equipOverridden: PbRemoveEntityReason.EQUIP_OVERRIDDEN,
-          createSupportOverridden:
-            PbRemoveEntityReason.CREATE_SUPPORT_OVERRIDDEN,
+          equipmentReplaced: PbRemoveEntityReason.EQUIPMENT_REPLACED,
           overflow: PbRemoveEntityReason.OVERFLOW,
-          other: PbRemoveEntityReason.UNSPECIFIED,
+          parentMoved: PbRemoveEntityReason.PARENT_MOVED,
+          costAttachmentNeutralized: PbRemoveEntityReason.COST_ATTACHMENT_NEUTRALIZED,
+          selectedCardNotPlayed: PbRemoveEntityReason.SELECTED_CARD_NOT_PLAYED,
+          unspecified: PbRemoveEntityReason.UNSPECIFIED,
         };
       return {
         $case: "removeEntity",
@@ -452,7 +454,7 @@ export function exposeMutation(
           generate: PbResetDiceReason.GENERATE,
           convert: PbResetDiceReason.CONVERT,
           absorb: PbResetDiceReason.ABSORB,
-          other: PbResetDiceReason.UNSPECIFIED,
+          unspecified: PbResetDiceReason.UNSPECIFIED,
         }[m.reason] ?? PbResetDiceReason.UNSPECIFIED;
       return {
         $case: "resetDice",
