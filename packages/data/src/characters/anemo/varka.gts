@@ -145,7 +145,7 @@ define card {
   since "v7.2.0";
   cost DiceType.Aligned, 2;
   undiscoverable;
-  :selectAndPlay([FourWindsAscensionStatus, AzureDevourStatus]);
+  :selectAndCreateHandCard([FourWindsAscensionStatus, AzureDevourStatus]);
 };
 
 /**
@@ -159,7 +159,9 @@ define card {
   id 115173 as FourWindsAscensionStatus;
   since "v7.2.0";
   undiscoverable;
-  :characterStatus(FourWindsAscensionInEffect, $.my.def(Varka));
+  on selfHandCardInserted, only {
+    :characterStatus(FourWindsAscensionInEffect, $.my.def(Varka));
+  };
 };
 
 /**
@@ -173,7 +175,9 @@ define card {
   id 115174 as AzureDevourStatus;
   since "v7.2.0";
   undiscoverable;
-  :characterStatus(AzureDevourInEffect, $.my.def(Varka));
+  on selfHandCardInserted, only {
+    :characterStatus(AzureDevourInEffect, $.my.def(Varka));
+  };
 };
 
 /**
