@@ -30,6 +30,11 @@ export type ProfileGameConfig = Omit<
 export interface ModSource extends z.infer<typeof modSchema> {}
 export interface PluginConfig extends z.output<typeof inlinePluginSchema> {}
 export interface Preset extends z.output<typeof presetSchema> {}
+export interface PluginContext {
+  preset: Preset;
+  baseVersion: Version;
+  gameConfig: ProfileGameConfig;
+}
 
 export interface ProfileDeckConfig {
   blacklist?: number[];

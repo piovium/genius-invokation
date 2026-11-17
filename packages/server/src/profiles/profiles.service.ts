@@ -29,6 +29,7 @@ export class ProfilesService {
     }
     for (const compiled of await loadPresets(
       new URL("../../presets/", import.meta.url),
+      { recursive: true },
     )) {
       this.profiles.set(compiled.profile.id, compiled);
     }

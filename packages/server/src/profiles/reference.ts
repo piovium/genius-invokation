@@ -85,6 +85,7 @@ function resolveRemoteReference(reference: string, parent: URL): URL {
 async function loadExternalReference(
   reference: string,
   parent: URL,
+  context?: unknown,
 ): Promise<LoadedReference> {
   let source = resolveReference(reference, parent);
   const extension = extname(source.pathname).toLowerCase();
@@ -95,7 +96,7 @@ async function loadExternalReference(
     const jiti = createJiti(parent.href);
     let value = await jiti.import(fileURLToPath(source), { default: true });
     if (typeof value === "function") {
-      value = await value();
+      value = await value(context);
     }
     return { value, source };
   }
@@ -138,9 +139,14 @@ export async function loadReference<T>(
   parent: URL,
   schema: z.ZodType<T, z.ZodTypeDef, unknown>,
   inlineSchema = schema,
+  context?: unknown,
 ): Promise<LoadedReference<T>> {
   if (typeof entry === "string") {
-    const { value, source } = await loadExternalReference(entry, parent);
+    const { value, source } = await loadExternalReference(
+      entry,
+      parent,
+      context,
+    );
     return {
       value: schema.parse(value),
       source,

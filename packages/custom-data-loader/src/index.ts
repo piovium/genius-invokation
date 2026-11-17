@@ -125,6 +125,7 @@ export class CustomDataLoader {
     for (const src of sources) {
       const scope = this.registry.begin();
       const definitionIds = new WeakMap<object, number>();
+      const registeredIds = new Set<number>();
       const endRegistration = beginCustomDataRegistration({
         allocateId: (node) => {
           let id = definitionIds.get(node);
@@ -136,6 +137,12 @@ export class CustomDataLoader {
         },
         registerMetadata: (md) => {
           const id = md.id;
+          if (registeredIds.has(id)) {
+            throw new Error(
+              `Multiple custom data definitions found for id ${id} in the same mod`,
+            );
+          }
+          registeredIds.add(id);
           if (md.internal) {
             this.internalIds.add(id);
           }
@@ -182,12 +189,7 @@ export class CustomDataLoader {
       const customDataItems = items.filter(
         (item) => item.version.from === "customData",
       );
-      if (customDataItems.length > 1) {
-        throw new Error(
-          `Multiple custom data versions found for id ${customDataItems[0]!.id}`,
-        );
-      }
-      return customDataItems[0] ?? null;
+      return customDataItems.at(-1) ?? null;
     }, officialVersionResolver);
     let officialDeckCompatible = true;
     const customData: CustomData = {
