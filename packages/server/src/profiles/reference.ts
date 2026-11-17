@@ -137,7 +137,7 @@ async function loadExternalReference(
 export async function loadReference<T>(
   entry: unknown,
   parent: URL,
-  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+  schema: z.ZodType<T>,
   inlineSchema = schema,
   context?: unknown,
 ): Promise<LoadedReference<T>> {

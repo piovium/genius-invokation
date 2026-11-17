@@ -1,0 +1,418 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "$schema_version": {
+      "type": "number",
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[\\w.-]+\\/[\\w.-]+$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "v3.3.0",
+            "v3.4.0",
+            "v3.5.0",
+            "v3.6.0",
+            "v3.7.0",
+            "v3.8.0",
+            "v4.0.0",
+            "v4.1.0",
+            "v4.2.0",
+            "v4.3.0",
+            "v4.4.0",
+            "v4.5.0",
+            "v4.6.0",
+            "v4.6.1",
+            "v4.7.0",
+            "v4.8.0",
+            "v5.0.0",
+            "v5.1.0",
+            "v5.2.0",
+            "v5.3.0",
+            "v5.4.0",
+            "v5.5.0",
+            "v5.6.0",
+            "v5.7.0",
+            "v5.8.0",
+            "v6.0.0",
+            "v6.1.0",
+            "v6.2.0",
+            "v6.3.0",
+            "v6.4.0",
+            "v6.5.0",
+            "v6.6.0",
+            "v6.7.0",
+            "v7.0.0",
+            "v7.1.0",
+            "v7.2.0"
+          ]
+        },
+        {
+          "type": "string",
+          "const": "latest"
+        }
+      ]
+    },
+    "deck": {
+      "type": "object",
+      "properties": {
+        "blacklist": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "whitelist": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "version_behavior": {
+      "type": "object",
+      "properties": {
+        "defaultRecreateBehavior": {
+          "type": "string",
+          "enum": [
+            "overwrite",
+            "takeMax"
+          ]
+        },
+        "foodOmitInjuredOnly": {
+          "type": "boolean"
+        },
+        "discardMaxCostHandsAbortPreview": {
+          "type": "boolean"
+        },
+        "diceCostApplyAttachments": {
+          "type": "boolean"
+        },
+        "base": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "v3.3.0",
+                "v3.4.0",
+                "v3.5.0",
+                "v3.6.0",
+                "v3.7.0",
+                "v3.8.0",
+                "v4.0.0",
+                "v4.1.0",
+                "v4.2.0",
+                "v4.3.0",
+                "v4.4.0",
+                "v4.5.0",
+                "v4.6.0",
+                "v4.6.1",
+                "v4.7.0",
+                "v4.8.0",
+                "v5.0.0",
+                "v5.1.0",
+                "v5.2.0",
+                "v5.3.0",
+                "v5.4.0",
+                "v5.5.0",
+                "v5.6.0",
+                "v5.7.0",
+                "v5.8.0",
+                "v6.0.0",
+                "v6.1.0",
+                "v6.2.0",
+                "v6.3.0",
+                "v6.4.0",
+                "v6.5.0",
+                "v6.6.0",
+                "v6.7.0",
+                "v7.0.0",
+                "v7.1.0",
+                "v7.2.0"
+              ]
+            },
+            {
+              "type": "string",
+              "const": "latest"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "config": {
+      "type": "object",
+      "properties": {
+        "initialHandsCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxHandsCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxPileCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxRoundsCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxSupportsCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxSummonsCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "adventureSpotCandidatesCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "initialDiceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxDiceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "randomElementIncludesOmni": {
+          "type": "boolean"
+        },
+        "unexpectedInsufficientDice": {
+          "type": "string",
+          "enum": [
+            "throw",
+            "skipConsume",
+            "skipAction"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "plugins": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "$schema_version": {
+                "type": "number",
+                "const": 1
+              },
+              "name": {
+                "type": "string"
+              },
+              "version_maps": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string",
+                        "pattern": "^[1-9]\\d*$"
+                      },
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "v3.3.0",
+                              "v3.4.0",
+                              "v3.5.0",
+                              "v3.6.0",
+                              "v3.7.0",
+                              "v3.8.0",
+                              "v4.0.0",
+                              "v4.1.0",
+                              "v4.2.0",
+                              "v4.3.0",
+                              "v4.4.0",
+                              "v4.5.0",
+                              "v4.6.0",
+                              "v4.6.1",
+                              "v4.7.0",
+                              "v4.8.0",
+                              "v5.0.0",
+                              "v5.1.0",
+                              "v5.2.0",
+                              "v5.3.0",
+                              "v5.4.0",
+                              "v5.5.0",
+                              "v5.6.0",
+                              "v5.7.0",
+                              "v5.8.0",
+                              "v6.0.0",
+                              "v6.1.0",
+                              "v6.2.0",
+                              "v6.3.0",
+                              "v6.4.0",
+                              "v6.5.0",
+                              "v6.6.0",
+                              "v6.7.0",
+                              "v7.0.0",
+                              "v7.1.0",
+                              "v7.2.0"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "const": "latest"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "mods": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "fileUri": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "content"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "static_data_overrides": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "additionalProperties": {
+                        "$ref": "#/definitions/__schema0"
+                      }
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "id"
+                        ],
+                        "additionalProperties": {
+                          "$ref": "#/definitions/__schema0"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "$schema_version",
+    "id"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "__schema0": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/__schema0"
+          }
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/definitions/__schema0"
+          }
+        }
+      ]
+    }
+  }
+}
