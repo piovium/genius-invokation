@@ -586,8 +586,10 @@ define combatStatus {
   };
   on increaseDamage {
     when :( :e.getReaction() );
-    // 官方实际行为是内联治疗
-    :heal(1, $.macros.myMostInjured);
     :e.increaseDamage(1);
+  };
+  on dealDamage {
+    when :( :e.getReaction() );
+    :heal(1, $.macros.myMostInjured);
   };
 };
