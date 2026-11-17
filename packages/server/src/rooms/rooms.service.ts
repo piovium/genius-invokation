@@ -680,10 +680,16 @@ function toShuffled<T>(array: readonly T[]): T[] {
   return result;
 }
 
+const BLOCKED_ROOM_IDS = new Set([8964]);
+
 export class RoomsService {
   private logger = console;
 
-  private roomIdPool = toShuffled(Array.from({ length: 10000 }, (_, i) => i));
+  private roomIdPool = toShuffled(
+    Array.from({ length: 10000 }, (_, i) => i).filter(
+      (id) => !BLOCKED_ROOM_IDS.has(id),
+    ),
+  );
   private rooms = new Map<number, Room>();
   private shutdownResolvers: PromiseWithResolvers<void> | null = null;
 
