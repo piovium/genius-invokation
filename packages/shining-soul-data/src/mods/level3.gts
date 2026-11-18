@@ -30,7 +30,7 @@ import {
  */
 define card {
   id 312015;
-  description "我方角色每受到1点实际治疗，累积1个海染泡沫（最多6个）。角色造成伤害时消耗全部泡沫，每3个使伤害+1。";
+  description "<color=#FFFFFFFF>我方角色每受到1点实际治疗，</color>累积1个<color=#FFFFFFFF>海染泡沫</color>（最多6个）。<color=#FFFFFFFF>角色造成伤害时</color>消耗全部泡沫，每3个使伤害+1。";
   cost DiceType.Aligned, 1;
   artifact {
     variable bubble, 0 { range 6; };
@@ -57,7 +57,7 @@ define card {
  */
 define card {
   id 312016;
-  description "入场时治疗所附属角色3点。我方角色每受到1点实际治疗，累积1个海染泡沫（最多6个）。角色造成伤害时消耗全部泡沫，每3个使伤害+1。";
+  description "<color=#FFFFFFFF>入场时</color>治疗所附属角色3点。<color=#FFFFFFFF>我方角色每受到1点实际治疗，</color>累积1个<color=#FFFFFFFF>海染泡沫</color>（最多6个）。<color=#FFFFFFFF>角色造成伤害时</color>消耗全部泡沫，每3个使伤害+1。";
   cost DiceType.Void, 3;
   artifact {
     variable bubble, 0 { range 6; };
@@ -128,7 +128,7 @@ define combatStatus {
  */
 define card {
   id 332015;
-  description "声明冰、水、火、雷中的两种元素，由对方选择其中一种，召唤对应的丘丘人（2次可用次数）。牌组包含至少2个魔物角色才能加入。";
+  description "声明{SPRITE_PRESET#2101}<color=#99FFFFFF>冰</color>、{SPRITE_PRESET#2102}<color=#80C0FFFF>水</color>、{SPRITE_PRESET#2103}<color=#FF9999FF>火</color>、{SPRITE_PRESET#2104}<color=#FFACFFFF>雷</color>中的两种元素，由对方选择其中一种，召唤对应的丘丘人（2次$[K3]）。牌组包含至少2个{SPRITE_PRESET#3503}魔物角色才能加入。";
   cost DiceType.Aligned, 2;
   :combatStatus(ElementDeclaration);
 };
@@ -145,7 +145,7 @@ define card {
  */
 define card {
   id 332016;
-  description "声明冰、水、火、雷中的两种元素，由对方选择其中一种，在对方场上生成对应的愚人众伏兵（2次可用次数，每回合1次）。牌组包含至少2个愚人众角色才能加入。";
+  description "声明{SPRITE_PRESET#2101}<color=#99FFFFFF>冰</color>、{SPRITE_PRESET#2102}<color=#80C0FFFF>水</color>、{SPRITE_PRESET#2103}<color=#FF9999FF>火</color>、{SPRITE_PRESET#2104}<color=#FFACFFFF>雷</color>中的两种元素，由对方选择其中一种，在对方场上生成对应的$[K1004]（2次$[K3]，每回合1次）。牌组包含至少2个{SPRITE_PRESET#3501}愚人众角色才能加入。";
   cost DiceType.Aligned, 2;
   :combatStatus(ElementDeclaration, "my", {
     overrideVariables: { fatui: 1 },
