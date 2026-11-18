@@ -486,14 +486,24 @@ describe("CustomDataLoader GTS", () => {
     }
   });
 
-  test("rejects multiple custom data versions for the same id", async () => {
+  test("later mods override definitions with the same id", async () => {
     const loader = await new CustomDataLoader().loadMod(
       conflictingCustomDataGts,
-      conflictingCustomDataGts,
+      conflictingCustomDataGts.replace("usage 1", "usage 3"),
     );
 
-    expect(() => loader.done()).toThrow(
-      "Multiple custom data versions found for id 100",
+    expect(
+      loader.done()[0].entities.get(100)?.varConfigs.usage.initialValue,
+    ).toBe(3);
+  });
+
+  test("rejects duplicate definitions within one mod", async () => {
+    await expect(
+      new CustomDataLoader().loadMod(
+        `${conflictingCustomDataGts}\n${conflictingCustomDataGts.replace("ConflictingStatus", "OtherStatus")}`,
+      ),
+    ).rejects.toThrow(
+      "Multiple custom data definitions found for id 100 in the same mod",
     );
   });
 

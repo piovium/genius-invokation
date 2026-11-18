@@ -72,7 +72,7 @@ const jsonSchema: z.ZodType<Json> = z.lazy(() =>
     z.number().finite(),
     z.string(),
     z.array(jsonSchema),
-    z.record(jsonSchema),
+    z.record(z.string(), jsonSchema),
   ]),
 );
 // Static keyword IDs may be negative; arbitrary fields must remain JSON data.

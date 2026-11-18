@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../../schemas/preset.json
 # Copyright (C) 2026 Piovium Labs
 #
 # This program is free software: you can redistribute it and/or modify
@@ -14,15 +15,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $schema_version: 1
-id: piovium/lianyu-s1
-name: 恋雨杯 S1
-version: v7.1.0
+id: piovium/lianyu-live
+name: 恋雨杯 Live
+version: v7.2.0
 version_behavior:
   discardMaxCostHandsAbortPreview: false
 plugins:
-- version_maps:
-  - ./versions.jsonc
-  mods:
-  - ./mod.gts
-  static_data_overrides:
-  - ./overrides.yml
+  - ../s1/plugin.ts
+  - ./plugin.ts

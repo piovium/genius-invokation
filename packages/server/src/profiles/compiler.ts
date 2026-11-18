@@ -123,6 +123,7 @@ export async function compilePreset(
       source,
       pluginSchema,
       inlinePluginSchema,
+      { preset, baseVersion, gameConfig },
     );
     for (const entry of plugin.version_maps ?? []) {
       const { value } = await loadReference(
@@ -131,9 +132,6 @@ export async function compilePreset(
         versionMapSchema,
       );
       for (const [id, selected] of Object.entries(value)) {
-        if (versionMap[Number(id)] && versionMap[Number(id)] !== selected) {
-          throw new Error(`Conflicting versions for ${id}`);
-        }
         versionMap[Number(id)] = selected;
       }
     }
