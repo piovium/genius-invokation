@@ -44,8 +44,8 @@ const EntityTopHint = (props: { cardDefinitionId: number; value: number }) => {
     () =>
       assetsManager()
         .getData(defId())
-        .catch(() => undefined),
-    { loadingValue: undefined },
+        .catch(() => void 0),
+    { loadingValue: void 0 },
   );
   const ICON_MAP: Record<string, Component> = {
     GCG_TOKEN_ICON_CLOCK: ClockIcon,

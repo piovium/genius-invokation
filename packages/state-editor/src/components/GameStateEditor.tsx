@@ -95,12 +95,11 @@ function SectionCard(props: {
     <button
       type="button"
       onClick={() => props.onClick()}
-      class={`
-        relative rounded-md @2xl:rounded-2xl border p-1 @2xl:p-3 text-left transition-all duration-200
-        hover:scale-[1.02] hover:shadow-lg overflow-hidden flex flex-col justify-start
-        ${variantStyles[props.config.variant || "default"]}
-        ${activeStyles()}
-      `}
+      class={[
+        "relative rounded-md @2xl:rounded-2xl border p-1 @2xl:p-3 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-lg overflow-hidden flex flex-col justify-start",
+        variantStyles[props.config.variant || "default"],
+        activeStyles(),
+      ]}
       style={gridStyle()}
     >
       {/* 标题 */}
@@ -148,7 +147,6 @@ export function GameStateEditor(props: GameStateEditorProps) {
 
   const errors = createMemo(() => validateGameState(state, catalog()));
   const [formValid, setFormValid] = createSignal(true);
-  // eslint-disable-next-line no-unassigned-vars
   let formRef!: HTMLFormElement;
 
   const refreshFormValidity = () => {

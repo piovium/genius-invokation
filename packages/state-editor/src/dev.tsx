@@ -45,7 +45,6 @@ function downloadState(serialized: string) {
 
 function App() {
   const [persistedState, setPersistedState] = makePersisted(
-    // eslint-disable-next-line solid/reactivity
     createSignal<string | null>(null),
     {
       storage: localStorage,

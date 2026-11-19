@@ -39,8 +39,8 @@ export function Image(props: ImageProps) {
           type: props.type,
           thumbnail: true,
         })
-        .catch(() => undefined),
-    { loadingValue: undefined },
+        .catch(() => void 0),
+    { loadingValue: void 0 },
   );
 
   const showImage = () => (imageId() !== 0 || props.zero === "physic") && url();

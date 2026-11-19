@@ -5,6 +5,7 @@ import {
   createMemo,
   createSignal,
   omit,
+  untrack,
 } from "solid-js";
 import type { ComponentProps, JSX } from "@solidjs/web";
 import type { AssetOption } from "../types";
@@ -69,9 +70,7 @@ export interface NumberFieldProps {
 }
 
 export function NumberField(props: NumberFieldProps) {
-  // eslint-disable-next-line solid/reactivity
-  const [text, setText] = createSignal(String(props.value ?? ""));
-  // eslint-disable-next-line no-unassigned-vars
+  const [text, setText] = createSignal(untrack(() => String(props.value ?? "")));
   let inputRef!: HTMLInputElement;
 
   createEffect(
@@ -160,14 +159,16 @@ export function BooleanField(props: BooleanFieldProps) {
         aria-checked={props.value ? "true" : "false"}
         disabled={props.disabled}
         onClick={() => props.onChange(!props.value)}
-        class={`relative inline-flex h-6 w-11 p-0.5 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/50 disabled:cursor-not-allowed disabled:opacity-60 ${
-          props.value ? "bg-amber-400/80" : "bg-slate-600/60"
-        }`}
+        class={[
+          "relative inline-flex h-6 w-11 p-0.5 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/50 disabled:cursor-not-allowed disabled:opacity-60",
+          props.value ? "bg-amber-400/80" : "bg-slate-600/60",
+        ]}
       >
         <span
-          class={`pointer-events-none inline-block h-5 w-5 translate-x-0 rounded-full bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
-            props.value ? "translate-x-5" : "translate-x-0"
-          }`}
+          class={[
+            "pointer-events-none inline-block h-5 w-5 translate-x-0 rounded-full bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out",
+            props.value ? "translate-x-5" : "translate-x-0",
+          ]}
         />
       </button>
     </div>

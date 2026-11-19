@@ -159,16 +159,6 @@ export function Card(props: CardProps) {
     return result;
   });
 
-  // onSettled(() => {
-  //   console.log(el);
-  // });
-
-  // createEffect(() => {
-  //   if (props.data.id === -500039) {
-  //     console.log(el);
-  //   }
-  // });
-
   createEffect(
     () => props.uiState,
     (uiState) => {
@@ -279,8 +269,10 @@ export function Card(props: CardProps) {
         {/* with animate no render */}
         <ConductiveEffect
           noRender
-          class={`m--3 w-27 h-42 max-w-27 max-h-42
-            ${props.kind === "oppHand" ? "rotate-y-180 translate-z--0.2px" : ""}`}
+          class={[
+            "m--3 w-27 h-42 max-w-27 max-h-42",
+            props.kind === "oppHand" && "rotate-y-180 translate-z--0.2px",
+          ]}
         />
       </Show>
     </div>

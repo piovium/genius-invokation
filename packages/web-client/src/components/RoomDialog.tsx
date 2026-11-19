@@ -161,8 +161,8 @@ export function RoomDialog(props: RoomDialogProps) {
       axios
         .get<ProfileList>("profiles")
         .then(({ data }) => data)
-        .catch(() => undefined),
-    { loadingValue: undefined },
+        .catch(() => void 0),
+    { loadingValue: void 0 },
   );
   const [profile, setProfile] = createSignal<ProfileSummary>();
   const [timeConfig, setTimeConfig] = createSignal(TIME_CONFIGS[1]);

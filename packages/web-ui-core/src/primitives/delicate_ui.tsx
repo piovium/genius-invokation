@@ -100,11 +100,11 @@ export function WithDelicateUi(props: WithDelicateUiProps) {
               }
             }),
         ),
-      ).catch(() => undefined),
-    { loadingValue: undefined },
+      ).catch(() => void 0),
+    { loadingValue: void 0 },
   );
   return (
-    <Show when={resource() != null} fallback={props.fallback}>
+    <Show when={typeof resource() !== "undefined"} fallback={props.fallback}>
       {props.children(...(resource() as any[]))}
     </Show>
   );

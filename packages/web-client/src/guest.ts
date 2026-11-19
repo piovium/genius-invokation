@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Accessor, createSignal, createStore } from "solid-js";
+import { Accessor, createMemo, createSignal, createStore } from "solid-js";
 import { makePersisted } from "@solid-primitives/storage";
 import type { DeckInfo } from "./pages/Decks";
 import type { Deck } from "@gi-tcg/typings";
@@ -99,9 +99,10 @@ export const useGuestDecks = (): GuestDeck => {
   };
 
   const limit = pLimit(1);
+  const decks = createMemo(() => guestDeck.toReversed());
 
   return [
-    () => guestDeck.toReversed(),
+    decks,
     {
       addGuestDeck: (deck) => limit(addGuestDeck, deck),
       updateGuestDeck: (id, newDeck) => limit(updateGuestDeck, id, newDeck),

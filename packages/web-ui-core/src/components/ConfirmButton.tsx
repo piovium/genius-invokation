@@ -26,7 +26,7 @@ export interface ConfirmButtonProps {
 export function ConfirmButton(props: ConfirmButtonProps) {
   return (
     <Button
-      class={`hidden data-[shown]:grid ${props.class ?? ""}`}
+      class={["hidden data-[shown]:grid", props.class]}
       onClick={() => props.step && props.onClick?.(props.step)}
       data-shown={!!props.step}
     >

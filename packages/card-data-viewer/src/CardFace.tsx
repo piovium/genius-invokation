@@ -28,8 +28,8 @@ export function CardFace(props: CardFaceProps) {
     () =>
       assetsManager()
         .getImageUrl(props.defId)
-        .catch(() => undefined),
-    { loadingValue: undefined },
+        .catch(() => void 0),
+    { loadingValue: void 0 },
   );
   const frameUrl = `${UI_ASSET_URL_BASE}CardFrameNormal.svg.webp`;
   return (

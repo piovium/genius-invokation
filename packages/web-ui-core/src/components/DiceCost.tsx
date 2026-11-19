@@ -100,8 +100,8 @@ export const DiceCostAsync = (props: DiceCostAsyncProps) => {
     () =>
       assetsManager()
         .getData(props.cardDefinitionId)
-        .catch(() => undefined),
-    { loadingValue: undefined },
+        .catch(() => void 0),
+    { loadingValue: void 0 },
   );
   const COST_MAP: Record<string, number> = {
     GCG_COST_DICE_VOID: DiceType.Void,

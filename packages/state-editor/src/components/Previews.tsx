@@ -53,11 +53,12 @@ export function PreviewTile(props: PreviewTileProps) {
   const mode = () => props.mode ?? "card";
   return (
     <div
-      class={`rounded-3xl border p-3 transition ${
+      class={[
+        "rounded-3xl border p-3 transition",
         props.active
           ? "border-amber-200/45 bg-amber-300/10"
-          : "border-white/10 bg-slate-950/25"
-      }`}
+          : "border-white/10 bg-slate-950/25",
+      ]}
     >
       <button
         type="button"
@@ -68,7 +69,10 @@ export function PreviewTile(props: PreviewTileProps) {
         <img
           src={getImageUrl(props.definition, mode())}
           alt={props.title ?? getDefinitionName(props.definition)}
-          class={`w-full rounded-2xl ${mode() === "card" ? "gi-editor-card-image" : "gi-editor-icon-image"}`}
+          class={[
+            "w-full rounded-2xl",
+            mode() === "card" ? "gi-editor-card-image" : "gi-editor-icon-image",
+          ]}
         />
         <div class="space-y-1">
           <p class="text-sm font-semibold text-amber-50">

@@ -36,7 +36,10 @@ import {
 } from "@gi-tcg/assets-manager";
 import { translations, type Locale } from "./i18n";
 import type { I18nKey } from "./locales";
-import { resolveTemplate, translator } from "@solid-primitives/i18n";
+import {
+  resolveTemplate,
+  translator as createTranslator,
+} from "@solid-primitives/i18n";
 
 export interface DeckBuilderProps extends JSX.HTMLAttributes<HTMLDivElement> {
   assetsManager?: AssetsManager;
@@ -69,8 +72,7 @@ export function DeckBuilder(props: DeckBuilderProps) {
     () => props.assetsManager ?? DEFAULT_ASSETS_MANAGER,
   );
   const locale = createMemo(() => props.locale ?? "zh-CN");
-  const dict = createMemo(() => translations[locale()]);
-  const t = translator(dict, resolveTemplate);
+  const t = createTranslator(() => translations[locale()], resolveTemplate);
 
   const deckDataRequest = createRequest(() => assetsManager().getDeckData());
   const deckData = deckDataRequest.value;

@@ -86,6 +86,7 @@ export function CurrentDeck(props: AllCardsProps) {
   return (
     // <div
     //   class="flex-shrink-0 flex flex-col flex-grow items-center justify-center gap-1 data-[deck-page]:gap-3 @3xl:gap-3"
+    //   data-deck-page={deckPage()}
     // >
     <div
       // the DP:max-h-[calc(100%-25px)] is calculated by subtracting b-t-1 of split line, mt-3 of split line, h-3 of toggle button and mb-2 of toggle button

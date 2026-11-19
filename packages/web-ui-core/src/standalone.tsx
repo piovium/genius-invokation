@@ -17,14 +17,13 @@ import type { PbExposedMutation, PbGameState } from "@gi-tcg/typings";
 import { createMemo, omit } from "solid-js";
 import type { ComponentProps } from "@solidjs/web";
 import { Chessboard, type ChessboardData } from "./components/Chessboard";
-import { translations, UiContext, type Locale } from "./hooks/context";
+import { createUiTranslator, UiContext, type Locale } from "./hooks/context";
 import { parseMutations } from "./mutations";
 import {
   type AssetsManager,
   DEFAULT_ASSETS_MANAGER,
 } from "@gi-tcg/assets-manager";
 import type { HistoryBlock } from "./history/typings";
-import { resolveTemplate, translator } from "@solid-primitives/i18n";
 
 export interface StandaloneChessboardProps extends ComponentProps<"div"> {
   who: 0 | 1;
@@ -45,8 +44,7 @@ export function StandaloneChessboard(props: StandaloneChessboardProps) {
   );
 
   const getLocale = () => props.locale ?? "zh-CN";
-  const dict = createMemo(() => translations[getLocale()]);
-  const t = translator(dict, resolveTemplate);
+  const t = createUiTranslator(getLocale);
 
   const history = createMemo<HistoryBlock[]>(() => {
     return [];

@@ -108,7 +108,7 @@ export function SelectOption(props: SelectOptionProps) {
               <img
                 src={props.image}
                 alt=""
-                draggable={false}
+                draggable="false"
                 class="rounded-full w-9 h-9 object-cover grid-area-[1/1] self-end"
               />
             }

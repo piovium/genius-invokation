@@ -108,7 +108,10 @@ export function ListItem(props: ListItemProps) {
         {/* 图片 */}
         <Show when={props.imageSrc}>
           <div
-            class={`flex shrink-0 overflow-hidden items-center ${props.imageMode === "card" ? "w-14 h-24" : "w-12 h-12 ml-2"}`}
+            class={[
+              "flex shrink-0 overflow-hidden items-center",
+              props.imageMode === "card" ? "w-14 h-24" : "w-12 h-12 ml-2",
+            ]}
           >
             <img
               src={props.imageSrc}
@@ -119,7 +122,7 @@ export function ListItem(props: ListItemProps) {
         </Show>
 
         {/* 文字信息 */}
-        <div class={`flex-1 min-w-0 py-3 pr-2 ${props.imageSrc ? "" : "pl-4"}`}>
+        <div class={["flex-1 min-w-0 py-3 pr-2", { "pl-4": !props.imageSrc }]}>
           {/* 标题 */}
           <div class="text-sm font-semibold text-amber-50 truncate">
             {props.title}

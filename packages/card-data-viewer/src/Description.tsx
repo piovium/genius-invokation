@@ -126,8 +126,8 @@ function DamageDescription(props: DamageDescriptionProps) {
     () =>
       assetsManager()
         .getImageUrl(id())
-        .catch(() => undefined),
-    { loadingValue: undefined },
+        .catch(() => void 0),
+    { loadingValue: void 0 },
   );
   return (
     <>
@@ -263,8 +263,8 @@ function ReferenceName(props: { definitionId: number }) {
     () =>
       assetsManager()
         .getData(props.definitionId)
-        .catch(() => undefined),
-    { loadingValue: undefined },
+        .catch(() => void 0),
+    { loadingValue: void 0 },
   );
   return (
     <>

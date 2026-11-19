@@ -32,8 +32,8 @@ export function Card(props: CardProps) {
     () =>
       assetsManager()
         .getImageUrl(props.id, { thumbnail: true })
-        .catch(() => undefined),
-    { loadingValue: undefined },
+        .catch(() => void 0),
+    { loadingValue: void 0 },
   );
   const name = () => assetsManager().getNameSync(props.id);
 
@@ -175,14 +175,14 @@ export function TinyCharacterCard(props: TinyCardProps) {
     () =>
       assetsManager()
         .getImageUrl(props.id, { type: "icon", thumbnail: true })
-        .catch(() => undefined),
-    { loadingValue: undefined },
+        .catch(() => void 0),
+    { loadingValue: void 0 },
   );
 
   return (
     <div class="@3xl:hidden DP:hidden w-full h-full rounded-full overflow-clip b-gray-500 border-2 relative group">
       <Show
-        when={url() != null}
+        when={typeof url() === "string"}
         fallback={<div class="w-full h-full bg-gray-200" />}
       >
         <img src={url()} draggable="false" class="w-full object-cover" />
@@ -205,14 +205,14 @@ export function TinyActionCard(props: TinyCardProps) {
     () =>
       assetsManager()
         .getImageUrl(props.id, { thumbnail: true })
-        .catch(() => undefined),
-    { loadingValue: undefined },
+        .catch(() => void 0),
+    { loadingValue: void 0 },
   );
 
   return (
     <div class="@3xl:hidden DP:hidden w-full rounded-md overflow-clip b-gray-500 border-2 relative group">
       <Show
-        when={url() != null}
+        when={typeof url() === "string"}
         fallback={<div class="w-full aspect-ratio-[7/12] bg-gray-200" />}
       >
         <img src={url()} draggable="false" class="w-full object-cover" />

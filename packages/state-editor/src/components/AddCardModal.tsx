@@ -201,11 +201,12 @@ export function AddCardModal(props: AddCardModalProps) {
               <button
                 type="button"
                 onClick={() => setSelectedType(null)}
-                class={`px-3 py-1.5 rounded-full text-xs border transition ${
+                class={[
+                  "px-3 py-1.5 rounded-full text-xs border transition",
                   selectedType() === null
                     ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-50"
-                    : "bg-slate-800 border-white/20 text-slate-300 hover:bg-slate-700"
-                }`}
+                    : "bg-slate-800 border-white/20 text-slate-300 hover:bg-slate-700",
+                ]}
               >
                 全部
               </button>
@@ -214,11 +215,12 @@ export function AddCardModal(props: AddCardModalProps) {
                   <button
                     type="button"
                     onClick={() => setSelectedType(type)}
-                    class={`px-3 py-1.5 rounded-full text-xs border transition ${
+                    class={[
+                      "px-3 py-1.5 rounded-full text-xs border transition",
                       selectedType() === type
                         ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-50"
-                        : "bg-slate-800 border-white/20 text-slate-300 hover:bg-slate-700"
-                    }`}
+                        : "bg-slate-800 border-white/20 text-slate-300 hover:bg-slate-700",
+                    ]}
                   >
                     {ENTITY_TYPE_LABELS[type]}
                   </button>
@@ -245,11 +247,12 @@ export function AddCardModal(props: AddCardModalProps) {
                         setSelectedOther(false);
                         toggleTag(tag);
                       }}
-                      class={`px-3 py-1.5 rounded-full text-xs border transition ${
+                      class={[
+                        "px-3 py-1.5 rounded-full text-xs border transition",
                         selectedTags().includes(tag)
                           ? "bg-amber-500/20 border-amber-500/50 text-amber-50"
-                          : "bg-slate-800 border-white/20 text-slate-300 hover:bg-slate-700"
-                      }`}
+                          : "bg-slate-800 border-white/20 text-slate-300 hover:bg-slate-700",
+                      ]}
                     >
                       {tagLabel}
                     </button>
@@ -263,11 +266,12 @@ export function AddCardModal(props: AddCardModalProps) {
                     setSelectedTags([]);
                     setSelectedOther(!selectedOther());
                   }}
-                  class={`px-3 py-1.5 rounded-full text-xs border transition ${
+                  class={[
+                    "px-3 py-1.5 rounded-full text-xs border transition",
                     selectedOther()
                       ? "bg-amber-500/20 border-amber-500/50 text-amber-50"
-                      : "bg-slate-800 border-white/20 text-slate-300 hover:bg-slate-700"
-                  }`}
+                      : "bg-slate-800 border-white/20 text-slate-300 hover:bg-slate-700",
+                  ]}
                 >
                   其他
                 </button>
@@ -312,7 +316,10 @@ export function AddCardModal(props: AddCardModalProps) {
                   >
                     {/* 卡牌图片 */}
                     <div
-                      class={`w-full rounded-lg overflow-hidden ${cardMode === "icon" ? "" : "aspect-[3/4]"}`}
+                      class={[
+                        "w-full rounded-lg overflow-hidden",
+                        { "aspect-[3/4]": cardMode !== "icon" },
+                      ]}
                     >
                       <img
                         src={getImageUrl(card.definition, cardMode)}

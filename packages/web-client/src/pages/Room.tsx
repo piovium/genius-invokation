@@ -192,12 +192,16 @@ export default function Room() {
   }));
   return (
     <Show keyed when={session()}>
-      {(room) => <RoomSession {...room} />}
+      {renderRoomSession}
     </Show>
   );
 }
 
-function RoomSession(props: {
+function renderRoomSession({
+  code,
+  playerId,
+  action,
+}: {
   code: string;
   playerId?: string;
   action: boolean;
@@ -206,7 +210,6 @@ function RoomSession(props: {
   const { t, assetsManager, locale } = useI18n();
   const checkboxId = createUniqueId();
   const navigate = useNavigate();
-  const { code, action, playerId } = props;
   const id = roomCodeToId(code);
   const { status } = useAuth();
   const [playerIo, setPlayerIo] = createSignal<WebUiPlayerIO>();
@@ -621,9 +624,7 @@ function RoomSession(props: {
                 component={chessboard()}
                 rotation={mobile() ? 90 : 0}
                 autoHeight={!mobile()}
-                class={`${
-                  mobile() ? "mobile-chessboard h-100dvh w-100dvw" : ""
-                }`}
+                class={mobile() && "mobile-chessboard h-100dvh w-100dvw"}
                 chessboardColor={status().chessboardColor ?? void 0}
                 timer={currentMyTimer() ?? currentOppTimer()}
                 myPlayerInfo={getClientPlayerInfo(payload().myPlayerInfo)}

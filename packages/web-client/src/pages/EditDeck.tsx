@@ -41,18 +41,18 @@ export default function EditDeck() {
   const params = useParams<{ id: string }>();
   return (
     <Show when={params.id} keyed>
-      {(id) => <DeckEditor id={id} />}
+      {renderDeckEditor}
     </Show>
   );
 }
 
-function DeckEditor(props: { id: string }) {
+function renderDeckEditor(id: string) {
   const { t, locale, assetsManager } = useI18n();
   const { status } = useAuth();
   const [guestDecks, { addGuestDeck, updateGuestDeck }] = useGuestDecks();
   const [searchParams, setSearchParams] = useSearchParams<{ name: string }>();
-  const isNew = props.id === "new";
-  const deckId = Number(props.id);
+  const isNew = id === "new";
+  const deckId = Number(id);
   const [deckName, setDeckName] = createSignal<string>(
     searchParams.name ?? t("newDeck"),
   );

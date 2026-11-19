@@ -1458,7 +1458,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
 
 export interface HistoryCardProps {
   definitionId?: number;
-  class?: string;
+  class?: JSX.ClassValue;
 }
 
 export function HistoryCard(props: HistoryCardProps) {
@@ -1469,11 +1469,11 @@ export function HistoryCard(props: HistoryCardProps) {
     >
       <>
         <Image
-          class={`text-0 ${props.class ?? ""}`}
+          class={["text-0", props.class]}
           imageId={props.definitionId as number}
           fallback="card"
         />
-        <CardFrameNormal class={`pointer-events-none ${props.class ?? ""}`} />
+        <CardFrameNormal class={["pointer-events-none", props.class]} />
       </>
     </Show>
   );
@@ -1489,11 +1489,11 @@ export function HistorySummon(props: HistoryCardProps) {
     >
       <>
         <Image
-          class={`text-0 rounded-sm ${props.class ?? ""}`}
+          class={["text-0 rounded-sm", props.class]}
           imageId={props.definitionId as number}
           fallback="card"
         />
-        <CardFrameSummon class={`pointer-events-none ${props.class ?? ""}`} />
+        <CardFrameSummon class={["pointer-events-none", props.class]} />
       </>
     </Show>
   );
@@ -1577,28 +1577,26 @@ function HistorySummaryShot(props: { data: SummaryShot }) {
           </Match>
         </Switch>
       </div>
-      <Switch>
-        <Match when={props.data.size === "normal"}>
-          <For each={props.data.cardFace.toReversed()}>
-            {(imageId, index) => (
-              <HistoryCard
-                definitionId={imageId}
-                class={`grid-area-[2/1] justify-self-end w-10.5 h-18 mr-${index()}`}
-              />
-            )}
-          </For>
-        </Match>
-        <Match when={props.data.size === "summon"}>
-          <For each={props.data.cardFace.toReversed()}>
-            {(imageId, index) => (
-              <HistorySummon
-                definitionId={imageId}
-                class={`grid-area-[2/1] justify-self-end self-center w-10.5 h-12.5 mr-${index()}`}
-              />
-            )}
-          </For>
-        </Match>
-      </Switch>
+      <For each={props.data.cardFace.toReversed()}>
+        {(imageId, index) => (
+          <div
+            class={[
+              "grid-area-[2/1] justify-self-end grid children:grid-area-[1/1]",
+              { "self-center": props.data.size === "summon" },
+            ]}
+            style={{ "margin-right": `${index() * 0.25}rem` }}
+          >
+            <Show
+              when={props.data.size === "normal"}
+              fallback={
+                <HistorySummon definitionId={imageId} class="w-10.5 h-12.5" />
+              }
+            >
+              <HistoryCard definitionId={imageId} class="w-10.5 h-18" />
+            </Show>
+          </div>
+        )}
+      </For>
       <Switch>
         <Match when={props.data.inner === "switch"}>
           <SwitchActiveHistoryIcon class="grid-area-[2/1] self-center h-9 w-9 mx-0.75" />

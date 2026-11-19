@@ -29,8 +29,8 @@ const versionInfo = createMemo(
     axios
       .get("version")
       .then((res) => res.data)
-      .catch(() => undefined),
-  { loadingValue: undefined },
+      .catch(() => void 0),
+  { loadingValue: void 0 },
 );
 
 export function Footer() {

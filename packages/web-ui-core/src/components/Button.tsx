@@ -22,7 +22,6 @@ import ButtonActive from "../svg/ButtonActive.svg?fb";
 import { AutoResizeText } from "./AutoResizeText";
 
 export interface ButtonProps extends ComponentProps<"button"> {
-  class?: string;
   children: JSX.Element;
   onClick: (e: MouseEvent) => void;
 }

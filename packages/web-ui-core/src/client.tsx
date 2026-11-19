@@ -33,7 +33,6 @@ import {
   type PbExposedMutation,
 } from "@gi-tcg/typings";
 import {
-  createMemo,
   createEffect,
   createSignal,
   type Accessor,
@@ -54,7 +53,7 @@ import type {
 } from "@gi-tcg/core";
 import { QueueManager } from "./queue_manager";
 import { parseMutations, type ParseMutationContext } from "./mutations";
-import { translations, UiContext, type Locale } from "./hooks/context";
+import { createUiTranslator, UiContext, type Locale } from "./hooks/context";
 import {
   createActionState,
   createChooseActiveState,
@@ -75,7 +74,6 @@ import {
   type OppInfo,
 } from "./opp";
 import { flip } from "@gi-tcg/utils";
-import { flatten, resolveTemplate, translator } from "@solid-primitives/i18n";
 
 const EMPTY_PLAYER_DATA: PbPlayerState = {
   activeCharacterId: 0,
@@ -175,8 +173,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     void prepareActionCardsCache(manager);
   });
   const getLocale = () => option.locale?.() ?? "zh-CN";
-  const dict = createMemo(() => flatten(translations[getLocale()]));
-  const t = translator(dict, resolveTemplate);
+  const t = createUiTranslator(getLocale);
 
   const [data, setData] = createSignal<ChessboardData>({
     raw: [],
