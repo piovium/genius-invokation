@@ -50,6 +50,8 @@ import TriggerIcon from "../svg/TriggerIcon.svg?fb";
 import CardFrameSummon from "../svg/CardFrameSummon.svg?fb";
 import CardbackNormal from "../svg/CardbackNormal.svg?fb";
 import CardFrameNormal from "../svg/CardFrameNormal.svg?fb";
+import SelectOptionCard from "../svg/SelectOption.svg?fb";
+import { SelectOptionImage, textWithReference } from "./SelectOptionView";
 import { DAMAGE_COLOR } from "./Damage";
 import { REACTION_TEXT_MAP } from "./Reaction";
 import { RichText } from "./RichText";
@@ -1124,8 +1126,8 @@ interface HistoryBlockData {
   title: string;
   indent: number;
   imageId?: number;
-  imageSize: "normal" | "summon" | "text";
-  selectedKey?: string;
+  imageSize: "normal" | "summon" | "option";
+  optionImage?: string;
   callerId?: number;
   energyChange?: blockEnergyProps;
   status?: number;
@@ -1153,6 +1155,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
   const who = useWho();
   const { t } = useUiContext();
   const renderName = createRenderName();
+  const selectOptionText = textWithReference();
 
   let result: HistoryBlockData;
   const opp = (historyOwner: 0 | 1) => historyOwner !== who();
@@ -1354,15 +1357,15 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
           isOpp ? "history.oppSelectOptionTitle" : "history.mySelectOptionTitle",
         ),
         indent: block.indent,
-        imageSize: "text",
-        selectedKey: block.selectedKey,
+        imageSize: "option",
+        optionImage: block.image,
         content: {
           opp: isOpp,
-          name: block.prompt,
+          name: selectOptionText(block.title ?? ""),
           content: (
-            <span class="text-3 text-#d4bc8e whitespace-pre-wrap break-words">
-              {block.selectedKey}
-            </span>
+            <p class="whitespace-pre-wrap">
+              {selectOptionText(block.text)}
+            </p>
           ),
         },
         summary: renderSummary(block.children),
@@ -1666,6 +1669,20 @@ function HistorySummaryShot(props: { data: SummaryShot }) {
   );
 }
 
+function HistoryOption(props: { image?: string; class?: string }) {
+  return (
+    <div
+      class={`pointer-events-none grid children:grid-area-[1/1] ${props.class ?? ""}`}
+    >
+      <SelectOptionCard class="w-full h-full" />
+      <SelectOptionImage
+        image={props.image}
+        class="h-25% aspect-square mt-18% justify-self-center rounded-full"
+      />
+    </div>
+  );
+}
+
 function HistoryBlockBox(props: {
   data: HistoryBlockData;
   isSelected: boolean;
@@ -1690,18 +1707,13 @@ function HistoryBlockBox(props: {
         </For>
       </div>
       <div class="h-24 flex flex-row items-center justify-center gap-1.5">
-        <div
-          class="w-10.5 data-[text]:w-36 h-24 grid grid-cols-1 grid-rows-[1fr_6fr_1fr]"
-          bool:data-text={props.data.imageSize === "text"}
-        >
+        <div class="w-10.5 h-24 grid grid-cols-1 grid-rows-[1fr_6fr_1fr]">
           <Switch>
-            <Match when={props.data.imageSize === "text"}>
-              <div class="grid-area-[2/1] text-3 text-#fff3e0 whitespace-pre-wrap break-words overflow-hidden">
-                <div class="line-clamp-2">{props.data.content.name}</div>
-                <div class="text-#d4bc8e line-clamp-2">
-                  {props.data.selectedKey}
-                </div>
-              </div>
+            <Match when={props.data.imageSize === "option"}>
+              <HistoryOption
+                image={props.data.optionImage}
+                class="grid-area-[2/1] w-10.5 h-18"
+              />
             </Match>
             <Match when={props.data.imageSize === "normal"}>
               <HistoryCard
@@ -1941,24 +1953,26 @@ function HistoryBlockDetailPanel(props: {
     >
       <div class="overflow-y-scroll max-h-120 flex flex-col gap-1 history-scrollbar">
         <Show when={renderBlock().type !== "pocket"}>
-          <div
-            class="relative w-full bg-#2d333a rounded-t-md grid grid-cols-[3.625rem_1fr] data-[text]:grid-cols-[0_1fr] self-start b-2 b-white/10 shrink-0"
-            bool:data-text={renderBlock().type === "selectOption"}
-          >
+          <div class="relative w-full bg-#2d333a rounded-t-md grid grid-cols-[3.625rem_1fr] self-start b-2 b-white/10 shrink-0">
             <div
               class="absolute top-1px left-1px w-3.5 h-3.5 rounded-lt bg-#806440 data-[opp]:bg-#48678b history-card-hint"
               bool:data-opp={renderBlock().content.opp}
             />
-            <Show when={renderBlock().type !== "selectOption"}>
-              <HistoryCard
-                definitionId={renderBlock().content.imageId}
-                class="grid-area-[1/1] w-10.5 h-18 m-2"
-              />
-            </Show>
-            <div
-              class="grid-area-[1/2] py-1.5 pr-2 data-[text]:pl-4 min-w-0 flex flex-col text-2.5 text-#b2afa8"
-              bool:data-text={renderBlock().type === "selectOption"}
-            >
+            <Switch>
+              <Match when={renderBlock().imageSize === "option"}>
+                <HistoryOption
+                  image={renderBlock().optionImage}
+                  class="grid-area-[1/1] w-10.5 h-18 m-2"
+                />
+              </Match>
+              <Match when={true}>
+                <HistoryCard
+                  definitionId={renderBlock().content.imageId}
+                  class="grid-area-[1/1] w-10.5 h-18 m-2"
+                />
+              </Match>
+            </Switch>
+            <div class="grid-area-[1/2] py-1.5 pr-2 min-w-0 flex flex-col text-2.5 text-#b2afa8">
               <div class="text-3.5 text-#fff3e0 font-bold whitespace-pre-wrap break-words">
                 {renderBlock().content.name}
               </div>

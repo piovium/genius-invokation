@@ -36,6 +36,7 @@ export interface SelectOptionViewProps {
 export function SelectOptionView(props: SelectOptionViewProps) {
   const { t } = useUiContext();
   const [selectedIndex, setSelectedIndex] = createSignal<number | null>(null);
+  const selectOptionText = textWithReference();
   return (
     <div
       class="w-full h-full hidden data-[shown]:flex flex-col items-center justify-center select-none z-3 min-w-0 min-h-0"
@@ -45,7 +46,7 @@ export function SelectOptionView(props: SelectOptionViewProps) {
         {t("view.selectOption")}
       </h3>
       <p class="h-6 text-white/60 text-4">
-        <SelectOptionText text={props.request.prompt} />
+        {selectOptionText(props.request.prompt)}
       </p>
       <div class={`flex flex-row h-36 mt-9 mb-15 justify-evenly w-180`}>
         <For each={props.request.options}>
@@ -83,19 +84,8 @@ export interface SelectOptionProps extends ComponentProps<"div"> {
 }
 
 export function SelectOption(props: SelectOptionProps) {
-  const [local, rest] = splitProps(props, [
-    "image",
-    "title",
-    "text",
-    "class",
-  ]);
-  const { assetsManager } = useUiContext();
-  const imageId = () => local.image?.match(/^id:\/\/(\d+)$/)?.[1];
-  const url = createMemo(() =>
-    local.image?.startsWith("name://")
-      ? assetsManager().getRawImageUrlSync(local.image.slice("name://".length))
-      : local.image,
-  );
+  const [local, rest] = splitProps(props, ["image", "title", "text", "class"]);
+  const selectOptionText = textWithReference();
   return (
     <div
       class={`w-21 h-36 grid relative children:grid-area-[1/1] rounded isolate transition-all select-option ${local.class ?? ""}`}
@@ -103,48 +93,61 @@ export function SelectOption(props: SelectOptionProps) {
     >
       <SelectOptionCard class="w-full h-full select-option-card" />
       <div class="grid grid-rows-[3.2rem_1.6rem_4.2rem] grid-cols-1 w-full h-full justify-items-center z-1">
-        <Show when={local.image}>
-          <Show
-            when={imageId()}
-            fallback={
-              <img
-                src={url()}
-                alt=""
-                draggable={false}
-                class="rounded-full w-9 h-9 object-cover grid-area-[1/1] self-end"
-              />
-            }
-          >
-            {(id) => (
-              <Image
-                imageId={Number(id())}
-                type="icon"
-                fallback="state"
-                class="rounded-full w-9 h-9 grid-area-[1/1] self-end"
-              />
-            )}
-          </Show>
-        </Show>
+        <SelectOptionImage
+          image={local.image}
+          class="rounded-full w-9 h-9 grid-area-[1/1] self-end"
+        />
         <span class="grid-area-[2/1] text-#ebccba font-bold text-2.5 self-center">
-          <SelectOptionText text={local.title ?? ""} />
+          {selectOptionText(local.title ?? "")}
         </span>
         <div class="grid-area-[3/1] w-full h-full overflow-y-auto px-1 pb-1 text-2 text-#ebd6c0 whitespace-pre-wrap break-words touch-pan scrollbar-hidden select-option-text">
-          <SelectOptionText text={local.text} />
+          {selectOptionText(local.text)}
         </div>
       </div>
     </div>
   );
 }
 
-function SelectOptionText(props: { text: string }) {
+export function SelectOptionImage(props: { image?: string; class?: string }) {
   const { assetsManager } = useUiContext();
+  const imageId = () => props.image?.match(/^id:\/\/(\d+)$/)?.[1];
+  const url = createMemo(() =>
+    props.image?.startsWith("name://")
+      ? assetsManager().getRawImageUrlSync(props.image.slice("name://".length))
+      : props.image,
+  );
   return (
-    <>
-      {props.text.replace(
-        /\$\[[ACS](\d+)\]/g,
-        (reference, id: string) =>
-          assetsManager().getNameSync(Number(id)) ?? reference,
-      )}
-    </>
+    <Show when={props.image}>
+      <Show
+        when={imageId()}
+        fallback={
+          <img
+            src={url()}
+            alt=""
+            draggable={false}
+            class={`object-cover ${props.class ?? ""}`}
+          />
+        }
+      >
+        {(id) => (
+          <Image
+            imageId={Number(id())}
+            type="icon"
+            fallback="state"
+            class={props.class}
+          />
+        )}
+      </Show>
+    </Show>
   );
 }
+
+export const textWithReference = () => {
+  const { assetsManager } = useUiContext();
+  return (text: string) =>
+    text.replace(
+      /\$\[[ACS](\d+)\]/g,
+      (reference, id: string) =>
+        assetsManager().getNameSync(Number(id)) ?? reference,
+    );
+};

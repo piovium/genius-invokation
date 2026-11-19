@@ -1230,14 +1230,15 @@ export class Game {
     if (selectedIndex < 0 || selectedIndex >= options.length) {
       throw new GiTcgIoError(who, "Selected option not in candidates");
     }
-    this.notifyOne(who, {
-      $case: "selectOptionDone",
-      who,
-      prompt,
-      selectedIndex,
-      selectedKey: options[selectedIndex].key,
-    });
-    this.notifyOne(flip(who), { $case: "selectOptionDone", who });
+    for (const recipient of [0, 1] as const) {
+      this.notifyOne(recipient, {
+        $case: "selectOptionDone",
+        who,
+        text: options[selectedIndex].text,
+        image: options[selectedIndex].image,
+        title: options[selectedIndex].title,
+      });
+    }
     return selectedIndex;
   }
 

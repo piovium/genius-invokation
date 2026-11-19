@@ -187,9 +187,9 @@ export interface SelectOptionHistoryBlock {
   type: "selectOption";
   indent: number;
   who: 0 | 1;
-  prompt?: string;
-  selectedIndex?: number;
-  selectedKey?: string;
+  text: string;
+  image?: string;
+  title?: string;
   children: HistoryChildren[];
 }
 
