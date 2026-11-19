@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  createMemo,
   createSignal,
   For,
   Show,
@@ -88,7 +89,13 @@ export function SelectOption(props: SelectOptionProps) {
     "text",
     "class",
   ]);
+  const { assetsManager } = useUiContext();
   const imageId = () => local.image?.match(/^id:\/\/(\d+)$/)?.[1];
+  const url = createMemo(() =>
+    local.image?.startsWith("name://")
+      ? assetsManager().getRawImageUrlSync(local.image.slice("name://".length))
+      : local.image,
+  );
   return (
     <div
       class={`w-21 h-36 grid relative children:grid-area-[1/1] rounded isolate transition-all select-option ${local.class ?? ""}`}
@@ -101,7 +108,7 @@ export function SelectOption(props: SelectOptionProps) {
             when={imageId()}
             fallback={
               <img
-                src={local.image}
+                src={url()}
                 alt=""
                 draggable={false}
                 class="rounded-full w-9 h-9 object-cover grid-area-[1/1] self-end"
