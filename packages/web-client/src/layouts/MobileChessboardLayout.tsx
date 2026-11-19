@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ErrorBoundary, JSX } from "solid-js";
+import { Errored } from "solid-js";
+import type { JSX } from "@solidjs/web";
 import { getErrorMessage } from "../utils";
 
 export interface LayoutProps {
@@ -24,13 +25,13 @@ export interface LayoutProps {
 export function MobileChessboardLayout(props: LayoutProps) {
   return (
     <main class="flex w-full h-full flex-col touch-none">
-      <ErrorBoundary
+      <Errored
         fallback={(err) => (
-          <div class="text-red-500">{getErrorMessage(err)}</div>
+          <div class="text-red-500">{getErrorMessage(err())}</div>
         )}
       >
         {props.children}
-      </ErrorBoundary>
+      </Errored>
     </main>
   );
 }

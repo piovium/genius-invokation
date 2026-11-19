@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { createResource, Show } from "solid-js";
+import { Show, createMemo } from "solid-js";
 import { useAssetsManager } from "./context";
 
 export const UI_ASSET_URL_BASE = "https://ui-assets.piovium.org/";
@@ -24,9 +24,12 @@ export interface CardFaceProps {
 
 export function CardFace(props: CardFaceProps) {
   const { assetsManager } = useAssetsManager();
-  const [image] = createResource(
-    () => [props.defId, assetsManager()] as const,
-    ([defId, manager]) => manager.getImageUrl(defId),
+  const image = createMemo(
+    () =>
+      assetsManager()
+        .getImageUrl(props.defId)
+        .catch(() => undefined),
+    { loadingValue: undefined },
   );
   const frameUrl = `${UI_ASSET_URL_BASE}CardFrameNormal.svg.webp`;
   return (

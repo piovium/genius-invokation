@@ -1,6 +1,6 @@
 import js from "@eslint/js";
 import { FlatCompat } from "@eslint/eslintrc";
-import solid from "eslint-plugin-solid/configs/typescript";
+import solid from "eslint-plugin-solid/configs/v2";
 import * as tsParser from "@typescript-eslint/parser";
 
 import { fileURLToPath } from "node:url";

@@ -1,4 +1,5 @@
-import { For, Show, type JSX } from "solid-js";
+import { For, Show } from "solid-js";
+import type { JSX } from "@solidjs/web";
 
 import type { CharacterState } from "@gi-tcg/core";
 import { Aura } from "@gi-tcg/typings";

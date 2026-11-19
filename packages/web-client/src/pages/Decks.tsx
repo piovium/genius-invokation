@@ -13,10 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { For, Match, Switch, createResource, Accessor } from "solid-js";
+import { paths } from "../router";
+import { For, Match, Switch, Accessor } from "solid-js";
+import { createRequest } from "@gi-tcg/utils/solid";
 import { Layout } from "../layouts/Layout";
 import axios, { AxiosError } from "axios";
-import { A } from "@solidjs/router";
 import { DeckBriefInfo } from "../components/DeckBriefInfo";
 import type { Deck } from "@gi-tcg/typings";
 import { useGuestDecks } from "../guest";
@@ -46,12 +47,10 @@ export interface UseDecksResult {
 export function useDecks(): UseDecksResult {
   const { status } = useAuth();
   const EMPTY = { count: 0, data: [] };
-  const [userDecks, { refetch }] = createResource(
-    status,
-    () => axios.get<DecksResponse>("decks").then((res) => res.data),
-    {
-      initialValue: EMPTY,
-    },
+  const userDecksRequest = createRequest(() =>
+    status().type === "user"
+      ? axios.get<DecksResponse>("decks").then((res) => res.data)
+      : EMPTY,
   );
   const [guestDecks] = useGuestDecks();
   return {
@@ -63,15 +62,16 @@ export function useDecks(): UseDecksResult {
           data,
           count: data.length,
         };
-      } else if (type === "user" && userDecks.state === "ready") {
-        return userDecks();
+      } else if (type === "user") {
+        return userDecksRequest.value() ?? EMPTY;
       } else {
         return EMPTY;
       }
     },
-    loading: () => status().type === "user" && userDecks.loading,
-    error: () => (status().type === "user" ? userDecks.error : void 0),
-    refetch: () => (status().type === "user" ? refetch() : void 0),
+    loading: () => status().type === "user" && userDecksRequest.loading(),
+    error: () => (status().type === "user" ? userDecksRequest.error() : void 0),
+    refetch: () =>
+      status().type === "user" ? userDecksRequest.refetch() : void 0,
   };
 }
 
@@ -104,9 +104,9 @@ export default function Decks() {
       <div class="container mx-auto h-full px-2 flex flex-col">
         <div class="flex flex-row gap-4 justify-between items-center mb-5">
           <h2 class="text-2xl font-bold">{t("myDecks")}</h2>
-          <A class="btn btn-outline-green" href="/decks/new">
+          <a class="btn btn-outline-green" href={paths.decks("new")}>
             <i class="i-mdi-plus" /> {t("add")}
-          </A>
+          </a>
         </div>
         <Switch>
           <Match when={loading()}>{t("loading")}</Match>

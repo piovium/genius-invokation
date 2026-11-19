@@ -14,14 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  createSignal,
-  type Component,
-  type JSX,
-} from "solid-js";
+import { createSignal, type Component } from "solid-js";
+import type { JSX } from "@solidjs/web";
+
+import { RichText } from "./RichText";
 
 export interface AlertController {
-  show: (content: JSX.Element) => void;
+  show: (content: string) => void;
   hide: () => void;
 }
 
@@ -30,11 +29,11 @@ export const createAlert = (): [
   component: Component,
 ] => {
   const [showAlert, setShowAlert] = createSignal(false);
-  const [content, setContent] = createSignal<JSX.Element>();
+  const [content, setContent] = createSignal("");
 
   let autoHideTimeout: number | null = null;
 
-  const show = (content: JSX.Element) => {
+  const show = (content: string) => {
     setShowAlert(false); // retrigger animation
     window.setTimeout(() => {
       setContent(content);
@@ -60,7 +59,7 @@ export const createAlert = (): [
     },
     () => (
       <Alert shown={showAlert()} onBackdropClick={hide}>
-        {content()}
+        <RichText content={content()} />
       </Alert>
     ),
   ];
@@ -77,14 +76,14 @@ function Alert(props: AlertProps) {
   return (
     <div
       class="z-7 hidden data-[shown]:flex w-full h-full bg-black/50 items-center justify-center"
-      bool:data-shown={props.shown}
+      data-shown={props.shown}
       onClick={() => props.onBackdropClick?.()}
     >
       <div
-        class={`w-90 p-4 pointer-events-none select-none
-          font-bold text-#ede4d8 text-4.5 text-center
-          bg-#786049 border-#bea678 b-3 rounded-1.5
-          alert-auto-hide ${ props.class ?? "" }`}
+        class={[
+          "w-90 p-4 pointer-events-none select-none font-bold text-#ede4d8 text-4.5 text-center bg-#786049 border-#bea678 b-3 rounded-1.5 alert-auto-hide",
+          props.class,
+        ]}
       >
         {props.children}
       </div>

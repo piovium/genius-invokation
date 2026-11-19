@@ -23,7 +23,7 @@ import DiceCountYellow from "../svg/DiceCountYellow.svg?fb";
 import DiceCountBlue from "../svg/DiceCountBlue.svg?fb";
 import DiceLegend from "../svg/DiceLegend.svg?fb";
 import DiceLegendBg from "../svg/DiceLegendBg.svg?fb";
-import { Dynamic } from "solid-js/web";
+import { Dynamic } from "@solidjs/web";
 
 export interface PlayerInfoProps {
   class?: string;
@@ -49,11 +49,11 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
   }));
   return (
     <div
-      class={`pointer-events-none select-none h-50% py-2 gap-1
-        flex flex-col data-[opp]:flex-col-reverse items-start ${
-          props.class ?? ""
-        }`}
-      bool:data-opp={!!props.opp}
+      class={[
+        "pointer-events-none select-none h-50% py-2 gap-1 flex flex-col data-[opp]:flex-col-reverse items-start",
+        props.class,
+      ]}
+      data-opp={props.opp}
     >
       <div class="grid place-items-center w-18 h-9 my-9 children:grid-area-[1/1] info-dice-count">
         <Dynamic
@@ -72,8 +72,8 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
         class={`hidden data-[shown]block py-0.5 pr-3 pl-3.5 ml-7
           bg-#e9e1d3 b-1 b-#403f44 text-#403f44 text-3 font-bold
            rounded-r-3 rounded-lb-0 rounded-lt-4 data-[opp]:rounded-lb-4 data-[opp]:rounded-lt-0`}
-        bool:data-shown={props.declaredEnd}
-        bool:data-opp={props.opp}
+        data-shown={props.declaredEnd}
+        data-opp={props.opp}
       >
         {t("player.declaredEndStatus")}
       </div>

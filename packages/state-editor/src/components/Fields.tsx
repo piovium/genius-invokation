@@ -4,10 +4,9 @@ import {
   createEffect,
   createMemo,
   createSignal,
-  splitProps,
-  type ComponentProps,
-  type JSX,
+  omit,
 } from "solid-js";
+import type { ComponentProps, JSX } from "@solidjs/web";
 import type { AssetOption } from "../types";
 import { matchesSearch } from "../state/assets";
 
@@ -33,7 +32,10 @@ export function Surface(props: {
 }) {
   return (
     <section
-      class={`rounded-3xl border border-[var(--gi-editor-border)] bg-[var(--gi-editor-panel)] p-4 shadow-[var(--gi-editor-shadow)] ${props.class ?? ""}`}
+      class={[
+        "rounded-3xl border border-[var(--gi-editor-border)] bg-[var(--gi-editor-panel)] p-4 shadow-[var(--gi-editor-shadow)]",
+        props.class,
+      ]}
     >
       <Show when={props.title}>
         <h2 class="mb-4 text-lg font-semibold text-amber-50">{props.title}</h2>
@@ -56,7 +58,7 @@ export function FieldLabel(props: { label: string; hint?: string }) {
 
 export interface NumberFieldProps {
   label: string;
-  value: number;
+  value: number | undefined;
   onChange: (value: number) => void;
   mode?: "integer" | "number";
   min?: number;
@@ -68,16 +70,18 @@ export interface NumberFieldProps {
 
 export function NumberField(props: NumberFieldProps) {
   // eslint-disable-next-line solid/reactivity
-  const [text, setText] = createSignal(String(props.value));
+  const [text, setText] = createSignal(String(props.value ?? ""));
   // eslint-disable-next-line no-unassigned-vars
   let inputRef!: HTMLInputElement;
 
-  createEffect(() => {
-    const nextValue = String(props.value);
-    if (document.activeElement !== inputRef && text() !== nextValue) {
-      setText(nextValue);
-    }
-  });
+  createEffect(
+    () => String(props.value ?? ""),
+    (nextValue) => {
+      if (document.activeElement !== inputRef && text() !== nextValue) {
+        setText(nextValue);
+      }
+    },
+  );
 
   const validate = (raw: string) => {
     if (!inputRef) {
@@ -121,7 +125,7 @@ export function NumberField(props: NumberFieldProps) {
         max={props.max}
         value={text()}
         disabled={props.disabled}
-        readOnly={props.readOnly}
+        readonly={props.readOnly}
         required
         onInput={(event) => {
           const nextValue = event.currentTarget.value;
@@ -131,7 +135,7 @@ export function NumberField(props: NumberFieldProps) {
         onBlur={(event) => {
           validate(event.currentTarget.value);
           if (event.currentTarget.validity.valid) {
-            setText(String(props.value));
+            setText(String(props.value ?? ""));
           }
         }}
       />
@@ -153,7 +157,7 @@ export function BooleanField(props: BooleanFieldProps) {
       <button
         type="button"
         role="switch"
-        aria-checked={props.value}
+        aria-checked={props.value ? "true" : "false"}
         disabled={props.disabled}
         onClick={() => props.onChange(!props.value)}
         class={`relative inline-flex h-6 w-11 p-0.5 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/50 disabled:cursor-not-allowed disabled:opacity-60 ${
@@ -184,7 +188,7 @@ export function SelectField(props: SelectFieldProps) {
       <FieldLabel label={props.label} />
       <select
         class="rounded-2xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-amber-200/50 disabled:cursor-not-allowed disabled:opacity-60"
-        value={String(props.value)}
+        value={String(props.value ?? "")}
         disabled={props.disabled}
         onChange={(event) => props.onChange(event.currentTarget.value)}
       >
@@ -217,8 +221,7 @@ export function SearchableSelect<TDefinition>(
   );
   const [selected, setSelected] = createSignal<string>("");
 
-  createEffect(() => {
-    const options = filtered();
+  createEffect(filtered, (options) => {
     if (options.length === 0) {
       setSelected("");
       return;
@@ -285,12 +288,7 @@ export interface ActionButtonProps extends ComponentProps<"button"> {
 }
 
 export function ActionButton(props: ActionButtonProps) {
-  const [localProps, restProps] = splitProps(props, [
-    "label",
-    "disabled",
-    "tone",
-    "class",
-  ]);
+  const restProps = omit(props, "label", "disabled", "tone", "class");
   const toneClass = createMemo(() => {
     switch (props.tone) {
       case "danger":
@@ -304,11 +302,15 @@ export function ActionButton(props: ActionButtonProps) {
   return (
     <button
       type="button"
-      class={`gi-editor-button rounded-full border px-3 py-1.5 text-xs font-medium ${toneClass()} ${localProps.class || ""}`}
-      disabled={localProps.disabled}
+      class={[
+        "gi-editor-button rounded-full border px-3 py-1.5 text-xs font-medium",
+        toneClass(),
+        props.class || "",
+      ]}
+      disabled={props.disabled}
       {...restProps}
     >
-      {localProps.label}
+      {props.label}
     </button>
   );
 }

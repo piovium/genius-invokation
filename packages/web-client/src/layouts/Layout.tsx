@@ -13,18 +13,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ErrorBoundary, JSX } from "solid-js";
+import { Errored } from "solid-js";
+import type { JSX } from "@solidjs/web";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
-import { Dynamic } from "solid-js/web";
 import { getErrorMessage } from "../utils";
 
 export interface LayoutProps {
   children?: JSX.Element;
-}
-
-function Passthrough(props: { children?: JSX.Element }) {
-  return <>{props.children}</>;
 }
 
 export function Layout(props: LayoutProps) {
@@ -32,14 +28,17 @@ export function Layout(props: LayoutProps) {
     <div class="w-full h-full flex flex-col justify-between">
       <Header />
       <main class="flex-grow flex-shrink-0 min-h-0 w-full p-4 md:p-8 md:pb-0 mt-12 md:mt-16 md:max-h-[calc(100vh-8.5rem)]">
-        <Dynamic
-          component={import.meta.env.DEV ? Passthrough : ErrorBoundary}
-          fallback={(err: Error) => (
-            <div class="text-red-500">{getErrorMessage(err)}</div>
-          )}
-        >
-          {props.children}
-        </Dynamic>
+        {import.meta.env.DEV ? (
+          props.children
+        ) : (
+          <Errored
+            fallback={(err) => (
+              <div class="text-red-500">{getErrorMessage(err())}</div>
+            )}
+          >
+            {props.children}
+          </Errored>
+        )}
       </main>
 
       <Footer />

@@ -14,15 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  createMemo,
-  createResource,
-  Match,
-  Show,
-  Switch,
-  type Component,
-  type ComponentProps,
-} from "solid-js";
+import { createMemo, Match, Show, Switch, type Component } from "solid-js";
+import { type ComponentProps, Dynamic } from "@solidjs/web";
 import { cssPropertyOfTransform } from "../ui_state";
 import type { EntityInfo } from "./Chessboard";
 import { Image } from "./Image";
@@ -37,7 +30,6 @@ import HourglassIcon from "../svg/HourglassIcon.svg?fb";
 import BarrierIcon from "../svg/BarrierIcon.svg?fb";
 import { useUiContext } from "../hooks/context";
 import type { EntityRawData } from "@gi-tcg/assets-manager";
-import { Dynamic } from "solid-js/web";
 
 export interface EntityProps extends EntityInfo {
   selecting: boolean;
@@ -48,9 +40,12 @@ export interface EntityProps extends EntityInfo {
 const EntityTopHint = (props: { cardDefinitionId: number; value: number }) => {
   const { assetsManager } = useUiContext();
   const defId = createMemo(() => props.cardDefinitionId);
-  const [data] = createResource(
-    () => [defId(), assetsManager()] as const,
-    ([id, manager]) => manager.getData(id),
+  const data = createMemo(
+    () =>
+      assetsManager()
+        .getData(defId())
+        .catch(() => undefined),
+    { loadingValue: undefined },
   );
   const ICON_MAP: Record<string, Component> = {
     GCG_TOKEN_ICON_CLOCK: ClockIcon,
@@ -58,7 +53,7 @@ const EntityTopHint = (props: { cardDefinitionId: number; value: number }) => {
     GCG_TOKEN_ICON_BARRIER_SHIELD: BarrierIcon,
   };
   const hintComponent = createMemo(() => {
-    if (data.state === "ready") {
+    if (data() != null) {
       return ICON_MAP[(data() as EntityRawData).shownIcon as string];
     }
   });
@@ -113,10 +108,10 @@ export function Entity(props: EntityProps) {
       class={`absolute left-0 top-0 w-16 aspect-ratio-[28/33] data-[hidden]:invisible
         grid preserve-3d rounded isolate children:grid-area-[1/1] clickable-outline entity`}
       style={cssPropertyOfTransform(props.uiState.transform)}
-      bool:data-hidden={props.hidden}
-      bool:data-entering={props.animation === "entering"}
-      bool:data-disposing={props.animation === "disposing"}
-      bool:data-clickable={
+      data-hidden={props.hidden}
+      data-entering={props.animation === "entering"}
+      data-disposing={props.animation === "disposing"}
+      data-clickable={
         props.clickStep && props.clickStep.ui >= ActionStepEntityUi.Outlined
       }
       onClick={(e) => {
@@ -132,9 +127,9 @@ export function Entity(props: EntityProps) {
       <CardFrameSummon class="w-full h-full pointer-events-none z-1" />
       <div
         class="w-full h-full rounded entity-effect z-2"
-        bool:data-usable={data().hasUsagePerRound || props.previewingNew}
-        bool:data-entering={props.animation === "entering"}
-        bool:data-triggered={props.triggered}        
+        data-usable={data().hasUsagePerRound || props.previewingNew}
+        data-entering={props.animation === "entering"}
+        data-triggered={props.triggered}
       />
       <Show when={showVariableDiff()}>
         <VariableDiff

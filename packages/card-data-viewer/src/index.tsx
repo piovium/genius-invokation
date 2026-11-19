@@ -17,7 +17,7 @@ import "@gi-tcg/utils/reset.css";
 import "virtual:uno.css";
 import "./style.css";
 
-import type { JSX } from "solid-js/jsx-runtime";
+import type { JSX } from "@solidjs/web";
 import {
   CardDataViewerContainer,
   type ViewerInput,
@@ -116,7 +116,7 @@ export function createCardDataViewer(
 
   return {
     CardDataViewer: () => (
-      <AssetsContext.Provider
+      <AssetsContext
         value={{
           assetsManager: assetsManagerGetter,
           locale: localeGetter,
@@ -128,7 +128,7 @@ export function createCardDataViewer(
           inputs={inputs()}
           mainImageDefId={mainImageDefId()}
         />
-      </AssetsContext.Provider>
+      </AssetsContext>
     ),
     showCard: (id: number, opt?: ShowCardDataViewerOption) => {
       showDef(id, "card", opt);

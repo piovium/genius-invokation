@@ -18,7 +18,8 @@ import { defineConfig } from "tsdown";
 export default defineConfig({
   platform: "neutral",
   entry: {
-    index: "./src/index.ts"
+    index: "./src/index.ts",
+    solid: "./src/solid.ts",
   },
   sourcemap: true,
   dts: !process.env.NO_TYPING,

@@ -16,13 +16,12 @@
 import {
   createEffect,
   createMemo,
-  createResource,
   For,
   Match,
   Show,
   Switch,
+  createStore,
 } from "solid-js";
-import { createStore, produce } from "solid-js/store";
 import { Reference } from "./Entity";
 import { useAssetsManager } from "./context";
 
@@ -123,9 +122,12 @@ function DamageDescription(props: DamageDescriptionProps) {
       void 0,
     ].indexOf(props.dType);
   const keywordId = () => -(100 + id());
-  const [url] = createResource(
-    () => [id(), assetsManager()] as const,
-    ([id, manager]) => manager.getImageUrl(id),
+  const url = createMemo(
+    () =>
+      assetsManager()
+        .getImageUrl(id())
+        .catch(() => undefined),
+    { loadingValue: undefined },
   );
   return (
     <>
@@ -162,27 +164,23 @@ export function Description(props: DescriptionProps) {
   const [references, setReferences] = createStore<number[]>([]);
 
   const addReference = (defId: number) => {
-    setReferences(
-      produce((prev) => {
-        if (defId !== props.definitionId && !prev.includes(defId)) {
-          prev.push(defId);
-        }
-      }),
-    );
+    setReferences((prev) => {
+      if (defId !== props.definitionId && !prev.includes(defId)) {
+        prev.push(defId);
+      }
+    });
   };
 
-  createEffect(() => {
-    const addRefFn = props.onAddReference ?? addReference;
-    for (const item of items()) {
-      if (item.type !== "reference") {
-        continue;
-      } else if (item.rType === "S" && !props.fromSkill) {
-        addRefFn(item.id);
-      } else if (item.rType === "C") {
-        addRefFn(item.id);
-      }
-    }
-  });
+  createEffect(
+    () =>
+      items().flatMap((item) =>
+        item.type === "reference" &&
+        (item.rType === "C" || (item.rType === "S" && !props.fromSkill))
+          ? [item.id]
+          : [],
+      ),
+    (ids) => ids.forEach(props.onAddReference ?? addReference),
+  );
 
   return (
     <>
@@ -196,7 +194,7 @@ export function Description(props: DescriptionProps) {
               <Match when={item.type === "text" && item} keyed>
                 {(item) => (
                   <span
-                    classList={{
+                    class={{
                       "description-dynamic": item.color === "#D3BC8EFF",
                       "description-strong": item.color === "#FFFFFFFF",
                     }}
@@ -261,9 +259,12 @@ export function Description(props: DescriptionProps) {
 
 function ReferenceName(props: { definitionId: number }) {
   const { assetsManager } = useAssetsManager();
-  const [data] = createResource(
-    () => [props.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId),
+  const data = createMemo(
+    () =>
+      assetsManager()
+        .getData(props.definitionId)
+        .catch(() => undefined),
+    { loadingValue: undefined },
   );
   return (
     <>

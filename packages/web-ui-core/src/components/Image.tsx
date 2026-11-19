@@ -14,16 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  type ComponentProps,
-  Match,
-  Show,
-  Switch,
-  createMemo,
-  createResource,
-  mergeProps,
-  splitProps,
-} from "solid-js";
+import { Match, Show, Switch, createMemo, omit } from "solid-js";
+import type { ComponentProps } from "@solidjs/web";
 import { useUiContext } from "../hooks/context";
 import TechniqueNormal from "../svg/TechniqueNormal.svg?fb";
 import UnknownIcon from "../svg/Unknown.svg?fb";
@@ -37,49 +29,35 @@ export interface ImageProps extends ComponentProps<"img"> {
 }
 
 export function Image(props: ImageProps) {
-  const merged = mergeProps({ zero: "unknown" } as const, props);
-  const [local, rest] = splitProps(merged, [
-    "imageId",
-    "zero",
-    "fallback",
-    "type",
-  ]);
+  const rest = omit(props, "imageId", "zero", "fallback", "type");
   const { assetsManager } = useUiContext();
-  const imageId = createMemo(() => local.imageId);
-  const [url] = createResource(
-    () => [imageId(), local.type, assetsManager()] as const,
-    ([imageId, type, manager]) =>
-      manager.getImageUrl(imageId, {
-        type: type,
-        thumbnail: true,
-      }),
+  const imageId = createMemo(() => props.imageId);
+  const url = createMemo(
+    () =>
+      assetsManager()
+        .getImageUrl(imageId(), {
+          type: props.type,
+          thumbnail: true,
+        })
+        .catch(() => undefined),
+    { loadingValue: undefined },
   );
 
-  const showImage = () => {
-    if (imageId() === 0 && local.zero === "unknown") {
-      return false;
-    } else {
-      return url.state === "ready";
-    }
-  };
-
-  const classNames = "object-cover";
-  const innerProps = createMemo(
-    (): ComponentProps<"img"> => ({
-      ...rest,
-      class: `${rest.class ?? ""} ${classNames}`,
-      src: url.state === "ready" ? url() : void 0,
-      alt: assetsManager().getNameSync(imageId()) ?? `${imageId()}`,
-      draggable: "false",
-    }),
-  );
+  const showImage = () => (imageId() !== 0 || props.zero === "physic") && url();
+  const innerProps = createMemo((): ComponentProps<"img"> => ({
+    ...rest,
+    class: [rest.class, "object-cover"],
+    src: url(),
+    alt: assetsManager().getNameSync(imageId()) ?? `${imageId()}`,
+    draggable: "false",
+  }));
 
   return (
     <Show
       when={showImage()}
       fallback={
         <ImageFallback
-          type={local.fallback}
+          type={props.fallback}
           imageId={imageId()}
           {...innerProps()}
         />
@@ -92,40 +70,43 @@ export function Image(props: ImageProps) {
 
 export type ImageFallbackType = "card" | "state" | "skill" | "technique";
 
-export interface ImageFallbackProps {
+export interface ImageFallbackProps extends Pick<
+  ComponentProps<"img">,
+  "alt" | "class"
+> {
   type?: ImageFallbackType;
   imageId: number;
-  alt?: string;
-  class?: string;
 }
 
 export function ImageFallback(props: ImageFallbackProps) {
-  const [local, rest] = splitProps(props, ["type", "imageId", "alt", "class"]);
+  const rest = omit(props, "type", "imageId", "alt", "class");
   return (
     <Switch>
-      <Match when={local.type === "card"}>
+      <Match when={props.type === "card"}>
         <div
-          class={`text-center bg-#bdaa8a rounded-md leading-none select-none
-            contain-[size_style] flex justify-center items-center ${local.class ?? ""}`}
+          class={[
+            "text-center bg-#bdaa8a rounded-md leading-none select-none contain-[size_style] flex justify-center items-center ",
+            props.class,
+          ]}
           {...rest}
         >
-          {local.alt}
+          {props.alt}
         </div>
       </Match>
-      <Match when={local.type === "state"}>
+      <Match when={props.type === "state"}>
         <div
-          class={`state-fallback rounded-full ${local.class ?? ""}`}
+          class={["state-fallback rounded-full ", props.class]}
           style={{
-            "--bg-color": `var(--c-${DAMAGE_COLOR[Math.min(local.imageId, 8)]})`,
+            "--bg-color": `var(--c-${DAMAGE_COLOR[Math.min(props.imageId, 8)]})`,
           }}
           {...rest}
         />
       </Match>
-      <Match when={local.type === "skill"}>
-        <UnknownIcon class={`${local.class ?? ""}`} noRender {...rest} />
+      <Match when={props.type === "skill"}>
+        <UnknownIcon class={props.class} noRender {...rest} />
       </Match>
-      <Match when={local.type === "technique"}>
-        <TechniqueNormal class={`${local.class ?? ""}`} noRender {...rest} />
+      <Match when={props.type === "technique"}>
+        <TechniqueNormal class={props.class} noRender {...rest} />
       </Match>
     </Switch>
   );

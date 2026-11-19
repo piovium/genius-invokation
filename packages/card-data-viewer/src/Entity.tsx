@@ -13,23 +13,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  createEffect,
-  createMemo,
-  createResource,
-  createSignal,
-  For,
-  Match,
-  Show,
-  Switch,
-} from "solid-js";
+import { createMemo, For, Match, Show, Switch } from "solid-js";
+import { createRequest } from "@gi-tcg/utils/solid";
 import type { PbCharacterState, PbEntityState } from "@gi-tcg/typings";
 import type { ViewerInput } from "./CardDataViewer";
 import type {
   EntityRawData,
   CharacterRawData,
   KeywordRawData,
-  PlayCost,
   SkillRawData,
 } from "@gi-tcg/assets-manager";
 import { PlayCostList } from "./PlayCost";
@@ -54,32 +45,35 @@ export function Character(props: CardDataProps) {
     }
   });
   const { assetsManager, t } = useAssetsManager();
-  const [data] = createResource(
-    () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<CharacterRawData>,
+  const dataRequest = createRequest(
+    () =>
+      assetsManager().getData(
+        props.input.definitionId,
+      ) as Promise<CharacterRawData>,
   );
+  const data = dataRequest.value;
   const equipmentDefinitionIds = createMemo(
     () =>
       state()
         ?.entity.filter((entity) => typeof entity.equipment === "number")
         .map((entity) => entity.definitionId) ?? [],
   );
-  const [techniqueData] = createResource(
-    () => [equipmentDefinitionIds(), assetsManager()] as const,
-    ([definitionIds, manager]) =>
+  const techniqueData = createMemo(
+    () =>
       Promise.all(
-        definitionIds.map((definitionId) =>
-          (manager.getData(definitionId) as Promise<EntityRawData>)
+        equipmentDefinitionIds().map((definitionId) =>
+          (assetsManager().getData(definitionId) as Promise<EntityRawData>)
             .then((data) =>
               data.skills.filter((sk) => sk.type === "GCG_SKILL_TAG_VEHICLE"),
             )
             .catch(() => []),
         ),
       ),
+    { loadingValue: [] },
   );
   const skills = createMemo(() => [
     ...(data()?.skills ?? []),
-    ...(techniqueData()?.flat() ?? []),
+    ...techniqueData().flat(),
   ]);
   const hpText = createMemo(() => {
     const st = state();
@@ -100,8 +94,8 @@ export function Character(props: CardDataProps) {
   return (
     <div class={props.class}>
       <Switch>
-        <Match when={data.error}>{t("loadFailed")}</Match>
-        <Match when={data.state === "pending"}>{t("loading")}</Match>
+        <Match when={dataRequest.error()}>{t("loadFailed")}</Match>
+        <Match when={dataRequest.loading()}>{t("loading")}</Match>
         <Match when={data()}>
           {(data) => (
             <>
@@ -148,10 +142,13 @@ export function ActionCard(props: CardDataProps) {
     }
   });
   const { assetsManager, t } = useAssetsManager();
-  const [data] = createResource(
-    () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<EntityRawData>,
+  const dataRequest = createRequest(
+    () =>
+      assetsManager().getData(
+        props.input.definitionId,
+      ) as Promise<EntityRawData>,
   );
+  const data = dataRequest.value;
   const rawDescription = createMemo(() => {
     const st = state();
     const d = data() as EntityRawData | undefined;
@@ -167,8 +164,8 @@ export function ActionCard(props: CardDataProps) {
   return (
     <div class={props.class}>
       <Switch>
-        <Match when={data.error}>{t("loadFailed")}</Match>
-        <Match when={data.state === "pending"}>{t("loading")}</Match>
+        <Match when={dataRequest.error()}>{t("loadFailed")}</Match>
+        <Match when={dataRequest.loading()}>{t("loading")}</Match>
         <Match when={data()}>
           {(data) => (
             <>
@@ -207,27 +204,26 @@ interface ExpandableCardDataProps extends CardDataProps {
 
 export function Skill(props: ExpandableCardDataProps) {
   const { assetsManager, t } = useAssetsManager();
-  const [data] = createResource(
-    () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<SkillRawData>,
+  const dataRequest = createRequest(
+    () =>
+      assetsManager().getData(
+        props.input.definitionId,
+      ) as Promise<SkillRawData>,
   );
+  const data = dataRequest.value;
 
-  const [icon] = createResource(
-    () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getImageUrl(defId),
+  const icon = createMemo(
+    () =>
+      assetsManager()
+        .getImageUrl(props.input.definitionId)
+        .catch(() => undefined),
+    { loadingValue: undefined },
   );
-  const [skillTypeText, setSkillTypeText] = createSignal("");
-  const [playCost, setPlayCost] = createSignal<PlayCost[]>([]);
-
-  createEffect(() => {
-    if (data.state === "ready") {
-      setPlayCost(data().playCost);
-      setSkillTypeText(typeTagText(data().type, t) ?? "");
-    }
-  });
+  const skillTypeText = () => typeTagText(data()?.type ?? "", t) ?? "";
+  const playCost = () => data()?.playCost ?? [];
   return (
     <details
-      class={`flex flex-col min-h-0 skill-wrap ${props.class ?? ""}`}
+      class={["flex flex-col min-h-0 skill-wrap", props.class]}
       open={!props.asChild}
     >
       <summary class="flex flex-row items-center p-[0.25em] gap-[0.25em] cursor-pointer skill-header">
@@ -255,8 +251,8 @@ export function Skill(props: ExpandableCardDataProps) {
       </summary>
       <div class="p-[0.5em]">
         <Switch>
-          <Match when={data.error}>{t("loadFailed")}</Match>
-          <Match when={data.state === "pending"}>{t("loading")}</Match>
+          <Match when={dataRequest.error()}>{t("loadFailed")}</Match>
+          <Match when={dataRequest.loading()}>{t("loading")}</Match>
           <Match when={data()}>
             {(data) => (
               <Description
@@ -284,24 +280,24 @@ export function Entity(props: ExpandableCardDataProps) {
     }
   });
   const { assetsManager, t } = useAssetsManager();
-  const [data] = createResource(
-    () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<EntityRawData>,
+  const dataRequest = createRequest(
+    () =>
+      assetsManager().getData(
+        props.input.definitionId,
+      ) as Promise<EntityRawData>,
   );
-  const [icon] = createResource(
-    () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getImageUrl(defId, { type: "icon" }),
+  const data = dataRequest.value;
+  const icon = createMemo(
+    () =>
+      assetsManager()
+        .getImageUrl(props.input.definitionId, { type: "icon" })
+        .catch(() => undefined),
+    { loadingValue: undefined },
   );
-  const [entityTypeText, setEntityTypeText] = createSignal("");
-
-  createEffect(() => {
-    if (data.state === "ready") {
-      setEntityTypeText(typeTagText(data().type, t) ?? "");
-    }
-  });
+  const entityTypeText = () => typeTagText(data()?.type ?? "", t) ?? "";
   return (
     <details
-      class={`flex flex-col min-h-0 skill-wrap ${props.class ?? ""}`}
+      class={["flex flex-col min-h-0 skill-wrap", props.class]}
       open={!props.asChild}
     >
       <summary class="flex flex-row items-center p-[0.25em] gap-[0.25em] cursor-pointer skill-header">
@@ -326,8 +322,8 @@ export function Entity(props: ExpandableCardDataProps) {
       </summary>
       <div class="p-[0.5em]">
         <Switch>
-          <Match when={data.error}>{t("loadFailed")}</Match>
-          <Match when={data.state === "pending"}>{t("loading")}</Match>
+          <Match when={dataRequest.error()}>{t("loadFailed")}</Match>
+          <Match when={dataRequest.loading()}>{t("loading")}</Match>
           <Match when={data()}>
             {(data) => (
               <Description
@@ -355,20 +351,21 @@ export interface CardDefinitionProps {
 
 export function Keyword(props: CardDefinitionProps) {
   const { assetsManager, t } = useAssetsManager();
-  const [data] = createResource(
-    () => [props.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<KeywordRawData>,
+  const dataRequest = createRequest(
+    () =>
+      assetsManager().getData(props.definitionId) as Promise<KeywordRawData>,
   );
+  const data = dataRequest.value;
   return (
-    <div class={`px-[0.5em] ${props.class ?? ""}`}>
+    <div class={["px-[0.5em]", props.class]}>
       <h3 class="keyword-name">
         {data()?.name ??
           assetsManager().getNameSync(props.definitionId) ??
           props.definitionId}
       </h3>
       <Switch>
-        <Match when={data.error}>{t("loadFailed")}</Match>
-        <Match when={data.state === "pending"}>{t("loading")}</Match>
+        <Match when={dataRequest.error()}>{t("loadFailed")}</Match>
+        <Match when={dataRequest.loading()}>{t("loading")}</Match>
         <Match when={data()}>
           {(data) => (
             <Description
@@ -390,10 +387,10 @@ export interface ReferenceProps extends CardDefinitionProps {
 
 export function Reference(props: ReferenceProps) {
   const { assetsManager, t } = useAssetsManager();
-  const [data] = createResource(
-    () => [props.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<SkillRawData>,
+  const dataRequest = createRequest(
+    () => assetsManager().getData(props.definitionId) as Promise<SkillRawData>,
   );
+  const data = dataRequest.value;
   return (
     <>
       <h4 class="flex flex-row items-center justify-between mb-[0.25em]">
@@ -402,7 +399,7 @@ export function Reference(props: ReferenceProps) {
             assetsManager().getNameSync(props.definitionId) ??
             props.definitionId}
         </span>
-        <Show when={data.state === "ready" && data()}>
+        <Show when={data()}>
           {(data) => (
             <span class="reference-type">{typeTagText(data().type, t)}</span>
           )}
@@ -410,8 +407,8 @@ export function Reference(props: ReferenceProps) {
       </h4>
       <div class="reference-description">
         <Switch>
-          <Match when={data.error}>{t("loadFailed")}</Match>
-          <Match when={data.state === "pending"}>{t("loading")}</Match>
+          <Match when={dataRequest.error()}>{t("loadFailed")}</Match>
+          <Match when={dataRequest.loading()}>{t("loading")}</Match>
           <Match when={data()}>
             {(data) => (
               <Description

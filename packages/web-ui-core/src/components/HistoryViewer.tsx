@@ -23,12 +23,11 @@ import {
   Match,
   Show,
   Switch,
-  type JSX,
-  createResource,
   createMemo,
   createEffect,
-  untrack,
 } from "solid-js";
+import { createRequest } from "@gi-tcg/utils/solid";
+import type { JSX } from "@solidjs/web";
 import { useUiContext } from "../hooks/context";
 import type {
   CardHistoryChildren,
@@ -1063,19 +1062,19 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
 
 const CardDescriptionPart = (props: { cardDefinitionId: number }) => {
   const { assetsManager, t } = useUiContext();
-  const [data] = createResource(
-    () => [props.cardDefinitionId, assetsManager()] as const,
-    ([id, manager]) => manager.getData(id),
+  const dataRequest = createRequest(() =>
+    assetsManager().getData(props.cardDefinitionId),
   );
+  const data = dataRequest.value;
   return (
     <Switch>
       <Match when={props.cardDefinitionId === 0}>
         <p>???</p>
       </Match>
-      <Match when={data.loading}>
+      <Match when={dataRequest.loading()}>
         <p>{t("history.loading")}</p>
       </Match>
-      <Match when={data.error}>
+      <Match when={dataRequest.error()}>
         <p>{t("history.loadFailed")}</p>
       </Match>
       <Match when={data()}>
@@ -1485,7 +1484,7 @@ export function HistorySummon(props: HistoryCardProps) {
     <Show
       when={!!props.definitionId}
       fallback={
-        <div class={`bg-gray-700 b-2 b-white/50 ${props.class ?? ""}`} />
+        <div class={["bg-gray-700 b-2 b-white/50", props.class]} />
       }
     >
       <>
@@ -1504,7 +1503,7 @@ function HistoryChildBox(props: { data: HistoryChildData }) {
   return (
     <div
       class="w-full min-h-11.6 flex flex-row items-center shrink-0 bg-white/4 gap-2 p-1 b-l-4 b-#806440 data-[opp]:b-#48678b"
-      bool:data-opp={props.data.opp}
+      data-opp={props.data.opp}
     >
       <Switch>
         <Match when={!props.data.imageId}>
@@ -1531,7 +1530,7 @@ function HistoryChildBox(props: { data: HistoryChildData }) {
             {(healthChange) => (
               <div
                 class="flex h-4 px-3 gap-1 rounded-full b-1 b-black bg-#d14f51 data-[increase]:bg-#6e9b3a"
-                bool:data-increase={healthChange().type === "heal"}
+                data-increase={healthChange().type === "heal"}
               >
                 <Show when={healthChange().special}>
                   <Switch>
@@ -1674,14 +1673,14 @@ function HistoryBlockBox(props: {
   return (
     <div
       class={`w-full h-31 flex flex-col rounded-sm shrink-0 bg-[var(--bg-color)] border-[var(--bd-color)] b-2 relative overflow-clip history-block`}
-      bool:data-opp={props.data.opp}
-      bool:data-selected={props.isSelected}
+      data-opp={props.data.opp}
+      data-selected={props.isSelected}
       onClick={() => props.onClick()}
     >
       <div class="w-full h-6 bg-[var(--title-color)] flex flex-row items-center px-1 gap-1">
         <div
           class="text-[var(--text-color)] text-3 font-bold whitespace-nowrap flex-1"
-          bool:data-opp={props.data.opp}
+          data-opp={props.data.opp}
         >
           {props.data.title}
         </div>
@@ -1692,7 +1691,7 @@ function HistoryBlockBox(props: {
       <div class="h-24 flex flex-row items-center justify-center gap-1.5">
         <div
           class="w-10.5 data-[text]:w-36 h-24 grid grid-cols-1 grid-rows-[1fr_6fr_1fr]"
-          bool:data-text={props.data.imageSize === "text"}
+          data-text={props.data.imageSize === "text"}
         >
           <Switch>
             <Match when={props.data.imageSize === "text"}>
@@ -1768,7 +1767,7 @@ function PocketHistoryBlockBox(props: {
   return (
     <div
       class={`w-full h-6 rounded-sm shrink-0 text-center text-3 font-bold line-height-5 b-2 bg-#b1ada8 b-white text-#212933 opacity-60 data-[selected]:opacity-100`}
-      bool:data-selected={props.isSelected}
+      data-selected={props.isSelected}
       onClick={() => props.onClick()}
     >
       {props.data.title}
@@ -1787,7 +1786,7 @@ function HistoryHintBox(props: { data: HistoryHintData }) {
       <Match when={props.data.type === "action"}>
         <div
           class="w-full h-6 rounded-sm shrink-0 text-center text-3 font-bold line-height-loose bg-#885e2e data-[opp]:bg-#3e69a8 text-#efb264 data-[opp]:text-#9bc6ff"
-          bool:data-opp={props.data.opp}
+          data-opp={props.data.opp}
         >
           {props.data.content}
         </div>
@@ -1866,15 +1865,17 @@ export function HistoryPanel(props: HistoryPanelProps) {
 
   const who = createMemo(() => props.who);
 
-  createEffect(() => {
-    void props.history.at(-1);
-    if (untrack(keepScrollingBottom)) {
-      scrollToBottom("smooth");
-    }
-  });
+  createEffect(
+    () => props.history.at(-1),
+    () => {
+      if (keepScrollingBottom()) {
+        scrollToBottom("smooth");
+      }
+    },
+  );
 
   return (
-    <WhoContext.Provider value={who}>
+    <WhoContext value={who}>
       <div
         class="w-full h-full bg-black/50 z-4"
         onClick={() => {
@@ -1924,7 +1925,7 @@ export function HistoryPanel(props: HistoryPanelProps) {
           />
         )}
       </Show>
-    </WhoContext.Provider>
+    </WhoContext>
   );
 }
 
@@ -1943,11 +1944,11 @@ function HistoryBlockDetailPanel(props: {
         <Show when={renderBlock().type !== "pocket"}>
           <div
             class="relative w-full bg-#2d333a rounded-t-md grid grid-cols-[3.625rem_1fr] data-[text]:grid-cols-[0_1fr] self-start b-2 b-white/10 shrink-0"
-            bool:data-text={renderBlock().type === "selectOption"}
+            data-text={renderBlock().type === "selectOption"}
           >
             <div
               class="absolute top-1px left-1px w-3.5 h-3.5 rounded-lt bg-#806440 data-[opp]:bg-#48678b history-card-hint"
-              bool:data-opp={renderBlock().content.opp}
+              data-opp={renderBlock().content.opp}
             />
             <Show when={renderBlock().type !== "selectOption"}>
               <HistoryCard
@@ -1957,7 +1958,7 @@ function HistoryBlockDetailPanel(props: {
             </Show>
             <div
               class="grid-area-[1/2] py-1.5 pr-2 data-[text]:pl-4 min-w-0 flex flex-col text-2.5 text-#b2afa8"
-              bool:data-text={renderBlock().type === "selectOption"}
+              data-text={renderBlock().type === "selectOption"}
             >
               <div class="text-3.5 text-#fff3e0 font-bold whitespace-pre-wrap break-words">
                 {renderBlock().content.name}
@@ -1968,12 +1969,16 @@ function HistoryBlockDetailPanel(props: {
         </Show>
         <For each={props.block.children}>
           {(child) => {
-            const [childData] = createResource(renderBlock, (rb) =>
-              renderHistoryChild(child, rb.callerId),
+            const childData = createMemo(
+              () =>
+                renderHistoryChild(child, renderBlock().callerId).catch(
+                  () => undefined,
+                ),
+              { loadingValue: undefined },
             );
             return (
               <Show
-                when={childData.state === "ready" && childData()}
+                when={childData()}
                 fallback="" // just hide the child when not ready
               >
                 {(data) => <HistoryChildBox data={data()} />}

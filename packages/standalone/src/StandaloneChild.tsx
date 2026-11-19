@@ -15,7 +15,7 @@
 
 import { createClient } from "@gi-tcg/web-ui-core";
 import "@gi-tcg/web-ui-core/style.css";
-import { onCleanup, onMount } from "solid-js";
+import { onSettled } from "solid-js";
 
 export function StandaloneChild() {
   const [uiIo, Chessboard] = createClient(0, {
@@ -69,16 +69,15 @@ export function StandaloneChild() {
     }
   }
 
-  onMount(() => {
+  onSettled(() => {
     window.addEventListener("message", messageHandler);
     window.opener?.postMessage({
       giTcg: "1.0",
       method: "initialized",
     });
-  });
-
-  onCleanup(() => {
-    window.removeEventListener("message", messageHandler);
+    return () => {
+      window.removeEventListener("message", messageHandler);
+    };
   });
 
   return (

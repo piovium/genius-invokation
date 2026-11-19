@@ -16,9 +16,14 @@
 import { defineConfig } from "vite";
 import { resolve } from "node:path";
 import dts from "unplugin-dts/vite";
-import solid from "vite-plugin-solid";
+import solid from "@solidjs/vite-plugin";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  define: {
+    "process.env.NODE_ENV": JSON.stringify(
+      mode === "development" ? "development" : "production",
+    ),
+  },
   plugins: [
     solid(),
     !process.env.NO_TYPING &&
@@ -37,4 +42,4 @@ export default defineConfig({
       cssFileName: "style",
     },
   },
-});
+}));

@@ -1,5 +1,5 @@
 import { For, Show, createMemo } from "solid-js";
-import type { JSX } from "solid-js";
+import type { JSX } from "@solidjs/web";
 import type { EntityTag, EntityType } from "@gi-tcg/core";
 import { ENTITY_TYPE_LABELS, TAG_LABELS } from "../constants";
 
@@ -97,7 +97,10 @@ export function ListItem(props: ListItemProps) {
 
   return (
     <div
-      class={`flex w-full items-start justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 text-left transition hover:bg-white/10 box-border overflow-hidden ${props.class ?? ""}`}
+      class={[
+        "flex w-full items-start justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 text-left transition hover:bg-white/10 box-border overflow-hidden",
+        props.class,
+      ]}
       onClick={() => props.onClick?.()}
     >
       {/* 左侧信息区域 */}

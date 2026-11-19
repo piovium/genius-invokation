@@ -21,16 +21,17 @@
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
     "remeda": "^2.39.0",
+    "@solidjs/web": "catalog:",
     "solid-js": "catalog:"
   },
   "devDependencies": {
-    "@solid-primitives/storage": "^4.2.1",
+    "@solid-primitives/storage": "^5.0.0",
     "immer": "^11.1.4",
     "rollup-plugin-node-externals": "catalog:",
     "unocss": "catalog:",
     "vite": "catalog:",
     "unplugin-dts": "catalog:",
-    "vite-plugin-solid": "catalog:",
+    "@solidjs/vite-plugin": "catalog:",
     "ya-json-schema-types": "^2.0.0"
   }
 }

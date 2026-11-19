@@ -13,13 +13,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { createResource, For, Match, Show, Switch } from "solid-js";
-import { A } from "@solidjs/router";
+import { paths } from "../router";
+import { For, Match, Show, Switch } from "solid-js";
+import { createRequest } from "@gi-tcg/utils/solid";
 import axios from "axios";
 import { GameInfo } from "./GameInfo";
 import { ChessboardColor } from "./ChessboardColor";
 import { useI18n } from "../i18n";
-import { Portal } from "solid-js/web";
+import { Portal } from "@solidjs/web";
 import { AvatarSelector } from "./AvatarSelector";
 import { useAuth } from "../auth";
 import { TextFieldEdit } from "./TextFieldEdit";
@@ -36,9 +37,10 @@ export interface UserInfoProps {
 
 export function UserInfo(props: UserInfoProps) {
   const { t } = useI18n();
-  const [games] = createResource(() =>
+  const gamesRequest = createRequest(() =>
     axios.get<{ data: any[] }>(`games/mine`).then((res) => res.data),
   );
+  const games = gamesRequest.value;
 
   let avatarSelectorEl: HTMLDialogElement | undefined;
 
@@ -126,10 +128,10 @@ export function UserInfo(props: UserInfoProps) {
                 <Match when={props.type === "guest"}>
                   {t("guestNoGameRecords")}
                 </Match>
-                <Match when={games.loading}>{t("loading")}</Match>
-                <Match when={games.error}>
+                <Match when={gamesRequest.loading()}>{t("loading")}</Match>
+                <Match when={gamesRequest.error()}>
                   {t("loadFailed", {
-                    message: getErrorMessage(games.error),
+                    message: getErrorMessage(gamesRequest.error()),
                   })}
                 </Match>
                 <Match when={!games()?.data.length}>{t("noGameRecords")}</Match>
@@ -151,9 +153,9 @@ export function UserInfo(props: UserInfoProps) {
           </div>
           <hr class="h-1 w-full text-gray-4 my-4" />
           <div class="flex items-center gap-3">
-            <A class="btn btn-ghost font-bold" href="/decks">
+            <a class="btn btn-ghost font-bold" href={paths.decks()}>
               {t("myDecksMore")}
-            </A>
+            </a>
           </div>
         </Show>
       </div>

@@ -60,10 +60,11 @@
     "dts-bundle-generator": "^9.5.1",
     "monaco-languageclient": "~10.7.0",
     "rolldown": "^1.2.11",
+    "@solidjs/web": "catalog:",
     "solid-js": "catalog:",
     "unplugin-dts": "^1.0.0",
     "vite": "catalog:",
-    "vite-plugin-solid": "catalog:",
+    "@solidjs/vite-plugin": "catalog:",
     "vscode": "npm:@codingame/monaco-vscode-extension-api@~25.1.2",
     "vscode-languageclient": "~9.0.1"
   }

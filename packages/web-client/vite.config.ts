@@ -15,7 +15,7 @@
 
 import { defineConfig } from "vite";
 import unoCss from "unocss/vite";
-import solid from "vite-plugin-solid";
+import solid from "@solidjs/vite-plugin";
 import babel from "@rollup/plugin-babel";
 import { WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
 import { readdirSync } from "node:fs";

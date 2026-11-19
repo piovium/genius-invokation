@@ -15,12 +15,13 @@
 
 import {
   createSignal,
-  createResource,
   Switch,
   Match,
   Show,
   createEffect,
+  snapshot,
 } from "solid-js";
+import { createRequest } from "@gi-tcg/utils/solid";
 import { Layout } from "../layouts/Layout";
 import axios, { AxiosError } from "axios";
 import type { Deck } from "@gi-tcg/typings";
@@ -31,20 +32,27 @@ import "@gi-tcg/deck-builder/style.css";
 import { useGuestDecks } from "../guest";
 import { DeckInfo } from "./Decks";
 import { useAuth } from "../auth";
-import { unwrap } from "solid-js/store";
 import { copyShareCode, getErrorMessage } from "../utils";
 import { useI18n } from "../i18n";
 import { TextFieldEdit } from "../components/TextFieldEdit";
 import { AutoResizeText } from "@gi-tcg/web-ui-core";
 
 export default function EditDeck() {
+  const params = useParams<{ id: string }>();
+  return (
+    <Show when={params.id} keyed>
+      {(id) => <DeckEditor id={id} />}
+    </Show>
+  );
+}
+
+function DeckEditor(props: { id: string }) {
   const { t, locale, assetsManager } = useI18n();
-  const params = useParams();
   const { status } = useAuth();
   const [guestDecks, { addGuestDeck, updateGuestDeck }] = useGuestDecks();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const isNew = params.id === "new";
-  const deckId = Number(params.id);
+  const [searchParams, setSearchParams] = useSearchParams<{ name: string }>();
+  const isNew = props.id === "new";
+  const deckId = Number(props.id);
   const [deckName, setDeckName] = createSignal<string>(
     searchParams.name ?? t("newDeck"),
   );
@@ -54,29 +62,34 @@ export default function EditDeck() {
     characters: [],
     cards: [],
   });
-  const [userDeckData] = createResource(() =>
-    isNew ? void 0 : axios.get(`decks/${deckId}`).then((r) => r.data),
+  const userDeckDataRequest = createRequest(() =>
+    !isNew && status().type === "user"
+      ? axios.get<DeckInfo>(`decks/${deckId}`).then((r) => r.data)
+      : undefined,
   );
 
-  createEffect(() => {
-    if (isNew) {
-      return;
-    }
-    let deckInfo: DeckInfo = userDeckData.error ? void 0 : userDeckData();
-    const { type } = status();
-    if (type === "guest") {
-      const found = guestDecks().find((d) => d.id === deckId);
-      if (!found) {
-        throw new Error(t("deckNotFound"));
+  createEffect(
+    () => {
+      if (isNew) {
+        return;
       }
-      deckInfo = found;
-    }
-    if (deckInfo) {
-      setDeckValue(unwrap(deckInfo));
-      setDeckName(deckInfo.name);
-      setSearchParams({ name: null }, { replace: true });
-    }
-  });
+      if (status().type === "guest") {
+        const found = guestDecks().find((d) => d.id === deckId);
+        if (!found) {
+          throw new Error(t("deckNotFound"));
+        }
+        return snapshot(found);
+      }
+      return userDeckDataRequest.value();
+    },
+    (deckInfo) => {
+      if (deckInfo) {
+        setDeckValue(deckInfo);
+        setDeckName(deckInfo.name);
+        setSearchParams({ name: null }, { replace: true });
+      }
+    },
+  );
 
   const [dirty, setDirty] = createSignal(false);
 
@@ -246,10 +259,12 @@ export default function EditDeck() {
           </div>
         </div>
         <Switch>
-          <Match when={userDeckData.loading}>{t("loading")}</Match>
-          <Match when={status().type !== "guest" && userDeckData.error}>
+          <Match when={userDeckDataRequest.loading()}>{t("loading")}</Match>
+          <Match
+            when={status().type !== "guest" && userDeckDataRequest.error()}
+          >
             {t("loadFailed", {
-              message: getErrorMessage(userDeckData.error),
+              message: getErrorMessage(userDeckDataRequest.error()),
             })}
           </Match>
           <Match when={status().type !== "notLogin"}>

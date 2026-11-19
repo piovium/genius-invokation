@@ -13,12 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Accessor, createResource, createSignal } from "solid-js";
+import { Accessor, createSignal, createStore } from "solid-js";
 import { makePersisted } from "@solid-primitives/storage";
 import type { DeckInfo } from "./pages/Decks";
 import type { Deck } from "@gi-tcg/typings";
 import axios from "axios";
-import { createStore, produce } from "solid-js/store";
 import pLimit from "p-limit";
 
 export interface GuestInfo {
@@ -47,14 +46,12 @@ export type GuestDeck = readonly [
 ];
 
 const [guestInfo, setGuestInfo] = makePersisted(
-  // eslint-disable-next-line solid/reactivity
   createSignal<GuestInfo | null>(null),
   { storage: localStorage },
 );
 
 export const useGuestInfo = () => [guestInfo, setGuestInfo] as const;
 
-// eslint-disable-next-line solid/reactivity
 const [guestDeck, setGuestDeck] = makePersisted(createStore<DeckInfo[]>([]), {
   storage: localStorage,
 });
@@ -84,12 +81,10 @@ export const useGuestDecks = (): GuestDeck => {
       ...newDeck,
     });
     const result: DeckInfo = { ...data, id };
-    setGuestDeck(
-      produce((decks) => {
-        decks.splice(index, 1);
-        decks.push(result);
-      }),
-    );
+    setGuestDeck((decks) => {
+      decks.splice(index, 1);
+      decks.push(result);
+    });
     return result;
   };
 
@@ -98,11 +93,9 @@ export const useGuestDecks = (): GuestDeck => {
     if (idx === -1) {
       throw new Error("Deck not found");
     }
-    setGuestDeck(
-      produce((decks) => {
-        decks.splice(idx, 1);
-      }),
-    );
+    setGuestDeck((decks) => {
+      decks.splice(idx, 1);
+    });
   };
 
   const limit = pLimit(1);

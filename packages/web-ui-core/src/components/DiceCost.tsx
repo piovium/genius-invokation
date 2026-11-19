@@ -15,17 +15,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DiceType, type PbDiceRequirement } from "@gi-tcg/typings";
-import {
-  type ComponentProps,
-  createMemo,
-  createResource,
-  Show,
-  splitProps,
-} from "solid-js";
+import { createMemo, Show, omit, For } from "solid-js";
+import type { ComponentProps } from "@solidjs/web";
 import { useUiContext } from "../hooks/context";
 import { Cost, type CostTextColor } from "./Dice";
 import { isDeepEqual } from "remeda";
-import { Key } from "@solid-primitives/keyed";
 import type { AnyData } from "@gi-tcg/assets-manager";
 
 interface DiceCostProps extends ComponentProps<"div"> {
@@ -35,18 +29,14 @@ interface DiceCostProps extends ComponentProps<"div"> {
 }
 
 export function DiceCost(props: DiceCostProps) {
-  const [local, restProps] = splitProps(props, [
-    "cost",
-    "diceClass",
-    "realCost",
-  ]);
+  const restProps = omit(props, "cost", "diceClass", "realCost");
   const diceMap = createMemo(
     () => {
       const costMap = new Map(
-        local.cost.map(({ type, count }) => [type as DiceType, count]),
+        props.cost.map(({ type, count }) => [type as DiceType, count]),
       );
       const realCostMap = new Map(
-        local.realCost?.map(({ type, count }) => [type as DiceType, count]),
+        props.realCost?.map(({ type, count }) => [type as DiceType, count]),
       );
       type DiceTuple = readonly [
         type: DiceType,
@@ -54,7 +44,7 @@ export function DiceCost(props: DiceCostProps) {
         color: CostTextColor,
       ];
       let result: DiceTuple[] = [];
-      if (local.realCost) {
+      if (props.realCost) {
         for (const [type, originalCount] of costMap) {
           const realCount = realCostMap.get(type) ?? 0;
           const color =
@@ -80,21 +70,20 @@ export function DiceCost(props: DiceCostProps) {
       }
       return result;
     },
-    [],
     { equals: isDeepEqual },
   );
   return (
     <div {...restProps}>
-      <Key each={diceMap()} by={0} /* by-type */>
+      <For each={diceMap()} keyed={([type]) => type}>
         {(item) => (
           <Cost
             type={item()[0]}
             count={item()[1]}
-            class={local.diceClass}
+            class={props.diceClass}
             color={item()[2]}
           />
         )}
-      </Key>
+      </For>
     </div>
   );
 }
@@ -105,11 +94,14 @@ export interface DiceCostAsyncProps extends ComponentProps<"div"> {
 }
 
 export const DiceCostAsync = (props: DiceCostAsyncProps) => {
-  const [local, restProps] = splitProps(props, ["cardDefinitionId"]);
+  const restProps = omit(props, "cardDefinitionId");
   const { assetsManager } = useUiContext();
-  const [data] = createResource(
-    () => [local.cardDefinitionId, assetsManager()] as const,
-    ([id, manager]) => manager.getData(id),
+  const data = createMemo(
+    () =>
+      assetsManager()
+        .getData(props.cardDefinitionId)
+        .catch(() => undefined),
+    { loadingValue: undefined },
   );
   const COST_MAP: Record<string, number> = {
     GCG_COST_DICE_VOID: DiceType.Void,

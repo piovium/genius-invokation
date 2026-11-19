@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { createSignal, Index, Show } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 import { AllCharacterCards } from "./AllCharacterCards";
 import { AllActionCards } from "./AllActionCards";
 import type { Deck } from "@gi-tcg/typings";
@@ -45,14 +45,14 @@ export function AllCards(props: AllCardsProps) {
         <button
           class="data-[active]:font-bold rounded-l-full w-22 h-8 b-1 b-r-0 data-[active]:b-0 data-[active]:bg-blue-100"
           onClick={() => setTab(0)}
-          bool:data-active={tab() === 0}
+          data-active={tab() === 0}
         >
           {t("characters")}
         </button>
         <button
           class="data-[active]:font-bold rounded-r-full w-22 h-8 b-1 b-l-0 data-[active]:b-0 data-[active]:bg-blue-100"
           onClick={() => setTab(1)}
-          bool:data-active={tab() === 1}
+          data-active={tab() === 1}
         >
           {t("actionCards")}
         </button>
@@ -69,19 +69,19 @@ export function AllCards(props: AllCardsProps) {
             value={props.version}
             onChange={(e) => props.onSetVersion?.(Number(e.target.value))}
           >
-            <Index each={props.allVersions.toReversed()}>
+            <For keyed={false} each={props.allVersions.toReversed()}>
               {(versionStr, index) => (
                 <option value={props.allVersions.length - 1 - index}>
                   {versionStr()}
                 </option>
               )}
-            </Index>
+            </For>
           </select>
         </Show>
       </div>
       <div class="min-h-0">
         <div
-          bool:data-visible={tab() === 0}
+          data-visible={tab() === 0}
           class="h-full hidden data-[visible]:block"
         >
           <AllCharacterCards
@@ -90,7 +90,7 @@ export function AllCards(props: AllCardsProps) {
           />
         </div>
         <div
-          bool:data-visible={tab() === 1}
+          data-visible={tab() === 1}
           class="h-full hidden data-[visible]:block"
         >
           <AllActionCards {...props} onSwitchTab={(tabNo) => setTab(tabNo)} />

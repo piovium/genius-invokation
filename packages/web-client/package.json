@@ -13,18 +13,20 @@
   "dependencies": {
     "@gi-tcg/assets-manager": "workspace:*",
     "@gi-tcg/deck-builder": "workspace:*",
+    "@gi-tcg/utils": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/web-ui-core": "workspace:*",
     "@server-sent-stream/web": "^1.0.3",
-    "@solid-primitives/i18n": "^2.2.1",
-    "@solid-primitives/storage": "^4.2.1",
-    "@solidjs/router": "^0.13.5",
+    "@solid-primitives/i18n": "^3.0.0",
+    "@solid-primitives/storage": "^5.0.0",
+    "@solidjs/router": "^2.0.0",
     "@una-ui/preset": "^0.34.0-beta.1",
     "@unocss/reset": "catalog:",
     "axios": "catalog:",
     "core-js": "3.38.1",
     "dayjs": "^1.11.13",
     "p-limit": "^7.3.0",
+    "@solidjs/web": "catalog:",
     "solid-js": "catalog:"
   },
   "devDependencies": {
@@ -38,6 +40,6 @@
     "@unocss/preset-icons": "catalog:",
     "unocss": "catalog:",
     "vite": "catalog:",
-    "vite-plugin-solid": "catalog:"
+    "@solidjs/vite-plugin": "catalog:"
   }
 }

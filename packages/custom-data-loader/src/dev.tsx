@@ -17,13 +17,12 @@ import {
   Show,
   createEffect,
   createSignal,
-  on,
-  onMount,
+  onSettled,
   createMemo,
   type Component,
 } from "solid-js";
 import { CustomDataLoader } from "..";
-import { render, Dynamic } from "solid-js/web";
+import { render, Dynamic } from "@solidjs/web";
 
 import { AssetsManager } from "@gi-tcg/assets-manager";
 import { DeckBuilder } from "@gi-tcg/deck-builder";
@@ -43,13 +42,18 @@ interface MonacoEditorProps {
 
 const MonacoEditor = (props: MonacoEditorProps) => {
   let container!: HTMLDivElement;
-  onMount(async () => {
-    const { setupEditor } = await import("./dev-editor");
-    const editor = await setupEditor(container, props.code ?? "");
-    editor.onDidChangeModelContent(() => {
-      const newCode = editor.getValue();
-      props.onCodeChange?.(newCode);
-    });
+  onSettled(() => {
+    const editor = import("./dev-editor").then(({ setupEditor }) =>
+      setupEditor(container, props.code ?? ""),
+    );
+    void editor.then((instance) =>
+      instance.onDidChangeModelContent(() =>
+        props.onCodeChange?.(instance.getValue()),
+      ),
+    );
+    return () => {
+      void editor.then((instance) => instance.dispose());
+    };
   });
   return <div class="editor" ref={container} />;
 };
@@ -227,16 +231,15 @@ define card {
     gameInstance.start();
   };
 
-  createEffect(
-    on(code, () => {
-      setStep1Complete(false);
-    }),
-  );
+  createEffect(code, () => {
+    setStep1Complete(false);
+  });
 
   createEffect(
-    on([deck0, deck1], () => {
+    () => [deck0(), deck1()] as const,
+    () => {
       setStep2Complete(false);
-    }),
+    },
   );
 
   return (

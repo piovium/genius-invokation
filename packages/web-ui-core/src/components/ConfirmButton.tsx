@@ -28,7 +28,7 @@ export function ConfirmButton(props: ConfirmButtonProps) {
     <Button
       class={`hidden data-[shown]:grid ${props.class ?? ""}`}
       onClick={() => props.step && props.onClick?.(props.step)}
-      bool:data-shown={props.step}
+      data-shown={!!props.step}
     >
       {props.step?.confirmText}
     </Button>

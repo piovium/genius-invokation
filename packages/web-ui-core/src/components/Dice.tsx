@@ -15,14 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DiceType } from "@gi-tcg/typings";
-import {
-  Show,
-  splitProps,
-  type Component,
-  type ComponentProps,
-} from "solid-js";
+import { Show, omit, type Component } from "solid-js";
+import { type ComponentProps, Dynamic } from "@solidjs/web";
 import { StrokedText } from "./StrokedText";
-import { Dynamic } from "solid-js/web";
 
 import DiceCryoS from "../svg/DiceCryoS.svg?fb";
 import DiceHydroS from "../svg/DiceHydroS.svg?fb";
@@ -107,13 +102,13 @@ export interface DiceProps extends ComponentProps<"div"> {
 }
 
 export function Dice(props: DiceProps) {
-  const [local, rest] = splitProps(props, ["class", "type", "selected"]);
+  const rest = omit(props, "class", "type", "selected");
   return (
-    <div class={`grid ${local.class ?? "w-6 h-6"}`} {...rest}>
+    <div class={["grid", props.class ?? "w-6 h-6"]} {...rest}>
       <DiceContent
         class="w-full h-full"
-        type={local.type}
-        selected={local.selected}
+        type={props.type}
+        selected={props.selected}
         col={1}
         row={1}
       />
@@ -157,7 +152,7 @@ export interface CostProps {
 
 export function Cost(props: CostProps) {
   return (
-    <div class={`grid children:grid-area-[1/1] ${props.class}`}>
+    <div class={["grid children:grid-area-[1/1]", props.class]}>
       <Dynamic<Component<ComponentProps<"div">>>
         component={COST_COMPONENT_MAP[props.type]}
         class="w-full h-full"

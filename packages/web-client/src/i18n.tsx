@@ -66,9 +66,7 @@ export function I18nProvider(props: ParentProps) {
     t,
   };
 
-  return (
-    <I18nContext.Provider value={value}>{props.children}</I18nContext.Provider>
-  );
+  return <I18nContext value={value}>{props.children}</I18nContext>;
 }
 
 export function useI18n() {

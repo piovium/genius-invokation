@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { createEffect, createSignal, For, Match, Show, Switch } from "solid-js";
+import { createSignal, For, Match, Show, Switch } from "solid-js";
 import { InlineDice } from "./Dice";
 import { StaticCard } from "./SelectCardView";
 import { SelectOption } from "./SelectOptionView";
@@ -61,8 +61,8 @@ export function MiniView(props: MiniSpecialViewProps) {
           translate-y-50% data-[opp]:translate-y--50% transition-all-300
           flex flex-col items-center justify-start py-4 data-[fold]:py-2
           select-none bg-black/60 text-white/80`}
-      bool:data-opp={!!props.opp}
-      bool:data-fold={!props.visible}
+      data-opp={props.opp}
+      data-fold={!props.visible}
       onClick={() => {
         props.onBackDropClick();
       }}
@@ -161,14 +161,11 @@ export interface MiniSpecialViewGroupProps {
 }
 
 export function MiniSpecialViewGroup(props: MiniSpecialViewGroupProps) {
-  const [miniViewVisible, setMiniViewVisible] = createSignal(false);
-  createEffect(() => {
-    setMiniViewVisible(
-      [props.myViewType, props.oppViewType].some(
-        (type) => type === "selectCard" || type === "selectOption",
-      ),
-    );
-  });
+  const [miniViewVisible, setMiniViewVisible] = createSignal(() =>
+    [props.myViewType, props.oppViewType].some(
+      (type) => type === "selectCard" || type === "selectOption",
+    ),
+  );
   return (
     <>
       <Show when={props.showMyView || props.showOppView}>

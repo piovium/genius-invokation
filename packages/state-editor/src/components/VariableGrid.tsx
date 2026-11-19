@@ -2,7 +2,7 @@ import { For } from "solid-js";
 import { NumberField } from "./Fields";
 
 export function VariableGrid(props: {
-  entries: readonly [string, number][];
+  entries: readonly [string, number | undefined][];
   disabled?: boolean;
   readOnlyKeys?: readonly string[];
   onChange: (key: string, value: number) => void;

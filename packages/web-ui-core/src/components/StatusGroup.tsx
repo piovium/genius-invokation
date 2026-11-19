@@ -17,7 +17,7 @@
 import type { StatusViewInfo } from "./Chessboard";
 import { Image } from "./Image";
 import { useUiContext } from "../hooks/context";
-import { createMemo, createResource, Show, For } from "solid-js";
+import { createMemo, Show, For } from "solid-js";
 
 interface StatusProps extends StatusViewInfo {}
 
@@ -35,14 +35,14 @@ function Status(props: StatusProps) {
         class="h-5.5 w-5.5 m--0.25 max-h-5.5 max-w-5.5 place-self-center status-icon"
         type="icon"
         fallback="state"
-        bool:data-disposing={props.animation === "disposing"}
+        data-disposing={props.animation === "disposing"}
       />
       <div
         class="rounded-full status-effect"
-        bool:data-usable={hasUsagePerRound()}
-        bool:data-entering={props.animation === "entering"}
-        bool:data-disposing={props.animation === "disposing"}
-        bool:data-triggered={props.triggered}
+        data-usable={hasUsagePerRound()}
+        data-entering={props.animation === "entering"}
+        data-disposing={props.animation === "disposing"}
+        data-triggered={props.triggered}
       />
       <Show when={typeof data().variableValue === "number"}>
         <div class="place-self-end m--0.5 w-2.5 h-2.5 rounded-full bg-black/60 text-2.5 text-white text-center line-height-none">
@@ -67,7 +67,7 @@ export function StatusGroup(props: StatusGroupProps) {
     showEllipsis() ? props.statuses.slice(3) : [],
   );
   return (
-    <div class={`flex flex-row ${props.class ?? ""}`}>
+    <div class={["flex flex-row", props.class]}>
       <For each={statuses()}>{(status) => <Status {...status} />}</For>
       <Show when={showEllipsis()}>
         <div class="h-5 w-5 relative grid children:grid-area-[1/1]">
@@ -77,13 +77,13 @@ export function StatusGroup(props: StatusGroupProps) {
           </div>
           <div
             class="rounded-full status-effect"
-            bool:data-entering={ellipsisStatuses().some(
+            data-entering={ellipsisStatuses().some(
               (es) => es.animation === "entering",
             )}
-            bool:data-disposing={ellipsisStatuses().some(
+            data-disposing={ellipsisStatuses().some(
               (es) => es.animation === "disposing",
             )}
-            bool:data-triggered={ellipsisStatuses().some((es) => es.triggered)}
+            data-triggered={ellipsisStatuses().some((es) => es.triggered)}
           />
         </div>
       </Show>
@@ -102,7 +102,7 @@ export function AttachmentGroup(props: AttachmentGroupProps) {
     showEllipsis() ? props.attachments.slice(0, 1) : props.attachments,
   );
   return (
-    <div class={`flex flex-row ${props.class ?? ""}`}>
+    <div class={["flex flex-row", props.class]}>
       <For each={attachments()}>
         {(defId) => (
           <Image
@@ -125,5 +125,5 @@ export function MoreStatus(props: { class?: string }) {
   const url = createMemo(() =>
     assetsManager().getRawImageUrlSync("UI_Gcg_Buff_Common_More"),
   );
-  return <img class={`object-cover ${props.class ?? ""}`} src={url()} />;
+  return <img class={["object-cover", props.class]} src={url()} />;
 }

@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { IS_BETA } from "@gi-tcg/config";
-import { createResource, onMount, Show } from "solid-js";
+import { onSettled, Show, createMemo } from "solid-js";
 import dayjs from "dayjs";
 import localize from "dayjs/plugin/localizedFormat";
 import "dayjs/locale/zh-cn";
@@ -24,13 +24,18 @@ import axios from "axios";
 
 dayjs.extend(localize);
 
-const [versionInfo] = createResource(() =>
-  axios.get("version").then((res) => res.data),
+const versionInfo = createMemo(
+  () =>
+    axios
+      .get("version")
+      .then((res) => res.data)
+      .catch(() => undefined),
+  { loadingValue: undefined },
 );
 
 export function Footer() {
   const { t, locale } = useI18n();
-  onMount(() => {
+  onSettled(() => {
     dayjs.locale(locale().toLocaleLowerCase());
   });
   return (

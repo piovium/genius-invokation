@@ -37,9 +37,9 @@ import {
   createEffect,
   createSignal,
   type Accessor,
-  type ComponentProps,
-  type JSX,
+  createStore,
 } from "solid-js";
+import type { ComponentProps, JSX } from "@solidjs/web";
 import {
   Chessboard,
   type ChessboardViewType,
@@ -67,7 +67,6 @@ import {
   updateHistory,
   type HistoryData,
 } from "./history/parser";
-import { createStore, produce } from "solid-js/store";
 import type { Rotation } from "./components/TransformWrapper";
 import type { CancellablePlayerIO } from "@gi-tcg/core";
 import {
@@ -172,8 +171,8 @@ export interface ClientChessboardProps extends ComponentProps<"div"> {
 export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   const getAssetsManager = () =>
     option.assetsManager?.() ?? DEFAULT_ASSETS_MANAGER;
-  createEffect(() => {
-    void prepareActionCardsCache(getAssetsManager());
+  createEffect(getAssetsManager, (manager) => {
+    void prepareActionCardsCache(manager);
   });
   const getLocale = () => option.locale?.() ?? "zh-CN";
   const dict = createMemo(() => flatten(translations[getLocale()]));
@@ -429,9 +428,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         async () => {
           state = oppController.mergeState(state!);
           const parsed = parseMutations(mutation, parseMutationContext);
-          setHistory(
-            produce((history) => updateHistory(savedState, mutation, history)),
-          );
+          setHistory((history) => updateHistory(savedState, mutation, history));
           const { promise, resolve } = Promise.withResolvers<void>();
           setData({
             previousState: savedState ?? state,
@@ -543,7 +540,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   };
 
   const Wrapper = (props: ComponentProps<"div">) => (
-    <UiContext.Provider
+    <UiContext
       value={{
         ...option,
         assetsManager: getAssetsManager,
@@ -569,7 +566,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         opp={opp()}
         {...props}
       />
-    </UiContext.Provider>
+    </UiContext>
   );
 
   return [io, Wrapper];

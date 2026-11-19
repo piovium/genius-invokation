@@ -14,7 +14,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { useParams } from "@solidjs/router";
-import { createResource, Switch, Match } from "solid-js";
+import { Switch, Match } from "solid-js";
+import { createRequest } from "@gi-tcg/utils/solid";
 import { Layout } from "../layouts/Layout";
 import axios from "axios";
 import { useAuth, UserInfo as UserInfoT } from "../auth";
@@ -24,21 +25,18 @@ import { getErrorMessage, getGithubAvatarUrl } from "../utils";
 
 export default function User() {
   const { t } = useI18n();
-  const params = useParams();
+  const params = useParams<{ id: string }>();
   const { status: mine, avatarUrl: myAvatarUrl } = useAuth();
 
-  const [userInfo, { refetch }] = createResource(
-    () => params.id,
-    async (id) => {
-      if (id.trim() === "" || !Number.isFinite(+id)) {
-        throw new Error(`User ID is incorrect: ${id}`);
-      } else {
-        return await axios
-          .get(`users/${params.id}`)
-          .then((res) => res.data as UserInfoT);
-      }
-    },
-  );
+  const userInfoRequest = createRequest(async () => {
+    const id = params.id;
+    if (id.trim() === "" || !Number.isFinite(+id)) {
+      throw new Error(`User ID is incorrect: ${id}`);
+    }
+    return (await axios.get<UserInfoT>(`users/${id}`)).data;
+  });
+  const userInfo = userInfoRequest.value;
+  const refetch = userInfoRequest.refetch;
 
   const guestMode = () => params.id === "guest";
 
@@ -54,10 +52,10 @@ export default function User() {
             editable={true}
           />
         </Match>
-        <Match when={userInfo.loading}>{t("loading")}</Match>
-        <Match when={userInfo.error}>
+        <Match when={userInfoRequest.loading()}>{t("loading")}</Match>
+        <Match when={userInfoRequest.error()}>
           {t("loadFailed", {
-            message: getErrorMessage(userInfo.error),
+            message: getErrorMessage(userInfoRequest.error()),
           })}
         </Match>
         <Match when={userInfo()}>

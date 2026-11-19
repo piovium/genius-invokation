@@ -19,7 +19,7 @@ import "./index";
 
 import { makePersisted } from "@solid-primitives/storage";
 import { createMemo, createSignal } from "solid-js";
-import { render } from "solid-js/web";
+import { render } from "@solidjs/web";
 
 import getData from "@gi-tcg/data";
 import {

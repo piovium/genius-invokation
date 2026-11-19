@@ -15,10 +15,8 @@
 
 import { Image } from "./Image";
 import { InlineDice } from "./Dice";
-import {
-  createMemo,
-  type JSX,
-} from "solid-js";
+import { createMemo } from "solid-js";
+import type { JSX } from "@solidjs/web";
 
 export interface RichTextProps {
   /**

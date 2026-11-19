@@ -1,11 +1,5 @@
-import {
-  createContext,
-  onCleanup,
-  onMount,
-  Show,
-  useContext,
-  type JSX,
-} from "solid-js";
+import { createContext, onSettled, Show, useContext } from "solid-js";
+import type { JSX } from "@solidjs/web";
 
 export interface ModalProps {
   ref?: HTMLDialogElement | ((el: HTMLDialogElement) => void);
@@ -23,7 +17,7 @@ export interface ModalContextValue {
 const ModalContext = createContext<ModalContextValue>({
   removeSelf: () => {},
 });
-export const ModalContextProvider = ModalContext.Provider;
+export const ModalContextProvider = ModalContext;
 
 export function Modal(props: ModalProps) {
   const { removeSelf } = useContext(ModalContext);
@@ -39,14 +33,13 @@ export function Modal(props: ModalProps) {
     }
   };
 
-  onMount(() => {
+  onSettled(() => {
     ref.addEventListener("click", onClickClose);
     ref.showModal();
-  });
-
-  onCleanup(() => {
-    ref.close();
-    ref.removeEventListener("click", onClickClose);
+    return () => {
+      ref.close();
+      ref.removeEventListener("click", onClickClose);
+    };
   });
   return (
     <dialog

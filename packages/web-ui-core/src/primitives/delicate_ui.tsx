@@ -13,14 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  createEffect,
-  createMemo,
-  createResource,
-  Show,
-  untrack,
-  type JSX,
-} from "solid-js";
+import { createMemo, Show, untrack } from "solid-js";
+import type { JSX } from "@solidjs/web";
 import { useUiContext } from "../hooks/context";
 
 export type WithDelicateUiProps =
@@ -60,55 +54,57 @@ export function WithDelicateUi(props: WithDelicateUiProps) {
     );
   });
   const useDataUri = untrack(() => props.dataUri);
-  const [resource] = createResource(assetUrls, (urls) =>
-    Promise.all(
-      urls.map(
-        (url) =>
-          new Promise<HTMLImageElement | string>((resolve, reject) => {
-            if (disableDelicateUi) {
-              reject(null);
-              return;
-            }
-            if (useDataUri) {
-              if (assetsUriCache.has(url)) {
-                resolve(assetsUriCache.get(url)!);
+  const resource = createMemo(
+    () =>
+      Promise.all(
+        assetUrls().map(
+          (url) =>
+            new Promise<HTMLImageElement | string>((resolve, reject) => {
+              if (disableDelicateUi) {
+                reject(null);
                 return;
               }
-              fetch(url)
-                .then((res) => res.blob())
-                .then((blob) => {
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    const uri = reader.result as string;
-                    assetsUriCache.set(url, uri);
-                    resolve(uri);
-                  };
-                  reader.onerror = () => reject(null);
-                  reader.readAsDataURL(blob);
-                })
-                .catch(() => reject(null));
-            } else {
-              if (assetsImageCache.has(url)) {
-                resolve(
-                  assetsImageCache.get(url)!.cloneNode() as HTMLImageElement,
-                );
-                return;
+              if (useDataUri) {
+                if (assetsUriCache.has(url)) {
+                  resolve(assetsUriCache.get(url)!);
+                  return;
+                }
+                fetch(url)
+                  .then((res) => res.blob())
+                  .then((blob) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      const uri = reader.result as string;
+                      assetsUriCache.set(url, uri);
+                      resolve(uri);
+                    };
+                    reader.onerror = () => reject(null);
+                    reader.readAsDataURL(blob);
+                  })
+                  .catch(() => reject(null));
+              } else {
+                if (assetsImageCache.has(url)) {
+                  resolve(
+                    assetsImageCache.get(url)!.cloneNode() as HTMLImageElement,
+                  );
+                  return;
+                }
+                const img = new Image();
+                img.draggable = false;
+                img.src = url;
+                img.onload = () => {
+                  assetsImageCache.set(url, img);
+                  resolve(img);
+                };
+                img.onerror = () => reject(null);
               }
-              const img = new Image();
-              img.draggable = false;
-              img.src = url;
-              img.onload = () => {
-                assetsImageCache.set(url, img);
-                resolve(img);
-              };
-              img.onerror = () => reject(null);
-            }
-          }),
-      ),
-    ),
+            }),
+        ),
+      ).catch(() => undefined),
+    { loadingValue: undefined },
   );
   return (
-    <Show when={resource.state === "ready"} fallback={props.fallback}>
+    <Show when={resource() != null} fallback={props.fallback}>
       {props.children(...(resource() as any[]))}
     </Show>
   );

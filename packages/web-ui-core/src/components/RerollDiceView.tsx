@@ -16,7 +16,7 @@
 
 import type { DiceType } from "@gi-tcg/typings";
 import { Dice } from "./Dice";
-import { createSignal, Index } from "solid-js";
+import { createSignal, For } from "solid-js";
 import { checkPointerEvent } from "../utils";
 import { Button } from "./Button";
 import { useUiContext } from "../hooks/context";
@@ -48,14 +48,14 @@ export function RerollDiceView(props: RerollViewProps) {
   return (
     <div
       class="w-full h-full hidden data-[shown]:flex flex-col items-center justify-center select-none z-3 min-w-0 min-h-0"
-      bool:data-shown={props.shown}
+      data-shown={props.shown}
       onPointerUp={() => setSelectingOn(null)}
     >
       <h3 class="h-10 font-bold text-3xl text-white/80">
         {t("view.rerollDiceTitle")}
       </h3>
       <div class="h-42 my-12 grid grid-rows-2 grid-flow-col gap-2">
-        <Index each={props.dice}>
+        <For keyed={false} each={props.dice}>
           {(dice, index) => (
             <Dice
               type={dice()}
@@ -78,11 +78,11 @@ export function RerollDiceView(props: RerollViewProps) {
               }}
             />
           )}
-        </Index>
+        </For>
       </div>
       <Button
         class="visible data-[hidden]:invisible"
-        bool:data-hidden={props.noConfirmButton}
+        data-hidden={props.noConfirmButton}
         onClick={() => props.onConfirm()}
       >
         {t("view.confirmButton")}

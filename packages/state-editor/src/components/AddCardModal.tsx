@@ -304,7 +304,7 @@ export function AddCardModal(props: AddCardModalProps) {
                 return (
                   <button
                     type="button"
-                    bool:data-close-dialog={props.autoClose}
+                    data-close-dialog={props.autoClose}
                     onClick={() => {
                       props.onSelect(card.definition);
                     }}

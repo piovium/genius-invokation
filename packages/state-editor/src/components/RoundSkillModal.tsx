@@ -101,18 +101,22 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
   });
 
   // 重置状态当modal打开/关闭时
-  createEffect(() => {
-    if (isEditing() && props.editingCharacterId) {
-      setSelectedCharacterId(props.editingCharacterId);
-      setSelectedSkillIds(props.editingSkillIds ?? []);
-    } else {
-      setSelectedCharacterId(null);
-      setSelectedSkillIds([]);
-    }
-    setShowOtherCharacterSelect(false);
-    setShowOtherSkillSelect(false);
-    setOtherSkillQuery("");
-  });
+  createEffect(
+    () =>
+      [isEditing(), props.editingCharacterId, props.editingSkillIds] as const,
+    ([editing, characterId, skillIds]) => {
+      if (editing && characterId) {
+        setSelectedCharacterId(characterId);
+        setSelectedSkillIds(skillIds ?? []);
+      } else {
+        setSelectedCharacterId(null);
+        setSelectedSkillIds([]);
+      }
+      setShowOtherCharacterSelect(false);
+      setShowOtherSkillSelect(false);
+      setOtherSkillQuery("");
+    },
+  );
 
   // 切换技能选择
   const toggleSkill = (skillId: number) => {

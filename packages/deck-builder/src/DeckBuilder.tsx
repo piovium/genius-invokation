@@ -14,21 +14,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
-  type JSX,
   createContext,
-  splitProps,
+  omit,
   useContext,
-  untrack,
   createSignal,
-  createEffect,
   createMemo,
   Show,
-  createResource,
   Switch,
   Match,
   createUniqueId,
-  onCleanup,
 } from "solid-js";
+import { createRequest } from "@gi-tcg/utils/solid";
+import type { JSX } from "@solidjs/web";
 import { AllCards } from "./AllCards";
 import { CurrentDeck } from "./CurrentDeck";
 import type { Deck } from "@gi-tcg/typings";
@@ -36,7 +33,6 @@ import { createCardDataViewer } from "@gi-tcg/card-data-viewer";
 import {
   DEFAULT_ASSETS_MANAGER,
   type AssetsManager,
-  type DeckData,
 } from "@gi-tcg/assets-manager";
 import { translations, type Locale } from "./i18n";
 import type { I18nKey } from "./locales";
@@ -67,18 +63,17 @@ const EMPTY_DECK: Deck = {
 };
 
 export function DeckBuilder(props: DeckBuilderProps) {
-  const [local, rest] = splitProps(props, ["assetsManager", "locale", "class"]);
+  const rest = omit(props, "assetsManager", "locale", "class");
   let container!: HTMLDivElement;
   const assetsManager = createMemo(
-    () => local.assetsManager ?? DEFAULT_ASSETS_MANAGER,
+    () => props.assetsManager ?? DEFAULT_ASSETS_MANAGER,
   );
-  const locale = createMemo(() => local.locale ?? "zh-CN");
+  const locale = createMemo(() => props.locale ?? "zh-CN");
   const dict = createMemo(() => translations[locale()]);
   const t = translator(dict, resolveTemplate);
 
-  const [deckData] = createResource(assetsManager, (manager) =>
-    manager.getDeckData(),
-  );
+  const deckDataRequest = createRequest(() => assetsManager().getDeckData());
+  const deckData = deckDataRequest.value;
 
   const { CardDataViewer, showCard, showCharacter, hide } =
     createCardDataViewer({
@@ -89,25 +84,21 @@ export function DeckBuilder(props: DeckBuilderProps) {
   const [cardDataViewerOffsetX, setCardDataViewerOffsetX] = createSignal(0);
   const [cardDataViewerOffsetY, setCardDataViewerOffsetY] = createSignal(0);
 
-  const [version, setVersion] = createSignal(0);
   const allVersions = () => deckData()?.allVersions;
   const versionSpecified = () =>
     !!props.version && allVersions()?.includes(props.version);
 
-  createEffect(() => {
-    if (deckData.state === "ready") {
-      if (versionSpecified()) {
-        setVersion(deckData().allVersions.indexOf(props.version!));
-      } else {
-        setVersion(deckData().allVersions.length - 1);
-      }
-    }
+  const [version, setVersion] = createSignal(() => {
+    const versions = allVersions() ?? [];
+    return versionSpecified()
+      ? versions.indexOf(props.version!)
+      : Math.max(versions.length - 1, 0);
   });
 
   const deckPageControlId = createUniqueId();
 
   return (
-    <DeckBuilderContext.Provider
+    <DeckBuilderContext
       value={{
         assetsManager,
         locale,
@@ -143,7 +134,7 @@ export function DeckBuilder(props: DeckBuilderProps) {
       }}
     >
       <div
-        class={`gi-tcg-deck-builder @container groupxxx reset ${local.class}`}
+        class={["gi-tcg-deck-builder @container groupxxx reset", props.class]}
         ref={container}
       >
         <input
@@ -158,10 +149,10 @@ export function DeckBuilder(props: DeckBuilderProps) {
           onClick={() => hide()}
         >
           <Switch>
-            <Match when={deckData.loading}>
+            <Match when={deckDataRequest.loading()}>
               <div class="flex-grow">{t("loadingCards")}</div>
             </Match>
-            <Match when={deckData.error}>
+            <Match when={deckDataRequest.error()}>
               <div class="flex-grow">{t("loadCardsFailed")}</div>
             </Match>
             <Match when={deckData()}>
@@ -207,6 +198,6 @@ export function DeckBuilder(props: DeckBuilderProps) {
           <CardDataViewer />
         </div>
       </div>
-    </DeckBuilderContext.Provider>
+    </DeckBuilderContext>
   );
 }

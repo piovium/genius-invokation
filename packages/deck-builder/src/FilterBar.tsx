@@ -99,8 +99,8 @@ export function FilterBar(props: FilterBarProps) {
                   {(tag) => (
                     <button
                       onClick={() => fs.onSelect(tag)}
-                      bool:data-selected={fs.selected() === tag}
-                      bool:data-capsule={!tag.startsWith("GCG_TAG_")}
+                      data-selected={fs.selected() === tag}
+                      data-capsule={!tag.startsWith("GCG_TAG_")}
                       class={`flex-shrink-0 bg-gray-200 
                         w-7 h-7
                         FM:w-10 FM:h-10 @3xl:w-10 @3xl:h-10 
@@ -139,7 +139,7 @@ export function FilterBar(props: FilterBarProps) {
                   class={`flex-shrink-0 bg-gray-200 w-7 h-7 text-3.5 font-bold
                     flex flex-col items-center justify-center rounded-full 
                     data-[capsule]:w-auto min-w-7 data-[capsule]:px-1`}
-                  bool:data-capsule={!tag().startsWith("GCG_TAG_")}
+                  data-capsule={!tag().startsWith("GCG_TAG_")}
                 >
                   <TagIcon tagName={tag()} />
                 </div>

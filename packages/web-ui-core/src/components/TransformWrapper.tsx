@@ -17,13 +17,12 @@
 import {
   children,
   createEffect,
-  on,
   onCleanup,
-  onMount,
+  onSettled,
   untrack,
-  type JSX,
   type Setter,
 } from "solid-js";
+import type { JSX } from "@solidjs/web";
 import { MINIMUM_HEIGHT, MINIMUM_WIDTH, unitInPx } from "../layout";
 import { funnel } from "remeda";
 
@@ -107,22 +106,20 @@ export function TransformWrapper(props: TransformWrapperProps) {
   const containerResizeObserver = new ResizeObserver(
     onContainerResizeDebouncer.call,
   );
-  onMount(() => {
+  onSettled(() => {
     onContainerResize();
     containerResizeObserver.observe(transformWrapperEl.parentElement!);
   });
   createEffect(
-    on(
-      () => [
-        props.hasOppChessboard,
-        props.autoHeight,
-        props.rotation,
-        props.isFullscreen,
-      ],
-      () => {
-        onContainerResizeDebouncer.call();
-      },
-    ),
+    () => [
+      props.hasOppChessboard,
+      props.autoHeight,
+      props.rotation,
+      props.isFullscreen,
+    ],
+    () => {
+      onContainerResizeDebouncer.call();
+    },
   );
   onCleanup(() => {
     containerResizeObserver.disconnect();
@@ -131,7 +128,7 @@ export function TransformWrapper(props: TransformWrapperProps) {
   const inner = children(() => props.children);
   return (
     <div
-      class={`transform-origin-center ${props.class ?? ""}`}
+      class={["transform-origin-center", props.class]}
       ref={transformWrapperEl}
     >
       {inner()}

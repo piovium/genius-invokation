@@ -13,14 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  Show,
-  Switch,
-  Match,
-  createResource,
-  createSignal,
-  onCleanup,
-} from "solid-js";
+import { Show, Switch, Match, createMemo } from "solid-js";
 import { useDeckBuilderContext } from "./DeckBuilder";
 import BrowseIcon from "./Browse.svg";
 import DeleteIcon from "./Delete.svg";
@@ -35,15 +28,19 @@ export interface CardProps {
 export function Card(props: CardProps) {
   const { assetsManager, showCard } = useDeckBuilderContext();
 
-  const [url] = createResource(() =>
-    assetsManager().getImageUrl(props.id, { thumbnail: true }),
+  const url = createMemo(
+    () =>
+      assetsManager()
+        .getImageUrl(props.id, { thumbnail: true })
+        .catch(() => undefined),
+    { loadingValue: undefined },
   );
   const name = () => assetsManager().getNameSync(props.id);
 
   return (
     <div title={name()} class="w-full relative group">
       <Show
-        when={url.state === "ready"}
+        when={url() != null}
         fallback={
           <div class="w-full aspect-ratio-[7/12] bg-gray-200 text-black whitespace-pre overflow-clip">
             {name()}
@@ -70,10 +67,12 @@ export function Card(props: CardProps) {
         class="absolute inset-0 z-100 bg-transparent @3xl:hidden"
         onContextMenu={(e) => e.preventDefault()}
         data-long-press-delay="400"
-        on:long-press={(e: CustomEvent) => {
-          e.preventDefault();
-          showCard(e, props.type, props.id);
-        }}
+        ref={(el) =>
+          el.addEventListener("long-press", (e) => {
+            e.preventDefault();
+            showCard(e, props.type, props.id);
+          })
+        }
       />
     </div>
   );
@@ -91,16 +90,16 @@ export function PoolCard(props: PoolCardProps) {
   return (
     <div
       class="pool-card w-full rounded-lg overflow-clip b-[var(--border-color)] b-2 relative"
-      bool:data-selected={props.selected}
-      bool:data-partial-selected={props.partialSelected}
-      bool:data-invalid={props.valid === false}
+      data-selected={props.selected}
+      data-partial-selected={props.partialSelected}
+      data-invalid={props.valid === false}
     >
       <Card id={props.id} type={props.type} />
       <Switch>
         <Match when={props.valid === false}>
           <div
             class="absolute left-0 bottom-0 bg-[var(--border-color)] h-25% w-full items-center justify-center text-red font-bold text-sm flex"
-            bool:data-invalid={props.valid === false}
+            data-invalid={props.valid === false}
           >
             {t("invalid")}
           </div>
@@ -108,7 +107,7 @@ export function PoolCard(props: PoolCardProps) {
         <Match when={props.type === "character" && props.selected}>
           <div
             class="absolute left-0 bottom-0 bg-[var(--border-color)] h-25% w-full items-center justify-center text-white font-bold text-sm flex"
-            bool:data-selected={props.selected}
+            data-selected={props.selected}
           >
             {t("selected")}
           </div>
@@ -121,8 +120,8 @@ export function PoolCard(props: PoolCardProps) {
         >
           <div
             class="absolute left-0 bottom-0 bg-[var(--border-color)] h-25% w-full items-center justify-center text-white font-bold text-sm flex"
-            bool:data-selected={props.selected}
-            bool:data-partial-selected={props.partialSelected}
+            data-selected={props.selected}
+            data-partial-selected={props.partialSelected}
           >
             {t("selectedCount", { count: props.selectedCount ?? 0 })}
           </div>
@@ -140,15 +139,16 @@ export interface DeckCardProps extends CardProps {
 export function DeckCard(props: DeckCardProps) {
   return (
     <div
-      class={`w-full overflow-clip b-gray-500 b-2 relative group ${
-        props.class ?? ""
-      }`}
+      class={[
+        "w-full overflow-clip b-gray-500 b-2 relative group",
+        props.class,
+      ]}
     >
       <Card id={props.id} type={props.type} />
       <div
         class={`absolute inset-0 data-[warn]:flex hidden group-hover:hidden pointer-events-none
            bg-red-500/50 items-center justify-center`}
-        bool:data-warn={props.warn}
+        data-warn={props.warn}
       >
         <span class="text-4xl font-bold text-white text-center">&#9888;</span>
       </div>
@@ -171,14 +171,18 @@ export interface TinyCardProps {
 export function TinyCharacterCard(props: TinyCardProps) {
   const { assetsManager } = useDeckBuilderContext();
 
-  const [url] = createResource(() =>
-    assetsManager().getImageUrl(props.id, { type: "icon", thumbnail: true }),
+  const url = createMemo(
+    () =>
+      assetsManager()
+        .getImageUrl(props.id, { type: "icon", thumbnail: true })
+        .catch(() => undefined),
+    { loadingValue: undefined },
   );
 
   return (
     <div class="@3xl:hidden DP:hidden w-full h-full rounded-full overflow-clip b-gray-500 border-2 relative group">
       <Show
-        when={url.state === "ready"}
+        when={url() != null}
         fallback={<div class="w-full h-full bg-gray-200" />}
       >
         <img src={url()} draggable="false" class="w-full object-cover" />
@@ -186,7 +190,7 @@ export function TinyCharacterCard(props: TinyCardProps) {
       <div
         class={`absolute inset-0 data-[warn]:block hidden pointer-events-none 
           text-lg line-height-10 text-white text-center bg-red-500/50`}
-        bool:data-warn={props.warn}
+        data-warn={props.warn}
       >
         &#9888;
       </div>
@@ -197,14 +201,18 @@ export function TinyCharacterCard(props: TinyCardProps) {
 export function TinyActionCard(props: TinyCardProps) {
   const { assetsManager } = useDeckBuilderContext();
 
-  const [url] = createResource(() =>
-    assetsManager().getImageUrl(props.id, { thumbnail: true }),
+  const url = createMemo(
+    () =>
+      assetsManager()
+        .getImageUrl(props.id, { thumbnail: true })
+        .catch(() => undefined),
+    { loadingValue: undefined },
   );
 
   return (
     <div class="@3xl:hidden DP:hidden w-full rounded-md overflow-clip b-gray-500 border-2 relative group">
       <Show
-        when={url.state === "ready"}
+        when={url() != null}
         fallback={<div class="w-full aspect-ratio-[7/12] bg-gray-200" />}
       >
         <img src={url()} draggable="false" class="w-full object-cover" />
@@ -212,7 +220,7 @@ export function TinyActionCard(props: TinyCardProps) {
       <div
         class={`absolute inset-0 data-[warn]:block hidden pointer-events-none 
           text-lg line-height-10 text-white text-center bg-red-500/50`}
-        bool:data-warn={props.warn}
+        data-warn={props.warn}
       >
         &#9888;
       </div>

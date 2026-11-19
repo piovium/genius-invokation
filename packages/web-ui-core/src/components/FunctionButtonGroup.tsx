@@ -29,7 +29,7 @@ export interface SpecialViewToggleButtonProps {
 export function SpecialViewToggleButton(props: SpecialViewToggleButtonProps) {
   return (
     <button
-      class={`h-8 w-8 function-button ${props.class ?? ""}`}
+      class={["h-8 w-8 function-button", props.class]}
       onClick={() => {
         props.onClick?.();
       }}

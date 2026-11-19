@@ -13,18 +13,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { paths } from "../router";
 import {
   Show,
-  createResource,
   Switch,
   Match,
   For,
   createSignal,
-  onMount,
-  onCleanup,
+  onSettled,
+  createMemo,
 } from "solid-js";
+import { createRequest } from "@gi-tcg/utils/solid";
 import { Layout } from "../layouts/Layout";
-import { A, useNavigate } from "@solidjs/router";
+import { useNavigate } from "@solidjs/router";
 import axios, { AxiosError } from "axios";
 import { DeckBriefInfo } from "../components/DeckBriefInfo";
 import { RoomDialog } from "../components/RoomDialog";
@@ -34,7 +35,7 @@ import { useDecks } from "./Decks";
 import { Login } from "../components/Login";
 import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
-import { Portal } from "solid-js/web";
+import { Portal } from "@solidjs/web";
 
 export default function Home() {
   const { t } = useI18n();
@@ -49,30 +50,29 @@ export default function Home() {
     RoomInfo | undefined
   >();
 
-  const [currentRoom] = createResource(() =>
-    axios.get("rooms/current").then((r) => r.data),
-  );
-  const [allRooms, { refetch: refreshAllRooms }] = createResource<RoomInfo[]>(
+  const currentRoom = createMemo(
     () =>
       axios
-        .get("rooms")
-        .then((e) =>
-          e.data.filter((r: RoomInfo) => r.id !== currentRoom()?.id),
-        ),
+        .get<RoomInfo | null>("rooms/current")
+        .then((r) => r.data)
+        .catch(() => null),
+    { loadingValue: null },
   );
+  const allRoomsRequest = createRequest(() =>
+    axios.get<RoomInfo[]>("rooms").then((r) => r.data),
+  );
+  const allRooms = createMemo(() =>
+    allRoomsRequest.value()?.filter((room) => room.id !== currentRoom()?.id),
+  );
+  const refreshAllRooms = allRoomsRequest.refetch;
   const ROOM_REFRESH_INTERVAL_MS = 10000;
-  let roomRefreshInterval: number | null = null;
-  onMount(() => {
-    roomRefreshInterval = setInterval(() => {
+  onSettled(() => {
+    const interval = window.setInterval(() => {
       if (status().type !== "notLogin") {
         refreshAllRooms();
       }
     }, ROOM_REFRESH_INTERVAL_MS);
-  });
-  onCleanup(() => {
-    if (typeof roomRefreshInterval === "number") {
-      clearInterval(roomRefreshInterval);
-    }
+    return () => clearInterval(interval);
   });
 
   const isLogin = () => {
@@ -83,7 +83,7 @@ export default function Home() {
   const createRoom = () => {
     if (!decks().count) {
       alert(t("createDeckFirst"));
-      navigate("/decks/new");
+      navigate(paths.decks("new"));
       return;
     }
     createRoomDialogEl.showModal();
@@ -92,7 +92,7 @@ export default function Home() {
     e.preventDefault();
     if (!decks().count) {
       alert(t("createDeckFirst"));
-      navigate("/decks/new");
+      navigate(paths.decks("new"));
       return;
     }
     const form = new FormData(e.target as HTMLFormElement);
@@ -113,7 +113,7 @@ export default function Home() {
   const joinRoomByInfo = (roomInfo: RoomInfo) => {
     if (!decks().count) {
       alert(t("createDeckFirst"));
-      navigate("/decks/new");
+      navigate(paths.decks("new"));
       return;
     }
     setJoiningRoomInfo(roomInfo);
@@ -156,19 +156,22 @@ export default function Home() {
               <div class="flex flex-grow flex-col-reverse md:flex-row gap-8 md:gap-0 min-h-0">
                 <div class="h-full w-full md:w-128 flex flex-col items-start md:bottom-opacity-gradient">
                   <div class="flex flex-row justify-between mb-4 w-full md:pr-6 items-end">
-                    <A href="/decks" class="text-xl font-bold">
+                    <a href={paths.decks()} class="text-xl font-bold">
                       {t("myDecks")}
-                    </A>
+                    </a>
                     <div class="flex flex-row gap-2">
-                      <A
-                        href="/decks/new"
+                      <a
+                        href={paths.decks("new")}
                         class="btn btn-outline-green h-6 py-0"
                       >
                         {t("add")}
-                      </A>
-                      <A href="/decks" class="btn btn-outline-blue h-6 py-0">
+                      </a>
+                      <a
+                        href={paths.decks()}
+                        class="btn btn-outline-blue h-6 py-0"
+                      >
                         {t("manage")}
-                      </A>
+                      </a>
                     </div>
                   </div>
                   <Switch>
@@ -189,9 +192,12 @@ export default function Home() {
                           fallback={
                             <div class="text-gray-500">
                               {t("noDecks")}
-                              <A href="/decks/new" class="text-blue-500">
+                              <a
+                                href={paths.decks("new")}
+                                class="text-blue-500"
+                              >
                                 {t("goAdd")}
-                              </A>
+                              </a>
                             </div>
                           }
                         >
@@ -208,7 +214,7 @@ export default function Home() {
                     when={!currentRoom()}
                     fallback={
                       <div class="mb-8 grid gap-3 grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(360px,1fr))]">
-                        <RoomInfo {...currentRoom()} />
+                        <RoomInfo {...currentRoom()!} />
                       </div>
                     }
                   >
@@ -258,15 +264,17 @@ export default function Home() {
                   </h4>
                   <ul class="grid scrollbar-thin-hover grid w-full grid-cols-1 gap-2 md:grid-cols-[repeat(auto-fill,minmax(360px,1fr))] md:gap-3 md:overflow-y-auto">
                     <Switch>
-                      <Match when={allRooms.error}>
+                      <Match when={allRoomsRequest.error()}>
                         <div class="text-red-500">
                           {t("roomInfoLoadFailed", {
-                            message: getErrorMessage(allRooms.error),
+                            message: getErrorMessage(allRoomsRequest.error()),
                           })}
                         </div>
                       </Match>
                       {/* show loading text when no rooms and loading/refetching */}
-                      <Match when={allRooms.loading && !allRooms()?.length}>
+                      <Match
+                        when={allRoomsRequest.loading() && !allRooms()?.length}
+                      >
                         <div class="text-gray-500">{t("roomInfoLoading")}</div>
                       </Match>
                       <Match when={true}>

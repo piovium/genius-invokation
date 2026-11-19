@@ -28,7 +28,7 @@ import {
 
 import { createClient, StandaloneChessboard } from "@gi-tcg/web-ui-core";
 import "@gi-tcg/web-ui-core/style.css";
-import { For, Show, createSignal, onCleanup, onMount } from "solid-js";
+import { Show, createSignal, onSettled } from "solid-js";
 import { DetailLogViewer } from "@gi-tcg/detail-log-viewer";
 import { DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
 import mergeErrorCause from "merge-error-cause";
@@ -259,10 +259,9 @@ export function StandaloneParent(props: StandaloneParentProps) {
     setDetailLog([]);
   };
 
-  onMount(() => {
-    window.addEventListener("beforeunload", () => {
-      popupWindow()?.close();
-    });
+  onSettled(() => {
+    const closePopup = () => popupWindow()?.close();
+    window.addEventListener("beforeunload", closePopup);
     window.addEventListener("message", childGiveUpHandler);
     if (Array.isArray(props.logs)) {
       setStateLog(props.logs);
@@ -271,9 +270,10 @@ export function StandaloneParent(props: StandaloneParentProps) {
     } else {
       startGame();
     }
-  });
-  onCleanup(() => {
-    window.removeEventListener("message", childGiveUpHandler);
+    return () => {
+      window.removeEventListener("beforeunload", closePopup);
+      window.removeEventListener("message", childGiveUpHandler);
+    };
   });
 
   return (

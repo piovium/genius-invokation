@@ -18,8 +18,8 @@ import { cssPropertyOfTransform } from "../ui_state";
 import type { CardArea, CardCountHintInfo } from "./Chessboard";
 import CardCountHintBlue from "../svg/CardCountHintBlue.svg?fb";
 import CardCountHintYellow from "../svg/CardCountHintYellow.svg?fb";
-import type { Component, ComponentProps } from "solid-js";
-import { Dynamic } from "solid-js/web";
+import type { Component } from "solid-js";
+import { type ComponentProps, Dynamic } from "@solidjs/web";
 import { StrokedText } from "./StrokedText";
 
 export interface CardCountHintProps extends CardCountHintInfo {
@@ -42,7 +42,7 @@ export function CardCountHint(props: CardCountHintProps) {
     <div
       class="pointer-events-none absolute left-0 top-0 h-9 w-9 hidden data-[shown]:grid isolate children:grid-area-[1/1]"
       style={cssPropertyOfTransform(props.transform)}
-      bool:data-shown={props.shown}
+      data-shown={props.shown}
     >
       <Dynamic<Component<ComponentProps<"div">>>
         component={hintStyle().component}

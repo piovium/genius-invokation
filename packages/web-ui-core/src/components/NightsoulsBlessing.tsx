@@ -152,7 +152,7 @@ export function Background(props: BackgroundProps) {
 
 export function NightsoulsBlessing(props: NightsoulsBlessingProps) {
   return (
-    <div class={`rounded-lg ${props.class ?? ""}`}>
+    <div class={["rounded-lg", props.class]}>
       <Background
         color1={NIGHTSOUL_COLORS[props.element]?.[0] ?? "white"}
         color2={NIGHTSOUL_COLORS[props.element]?.[1] ?? "white"}

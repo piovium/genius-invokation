@@ -26,7 +26,7 @@ export function ChessboardBackdrop(props: ChessboardBackdropProps) {
         pointer-events-none data-[shown]:pointer-events-auto
         data-[shown]:bg-black/50 bg-black/0 transition-all
         invisible data-[shown]:visible`}
-      bool:data-shown={props.shown}
+      data-shown={props.shown}
       onClick={(e) => {
         e.stopPropagation();
         props.onClick?.(e);

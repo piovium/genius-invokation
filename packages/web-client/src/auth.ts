@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Accessor, createResource } from "solid-js";
+import { Accessor } from "solid-js";
+import { createRequest } from "@gi-tcg/utils/solid";
 import { GuestInfo, useGuestInfo } from "./guest";
 import axios from "axios";
 import { EMPTY_IMAGE, getGithubAvatarUrl, getRandomAvatar } from "./utils";
@@ -55,21 +56,18 @@ export interface Auth {
   readonly logout: () => Promise<void>;
 }
 
-const [user, { refetch: refetchUser }] = createResource<UserInfo | NotLogin>(
-  () =>
-    axios.get<UserInfo>("users/me").then(({ data }) =>
-      data
-        ? {
-            ...data,
-            type: "user",
-            name: data.name ?? data.login,
-          }
-        : NOT_LOGIN,
-    ),
-  {
-    initialValue: NOT_LOGIN,
-  },
+const userRequest = createRequest<UserInfo | NotLogin>(() =>
+  axios.get<UserInfo>("users/me").then(({ data }) =>
+    data
+      ? {
+          ...data,
+          type: "user",
+          name: data.name ?? data.login,
+        }
+      : NOT_LOGIN,
+  ),
 );
+const user = () => userRequest.value() ?? NOT_LOGIN;
 
 const updateUserInfo = async (newInfo: Partial<UserInfo>) => {
   await axios.patch("users/me", newInfo);
@@ -78,18 +76,11 @@ const updateUserInfo = async (newInfo: Partial<UserInfo>) => {
 export const useAuth = (): Auth => {
   const [guestInfo, setGuestInfo] = useGuestInfo();
   return {
-    status: () => {
-      return (
-        guestInfo() ??
-        (user.state === "ready" || user.state === "refreshing"
-          ? user()
-          : NOT_LOGIN)
-      );
-    },
-    loading: () => guestInfo() === null && user.loading,
-    error: () => (guestInfo() === null ? user.error : void 0),
+    status: () => guestInfo() ?? user(),
+    loading: () => guestInfo() === null && userRequest.loading(),
+    error: () => (guestInfo() === null ? userRequest.error() : void 0),
     refresh: async () => {
-      await refetchUser();
+      await userRequest.refetch();
     },
     loginGuest: async (name: string) => {
       setGuestInfo({
@@ -127,12 +118,12 @@ export const useAuth = (): Auth => {
         setGuestInfo({ ...guest, ...patch });
       } else {
         await updateUserInfo(patch);
-        await refetchUser();
+        await userRequest.refetch();
       }
     },
     logout: async () => {
       localStorage.removeItem("accessToken");
-      await refetchUser();
+      await userRequest.refetch();
       setGuestInfo(null);
     },
   };

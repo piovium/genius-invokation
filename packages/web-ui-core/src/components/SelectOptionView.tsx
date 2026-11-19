@@ -13,13 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  createSignal,
-  For,
-  Show,
-  splitProps,
-  type ComponentProps,
-} from "solid-js";
+import { createSignal, For, Show, omit } from "solid-js";
+import type { ComponentProps } from "@solidjs/web";
 import { type SelectOptionRequest, SelectOptionUiType } from "@gi-tcg/typings";
 import { Button } from "./Button";
 import { Image } from "./Image";
@@ -38,7 +33,7 @@ export function SelectOptionView(props: SelectOptionViewProps) {
   return (
     <div
       class="w-full h-full hidden data-[shown]:flex flex-col items-center justify-center select-none z-3 min-w-0 min-h-0"
-      bool:data-shown={props.shown}
+      data-shown={props.shown}
     >
       <h3 class="h-10 font-bold text-3xl text-white/80">
         {t("view.selectOption")}
@@ -55,14 +50,14 @@ export function SelectOptionView(props: SelectOptionViewProps) {
               title={option.title}
               text={option.text}
               onClick={() => setSelectedIndex(index())}
-              bool:data-selected={selectedIndex() === index()}
+              data-selected={selectedIndex() === index()}
             />
           )}
         </For>
       </div>
       <Button
         class="visible data-[hidden]:invisible"
-        bool:data-hidden={selectedIndex() === null}
+        data-hidden={selectedIndex() === null}
         onClick={() => {
           const index = selectedIndex();
           if (index !== null) {
@@ -84,16 +79,10 @@ export interface SelectOptionProps extends ComponentProps<"div"> {
 }
 
 export function SelectOption(props: SelectOptionProps) {
-  const [local, rest] = splitProps(props, [
-    "uiType",
-    "image",
-    "title",
-    "text",
-    "class",
-  ]);
-  const imageId = () => local.image?.match(/^id:\/\/(\d+)$/)?.[1];
+  const rest = omit(props, "uiType", "image", "title", "text", "class");
+  const imageId = () => props.image?.match(/^id:\/\/(\d+)$/)?.[1];
   const imageType = () => {
-    switch (local.uiType) {
+    switch (props.uiType) {
       case SelectOptionUiType.CARD_FACE:
         return "cardFace" as const;
       case SelectOptionUiType.ICON:
@@ -104,17 +93,20 @@ export function SelectOption(props: SelectOptionProps) {
   };
   return (
     <div
-      class={`w-21 h-36 grid relative children:grid-area-[1/1] rounded isolate transition-all select-option ${local.class ?? ""}`}
+      class={[
+        "w-21 h-36 grid relative children:grid-area-[1/1] rounded isolate transition-all select-option",
+        props.class,
+      ]}
       {...rest}
     >
       <SelectOptionCard class="w-full h-full select-option-card" />
       <div class="grid grid-rows-[3.2rem_1.6rem_4.2rem] grid-cols-1 w-full h-full justify-items-center z-1">
-        <Show when={local.image && imageType()}>
+        <Show when={props.image && imageType()}>
           <Show
             when={imageId()}
             fallback={
               <img
-                src={local.image}
+                src={props.image}
                 alt=""
                 draggable={false}
                 class="rounded-full w-9 h-9 object-cover grid-area-[1/1] self-end"
@@ -132,10 +124,10 @@ export function SelectOption(props: SelectOptionProps) {
           </Show>
         </Show>
         <span class="grid-area-[2/1] text-#ebccba font-bold text-2.5 self-center">
-          <SelectOptionText text={local.title ?? ""} />
+          <SelectOptionText text={props.title ?? ""} />
         </span>
         <div class="grid-area-[3/1] w-full h-full overflow-y-auto px-1 text-2 text-#ebd6c0 whitespace-pre-wrap break-words">
-          <SelectOptionText text={local.text} />
+          <SelectOptionText text={props.text} />
         </div>
       </div>
     </div>
