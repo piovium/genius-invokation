@@ -128,7 +128,7 @@ export function SelectOption(props: SelectOptionProps) {
         <span class="grid-area-[2/1] text-#ebccba font-bold text-2.5 self-center">
           <SelectOptionText text={local.title ?? ""} />
         </span>
-        <div class="grid-area-[3/1] w-full h-full overflow-y-auto px-1 text-2 text-#ebd6c0 whitespace-pre-wrap break-words">
+        <div class="grid-area-[3/1] w-full h-full overflow-y-auto px-1 pb-1 text-2 text-#ebd6c0 whitespace-pre-wrap break-words touch-pan scrollbar-hidden select-option-text">
           <SelectOptionText text={local.text} />
         </div>
       </div>
