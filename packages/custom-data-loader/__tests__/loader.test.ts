@@ -3,7 +3,7 @@ import {
   type AssetsManagerOption,
 } from "@gi-tcg/assets-manager";
 import { Game, playSkillOfCard } from "@gi-tcg/core";
-import { DiceType, SelectOptionUiType } from "@gi-tcg/typings";
+import { DiceType } from "@gi-tcg/typings";
 import { describe, expect, test, vi } from "vitest";
 
 import { CustomDataLoader } from "../src";
@@ -117,32 +117,13 @@ define status {
 
 describe("CustomDataLoader GTS", () => {
   test.each([
-    {
-      argument: ', { who: "my", uiType: "cardFace" }',
-      uiType: SelectOptionUiType.CARD_FACE,
-      who: 0,
-    },
-    {
-      argument: ', { uiType: "icon" }',
-      uiType: SelectOptionUiType.ICON,
-      who: 0,
-    },
-    {
-      argument: ', { who: "my", uiType: "none" }',
-      uiType: SelectOptionUiType.NONE,
-      who: 0,
-    },
-    { argument: "", uiType: SelectOptionUiType.NONE, who: 0 },
-    { argument: ", {}", uiType: SelectOptionUiType.NONE, who: 0 },
-    { argument: ', { who: "opp" }', uiType: SelectOptionUiType.NONE, who: 1 },
-    {
-      argument: ', { who: "opp", uiType: "icon" }',
-      uiType: SelectOptionUiType.ICON,
-      who: 1,
-    },
+    { argument: "", who: 0 },
+    { argument: ", {}", who: 0 },
+    { argument: ', { who: "my" }', who: 0 },
+    { argument: ', { who: "opp" }', who: 1 },
   ])(
     "preserves option presentation with settings argument '$argument'",
-    async ({ argument, uiType, who }) => {
+    async ({ argument, who }) => {
       const [data] = (
         await new CustomDataLoader().loadMod(`
         define card {
@@ -188,7 +169,6 @@ describe("CustomDataLoader GTS", () => {
           expect.objectContaining({
             who,
             prompt: "Choose",
-            uiType,
             options: [
               { key: "reference", text: "$[C1101]", image: "id://1101" },
               { key: "empty", title: "", text: "", image: "id://1102" },

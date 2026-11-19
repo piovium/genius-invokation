@@ -77,7 +77,6 @@ export function MiniView(props: MiniSpecialViewProps) {
                   {(option) => (
                     <SelectOption
                       class="scale-50 shrink-0 mx--7"
-                      uiType={request().uiType}
                       image={option.image}
                       title={option.title}
                       text={option.text}

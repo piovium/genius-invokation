@@ -20,7 +20,7 @@ import {
   splitProps,
   type ComponentProps,
 } from "solid-js";
-import { type SelectOptionRequest, SelectOptionUiType } from "@gi-tcg/typings";
+import type { SelectOptionRequest } from "@gi-tcg/typings";
 import { Button } from "./Button";
 import { Image } from "./Image";
 import { useUiContext } from "../hooks/context";
@@ -50,7 +50,6 @@ export function SelectOptionView(props: SelectOptionViewProps) {
         <For each={props.request.options}>
           {(option, index) => (
             <SelectOption
-              uiType={props.request.uiType}
               image={option.image}
               title={option.title}
               text={option.text}
@@ -77,7 +76,6 @@ export function SelectOptionView(props: SelectOptionViewProps) {
 }
 
 export interface SelectOptionProps extends ComponentProps<"div"> {
-  uiType: SelectOptionUiType;
   image?: string;
   title?: string;
   text: string;
@@ -85,23 +83,12 @@ export interface SelectOptionProps extends ComponentProps<"div"> {
 
 export function SelectOption(props: SelectOptionProps) {
   const [local, rest] = splitProps(props, [
-    "uiType",
     "image",
     "title",
     "text",
     "class",
   ]);
   const imageId = () => local.image?.match(/^id:\/\/(\d+)$/)?.[1];
-  const imageType = () => {
-    switch (local.uiType) {
-      case SelectOptionUiType.CARD_FACE:
-        return "cardFace" as const;
-      case SelectOptionUiType.ICON:
-        return "icon" as const;
-      default:
-        return void 0;
-    }
-  };
   return (
     <div
       class={`w-21 h-36 grid relative children:grid-area-[1/1] rounded isolate transition-all select-option ${local.class ?? ""}`}
@@ -109,7 +96,7 @@ export function SelectOption(props: SelectOptionProps) {
     >
       <SelectOptionCard class="w-full h-full select-option-card" />
       <div class="grid grid-rows-[3.2rem_1.6rem_4.2rem] grid-cols-1 w-full h-full justify-items-center z-1">
-        <Show when={local.image && imageType()}>
+        <Show when={local.image}>
           <Show
             when={imageId()}
             fallback={
@@ -124,8 +111,8 @@ export function SelectOption(props: SelectOptionProps) {
             {(id) => (
               <Image
                 imageId={Number(id())}
-                type={imageType()}
-                fallback={imageType() === "cardFace" ? "card" : "state"}
+                type="icon"
+                fallback="state"
                 class="rounded-full w-9 h-9 grid-area-[1/1] self-end"
               />
             )}

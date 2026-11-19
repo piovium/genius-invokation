@@ -2,7 +2,6 @@ import { expect, test } from "vitest";
 import {
   SelectOptionDoneEM,
   SelectOptionRequest,
-  SelectOptionUiType,
 } from "@gi-tcg/typings";
 import { verifyRpcResponse } from "../src/io";
 import { StateMutator } from "../src/mutator";
@@ -26,29 +25,22 @@ test("accepts an integer option index", () => {
   ).not.toThrow();
 });
 
-test.each([
-  SelectOptionUiType.NONE,
-  SelectOptionUiType.CARD_FACE,
-  SelectOptionUiType.ICON,
-])(
-  "preserves option presentation through RPC encoding for type %s",
-  (uiType) => {
-    const request = {
-      prompt: "Choose",
-      uiType,
-      options: [
-        { key: "image", text: "", image: "id://1101", title: "Character" },
-        { key: "text", text: "Text only" },
-        { key: "url", text: "URL", image: "https://example.com/card.png" },
-        { key: "empty", image: "id://1101", title: "", text: "" },
-        { key: "uri", text: "URI", image: "data:image/png;base64,AA==" },
-      ],
-    };
-    expect(
-      SelectOptionRequest.decode(SelectOptionRequest.encode(request).finish()),
-    ).toEqual(request);
-  },
-);
+test("preserves option presentation through RPC encoding", () => {
+  const request = {
+    prompt: "Choose",
+    options: [
+      { key: "image", text: "", image: "id://1101", title: "Character" },
+      { key: "text", text: "Text only" },
+      { key: "url", text: "URL", image: "https://example.com/card.png" },
+      { key: "empty", image: "id://1101", title: "", text: "" },
+      { key: "uri", text: "URI", image: "data:image/png;base64,AA==" },
+      { key: "empty-image", text: "No image", image: "" },
+    ],
+  };
+  expect(
+    SelectOptionRequest.decode(SelectOptionRequest.encode(request).finish()),
+  ).toEqual(request);
+});
 
 test.each([
   { who: 1 },

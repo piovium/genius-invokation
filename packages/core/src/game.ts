@@ -29,7 +29,6 @@ import {
   ActionValidity,
   type Deck,
   type SelectOption,
-  type SelectOptionUiType,
 } from "@gi-tcg/typings";
 import {
   getDefaultGameConfig,
@@ -273,8 +272,8 @@ export class Game {
       howToReroll: (who) => this.rpcReroll(who),
       howToSwitchHands: (who) => this.rpcSwitchHands(who),
       howToSelectCard: (who, cards) => this.rpcSelectCard(who, cards),
-      howToSelectOption: (who, prompt, options, uiType) =>
-        this.rpcSelectOption(who, prompt, options, uiType),
+      howToSelectOption: (who, prompt, options) =>
+        this.rpcSelectOption(who, prompt, options),
     };
     this.mutator = new StateMutator(initialState, this.mutatorConfig);
     this.players = [new Player(), new Player()];
@@ -1223,12 +1222,10 @@ export class Game {
     who: 0 | 1,
     prompt: string,
     options: readonly Readonly<SelectOption>[],
-    uiType: SelectOptionUiType,
   ) {
     const { selectedIndex } = await this.rpc(who, "selectOption", {
       prompt,
       options: [...options],
-      uiType,
     });
     if (selectedIndex < 0 || selectedIndex >= options.length) {
       throw new GiTcgIoError(who, "Selected option not in candidates");
