@@ -186,6 +186,7 @@ define card {
 
 define combatStatus {
   name "强能之雷·充能选择" as HighVoltageQuestion;
+  image "name://UI_Gcg_Buff_Common_Special";
   on selfEnter {
     const candidates = :queryAll(
       $.my.standby.var("energy", "<", "maxEnergy"),
@@ -230,11 +231,13 @@ define card {
 
 define combatStatus {
   name "白垩之术·充能转移" as CalxsArtsTransfer;
+  image "name://UI_Gcg_Buff_Common_Special";
   usage 2;
 };
 
 define status {
   name "白垩之术·询问" as CalxsArtsQuestion;
+  image "name://UI_Gcg_Buff_Common_Special";
   on selfEnter {
     if (!:query($.my.combatStatus.def(CalxsArtsTransfer))) {
       :dispose();

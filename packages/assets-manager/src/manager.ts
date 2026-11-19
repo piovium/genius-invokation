@@ -537,7 +537,9 @@ export class AssetsManager {
     const url =
       this.customDataImageUrls.get(id) ??
       `${this.apiUrl}/image/${id}?${searchParams}`;
-    return url;
+    return url.startsWith("name://")
+      ? this.getRawImageUrlSync(url.slice("name://".length))
+      : url;
   }
 
   getRawImageUrlSync(imageName: string): string {
@@ -549,7 +551,7 @@ export class AssetsManager {
     options: GetImageOptions = {},
   ): Promise<string> {
     if (this.customDataImageUrls.has(id)) {
-      return this.customDataImageUrls.get(id)!;
+      return this.getImageUrlSync(id, options);
     }
     const blob = await this.getImage(id, options);
     return blobToDataUrl(blob);

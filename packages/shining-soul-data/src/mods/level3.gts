@@ -84,7 +84,9 @@ const PhysicalElementDeclaration = customEvent(
 
 define combatStatus {
   name "深渊的呼唤·元素声明" as AbyssalSummonsDeclaration;
-  variable declared, 0;
+  description "从冰、水、火、雷中声明两种不同元素，由对方选择其中一种，召唤对应的「丘丘人」召唤物。";
+  image "name://UI_Gcg_Buff_Common_Special";
+  variable declared, 0 { visible false; };
   variable elements, 0 { visible false; };
   on selfEnter {
     :emitCustomEvent(PhysicalElementDeclaration);
@@ -126,7 +128,9 @@ define combatStatus {
 
 define combatStatus {
   name "愚人众的阴谋·元素声明" as FatuiConspiracyDeclaration;
-  variable declared, 0;
+  image "name://UI_Gcg_Buff_Common_Special";
+  description "从冰、水、火、雷中声明两种不同元素，由对方选择其中一种，在对方场上生成对应的「愚人众伏兵」。";
+  variable declared, 0 { visible false; };
   variable elements, 0 { visible false; };
   on selfEnter {
     :emitCustomEvent(PhysicalElementDeclaration);
