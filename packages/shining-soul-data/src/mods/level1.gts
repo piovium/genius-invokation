@@ -305,7 +305,7 @@ const diceImages = [
   "DiceElectroS",
   "DiceAnemoS",
   "DiceGeoS",
-  "DiceDendoS",
+  "DiceDendroS",
   "DiceOmniS",
 ];
 const PhysicalLibenCollect = customEvent("mod/physical/liben/collect");
@@ -340,13 +340,13 @@ define card {
         .sort((a, b) => a - b);
       if (kinds.length > 0) {
         :selectOption("立本：选择收集1枚未使用元素骰，或停止收集", [
+          ...kinds.map((die) => ({
+            key: String(die),
+            text: `收集1枚${diceNames[die]}元素骰`,
+            image: `https://ui-assets.piovium.org/${diceImages[die]}.svg.webp`,
+            title: `${diceNames[die]}元素`,
+          })),
           {
-            ...kinds.map((die) => ({
-              key: String(die),
-              text: `收集1枚${diceNames[die]}元素骰`,
-              image: `https://ui-assets.piovium.org/${diceImages[die]}.svg.webp`,
-              title: `${diceNames[die]}元素`,
-            })),
             key: "none",
             text: "停止继续收集元素骰",
             image: "name://UI_Gcg_Buff_Common_More",
