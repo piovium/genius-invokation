@@ -1503,6 +1503,20 @@ export function HistorySummon(props: HistoryCardProps) {
   );
 }
 
+function HistoryOption(props: { image?: string; class?: string }) {
+  return (
+    <div
+      class={`pointer-events-none grid children:grid-area-[1/1] ${props.class ?? ""}`}
+    >
+      <SelectOptionCard class="w-full h-full" />
+      <SelectOptionImage
+        image={props.image}
+        class="h-25% aspect-square mt-18% justify-self-center rounded-full"
+      />
+    </div>
+  );
+}
+
 function HistoryChildBox(props: { data: HistoryChildData }) {
   return (
     <div
@@ -1665,20 +1679,6 @@ function HistorySummaryShot(props: { data: SummaryShot }) {
           </Match>
         </Switch>
       </div>
-    </div>
-  );
-}
-
-function HistoryOption(props: { image?: string; class?: string }) {
-  return (
-    <div
-      class={`pointer-events-none grid children:grid-area-[1/1] ${props.class ?? ""}`}
-    >
-      <SelectOptionCard class="w-full h-full" />
-      <SelectOptionImage
-        image={props.image}
-        class="h-25% aspect-square mt-18% justify-self-center rounded-full"
-      />
     </div>
   );
 }
