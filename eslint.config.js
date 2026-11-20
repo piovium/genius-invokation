@@ -6,7 +6,6 @@ export default [
     ...solid,
     files: [
       "packages/{custom-data-loader,detail-log-viewer,web-ui}/src/**/*.{ts,tsx}",
-      "packages/utils/src/solid.ts",
     ],
     languageOptions: {
       ...solid.languageOptions,

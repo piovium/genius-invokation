@@ -120,8 +120,9 @@ function DeckEditor(props: DeckRouteProps) {
   const { t, locale, assetsManager } = useI18n();
   const [guestDecks, { addGuestDeck, updateGuestDeck }] = useGuestDecks();
   const [searchParams, setSearchParams] = useSearchParams<{ name: string }>();
-  const isNew = props.id === "new";
-  const deckId = Number(props.id);
+  const id = untrack(() => props.id);
+  const isNew = id === "new";
+  const deckId = Number(id);
   const initialDeck = createMemo<DeckWithName>(() => {
     if (isNew) {
       return {
