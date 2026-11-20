@@ -1,19 +1,17 @@
 packages:
   - "packages/*"
 
-overrides:
-  "vite-plugin-solid>babel-preset-solid": 1.9.12
-
 catalog:
   axios: ^1.16.1
   vite: ^8.0.8
   unplugin-dts: ^1.0.0
-  vite-plugin-solid: ^2.11.13
+  "@solidjs/vite-plugin": ^3.0.1
   rollup-plugin-node-externals: ^8.0.1
   unocss: ^66.3.3
   "@unocss/preset-icons": ^66.3.3
   "@unocss/reset": ^66.3.3
-  solid-js: ^1.9.12
+  solid-js: ~2.0.1
+  "@solidjs/web": ~2.0.1
   execa: ^9.6.1
   "@gi-tcg/gts-transpiler": &GTS_VERSION "^0.8.0"
   "@gi-tcg/gts-runtime": *GTS_VERSION
@@ -30,6 +28,9 @@ patchedDependencies:
 minimumReleaseAgeExclude:
   - "@gi-tcg/*"
   - espolar
+  - "@solidjs/signals@2.0.1"
+  - "@solidjs/web@2.0.1"
+  - solid-js@2.0.1
 
 allowBuilds:
   "@bufbuild/buf": true

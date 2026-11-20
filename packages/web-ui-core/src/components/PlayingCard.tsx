@@ -26,8 +26,8 @@ export function PlayingCard(props: PlayingCardProps) {
   return (
     <div
       class="place-self-center w-35 h-60 mb-24 rounded-lg grid children:grid-area-[1/1] playing-card"
-      bool:data-opp={props.opp}
-      bool:data-no-effect={props.noEffect}
+      data-opp={props.opp}
+      data-no-effect={props.noEffect}
     >
       <Image
         class="h-full w-full p-1%"

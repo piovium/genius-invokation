@@ -16,7 +16,7 @@
 import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import nodeExternals from "rollup-plugin-node-externals";
-import solid from "vite-plugin-solid";
+import solid from "@solidjs/vite-plugin";
 import dts from "unplugin-dts/vite";
 
 export default defineConfig({

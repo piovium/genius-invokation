@@ -83,11 +83,12 @@ export function TagFilterGroup<T extends string>(
             <button
               type="button"
               onClick={() => props.onToggle(tag)}
-              class={`px-2 py-1 rounded-full text-xs border transition ${
+              class={[
+                "px-2 py-1 rounded-full text-xs border transition",
                 props.selectedTags.includes(tag)
                   ? props.activeClass
-                  : "bg-slate-800 border-white/10 text-slate-300 hover:bg-slate-700"
-              }`}
+                  : "bg-slate-800 border-white/10 text-slate-300 hover:bg-slate-700",
+              ]}
             >
               {label}
             </button>

@@ -1,4 +1,3 @@
-import { batch, createSignal } from "solid-js";
 import type { Accessor } from "solid-js";
 import { ConfirmModal } from "../components/ConfirmModal";
 import type { AttachmentState, EntityState } from "@gi-tcg/core";
@@ -22,33 +21,25 @@ export function createDuplicateEntityCheck<
   T extends EntityState | AttachmentState,
 >(options: DuplicateCheckOptions<T>): DuplicateCheckResult<T> {
   const { openModal } = useStateEditorContext();
-  const [pendingDefinition, setPendingDefinition] = createSignal<
-    T["definition"] | null
-  >(null);
-  const [existingIndex, setExistingIndex] = createSignal(-1);
+  let pendingDefinition: T["definition"] | null = null;
+  let existingIndex = -1;
 
   const checkDuplicate = (item: T["definition"]): number => {
     const index = options.items().findIndex((i) => i.definition.id === item.id);
-    batch(() => {
-      if (index !== -1) {
-        setPendingDefinition(() => item);
-      }
-    });
-    setExistingIndex(index);
+    pendingDefinition = index === -1 ? null : item;
+    existingIndex = index;
     return index;
   };
 
   const confirmOverride = (done?: () => void) => {
-    const pending = pendingDefinition();
-    if (!pending) return;
+    const pending = pendingDefinition;
+    if (!pending) {
+      return;
+    }
     openModal(() => (
       <ConfirmModal
         title={`检测到重复${options.subject || "实体"}`}
-        message={
-          pendingDefinition()
-            ? `区域中已存在相同类型的${options.subject || "实体"}「${getDefinitionName(pending)}」，是否覆盖？`
-            : ""
-        }
+        message={`区域中已存在相同类型的${options.subject || "实体"}「${getDefinitionName(pending)}」，是否覆盖？`}
         confirmText="确认覆盖"
         cancelText="取消"
         onConfirm={() => {
@@ -61,18 +52,18 @@ export function createDuplicateEntityCheck<
   };
 
   const handleConfirmReplace = () => {
-    const item = pendingDefinition();
-    const index = existingIndex();
+    const item = pendingDefinition;
+    const index = existingIndex;
     if (item && index !== -1) {
       options.onReplace(item, index);
     }
-    setPendingDefinition(null);
-    setExistingIndex(-1);
+    pendingDefinition = null;
+    existingIndex = -1;
   };
 
   const handleCancelReplace = () => {
-    setPendingDefinition(null);
-    setExistingIndex(-1);
+    pendingDefinition = null;
+    existingIndex = -1;
   };
 
   return {

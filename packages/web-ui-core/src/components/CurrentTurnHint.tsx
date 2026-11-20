@@ -29,7 +29,7 @@ export function CurrentTurnHint(props: CurrentTurnHintProps) {
     <Show when={props.phase <= PbPhaseType.ROLL}>
       <div
         class="h-6 min-w-20 px-3 rounded-full text-3.5 text-center line-height-6 font-bold current-turn-hint pointer-events-none select-none"
-        data-opp={props.opp}
+        data-opp={props.opp ? "true" : "false"}
       >
         {t(props.opp ? "capsule.hintOppSideFirst" : "capsule.hintMySideFirst")}
       </div>

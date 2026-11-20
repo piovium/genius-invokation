@@ -13,10 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { For, Index, Show, createEffect } from "solid-js";
+import { For, Show, createEffect, createStore } from "solid-js";
 import type { AllCardsProps } from "./AllCards";
 import { DeckCard, TinyActionCard, TinyCharacterCard } from "./Card";
-import { createStore, produce } from "solid-js/store";
 import type {
   DeckDataActionCardInfo,
   DeckDataCharacterInfo,
@@ -34,41 +33,52 @@ export function CurrentDeck(props: AllCardsProps) {
     ) as (DeckDataActionCardInfo | null)[],
   });
 
-  createEffect(() => {
-    const selectedChs = props.deck.characters
-      .map((id) => props.characters.get(id))
-      .filter((ch): ch is DeckDataCharacterInfo => typeof ch !== "undefined");
-    const selectedAcs = props.deck.cards
-      .map((id) => props.actionCards.get(id))
-      .filter((ac): ac is DeckDataActionCardInfo => typeof ac !== "undefined")
-      .toSorted((a, b) => a.id - b.id);
-    setCurrent(
-      produce((prev) => {
+  createEffect(
+    () => {
+      const selectedChs = props.deck.characters
+        .map((id) => props.characters.get(id))
+        .filter((ch): ch is DeckDataCharacterInfo => typeof ch !== "undefined");
+      const selectedAcs = props.deck.cards
+        .map((id) => props.actionCards.get(id))
+        .filter((ac): ac is DeckDataActionCardInfo => typeof ac !== "undefined")
+        .toSorted((a, b) => a.id - b.id);
+      return { selectedChs, selectedAcs };
+    },
+    ({ selectedChs, selectedAcs }) => {
+      setCurrent((prev) => {
         for (let i = 0; i < 3; i++) {
           prev.characters[i] = selectedChs[i] ?? null;
         }
         for (let i = 0; i < 30; i++) {
           prev.cards[i] = selectedAcs[i] ?? null;
         }
-      })
-    );
-  });
+      });
+    },
+  );
 
   const removeCharacter = (idx: number) => {
-    setCurrent(produce((prev) => (prev.characters[idx] = null)));
+    setCurrent((prev) => {
+      prev.characters[idx] = null;
+    });
     props.onChangeDeck?.({
       ...props.deck,
       characters: current.characters
-        .filter((ch): ch is DeckDataCharacterInfo => ch !== null)
+        .filter(
+          (ch, i): ch is DeckDataCharacterInfo => i !== idx && ch !== null,
+        )
         .map((ch) => ch.id),
     });
   };
   const removeActionCard = (idx: number) => {
-    setCurrent(produce((prev) => (prev.cards[idx] = null)));
+    setCurrent((prev) => {
+      prev.cards[idx] = null;
+    });
     props.onChangeDeck?.({
       ...props.deck,
       cards: current.cards
-        .filter((ac): ac is DeckDataActionCardInfo => ac !== null)
+        .filter(
+          (ac, i): ac is DeckDataActionCardInfo => i !== idx && ac !== null,
+        )
         .map((ac) => ac.id),
     });
   };
@@ -76,7 +86,7 @@ export function CurrentDeck(props: AllCardsProps) {
   return (
     // <div
     //   class="flex-shrink-0 flex flex-col flex-grow items-center justify-center gap-1 data-[deck-page]:gap-3 @3xl:gap-3"
-    //   bool:data-deck-page={deckPage()}
+    //   data-deck-page={deckPage()}
     // >
     <div
       // the DP:max-h-[calc(100%-25px)] is calculated by subtracting b-t-1 of split line, mt-3 of split line, h-3 of toggle button and mb-2 of toggle button

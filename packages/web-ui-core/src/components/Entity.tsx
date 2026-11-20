@@ -14,15 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  createMemo,
-  createResource,
-  Match,
-  Show,
-  Switch,
-  type Component,
-  type ComponentProps,
-} from "solid-js";
+import { AssetFallback } from "./AssetFallback";
+import { createMemo, Match, Show, Switch, type Component } from "solid-js";
+import { type ComponentProps, dynamic } from "@solidjs/web";
 import { cssPropertyOfTransform } from "../ui_state";
 import type { EntityInfo } from "./Chessboard";
 import { Image } from "./Image";
@@ -37,7 +31,6 @@ import HourglassIcon from "../svg/HourglassIcon.svg?fb";
 import BarrierIcon from "../svg/BarrierIcon.svg?fb";
 import { useUiContext } from "../hooks/context";
 import type { EntityRawData } from "@gi-tcg/assets-manager";
-import { Dynamic } from "solid-js/web";
 
 export interface EntityProps extends EntityInfo {
   selecting: boolean;
@@ -47,36 +40,35 @@ export interface EntityProps extends EntityInfo {
 
 const EntityTopHint = (props: { cardDefinitionId: number; value: number }) => {
   const { assetsManager } = useUiContext();
-  const defId = createMemo(() => props.cardDefinitionId);
-  const [data] = createResource(
-    () => [defId(), assetsManager()] as const,
-    ([id, manager]) => manager.getData(id),
+  const data = createMemo(() =>
+    assetsManager().getData(props.cardDefinitionId),
   );
-  const ICON_MAP: Record<string, Component> = {
+  const ICON_MAP: Record<
+    string,
+    Component<Pick<ComponentProps<"div">, "class">>
+  > = {
     GCG_TOKEN_ICON_CLOCK: ClockIcon,
     GCG_TOKEN_ICON_HOURGLASS: HourglassIcon,
     GCG_TOKEN_ICON_BARRIER_SHIELD: BarrierIcon,
   };
   const hintComponent = createMemo(() => {
-    if (data.state === "ready") {
-      return ICON_MAP[(data() as EntityRawData).shownIcon as string];
-    }
+    return ICON_MAP[(data() as EntityRawData).shownIcon as string];
   });
+  const HintIcon = dynamic(hintComponent);
   return (
-    <Show when={hintComponent()}>
-      <div class="absolute w-7 h-7 top--2.5 right--3 grid children:grid-area-[1/1] z-3">
-        <Dynamic<Component<ComponentProps<"div">>>
-          component={hintComponent()}
-          class="w-full h-full"
-        />
-        <StrokedText
-          class="place-self-center text-white font-bold"
-          strokeWidth={2}
-          strokeColor="#000000aa"
-          text={String(props.value)}
-        />
-      </div>
-    </Show>
+    <AssetFallback on={props.cardDefinitionId}>
+      <Show when={hintComponent()}>
+        <div class="absolute w-7 h-7 top--2.5 right--3 grid children:grid-area-[1/1] z-3">
+          <HintIcon class="w-full h-full" />
+          <StrokedText
+            class="place-self-center text-white font-bold"
+            strokeWidth={2}
+            strokeColor="#000000aa"
+            text={String(props.value)}
+          />
+        </div>
+      </Show>
+    </AssetFallback>
   );
 };
 
@@ -113,10 +105,10 @@ export function Entity(props: EntityProps) {
       class={`absolute left-0 top-0 w-16 aspect-ratio-[28/33] data-[hidden]:invisible
         grid preserve-3d rounded isolate children:grid-area-[1/1] clickable-outline entity`}
       style={cssPropertyOfTransform(props.uiState.transform)}
-      bool:data-hidden={props.hidden}
-      bool:data-entering={props.animation === "entering"}
-      bool:data-disposing={props.animation === "disposing"}
-      bool:data-clickable={
+      data-hidden={props.hidden}
+      data-entering={props.animation === "entering"}
+      data-disposing={props.animation === "disposing"}
+      data-clickable={
         props.clickStep && props.clickStep.ui >= ActionStepEntityUi.Outlined
       }
       onClick={(e) => {
@@ -132,9 +124,9 @@ export function Entity(props: EntityProps) {
       <CardFrameSummon class="w-full h-full pointer-events-none z-1" />
       <div
         class="w-full h-full rounded entity-effect z-2"
-        bool:data-usable={data().hasUsagePerRound || props.previewingNew}
-        bool:data-entering={props.animation === "entering"}
-        bool:data-triggered={props.triggered}        
+        data-usable={data().hasUsagePerRound || props.previewingNew}
+        data-entering={props.animation === "entering"}
+        data-triggered={props.triggered}
       />
       <Show when={showVariableDiff()}>
         <VariableDiff
@@ -170,7 +162,10 @@ export function Entity(props: EntityProps) {
         </Match>
         <Match when={props.selecting}>
           {/* with animate no render */}
-          <SelectingIcon noRender class="place-self-center w-21 h-21 m--2.5 max-w-21 z-4" />
+          <SelectingIcon
+            noRender
+            class="place-self-center w-21 h-21 m--2.5 max-w-21 z-4"
+          />
         </Match>
       </Switch>
     </div>

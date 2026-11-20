@@ -13,13 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { paths } from "../router";
 import { useNavigate } from "@solidjs/router";
-import axios, { AxiosError } from "axios";
-import { createResource, For, Show } from "solid-js";
+import { For, Show, createMemo } from "solid-js";
 import { DeckInfo } from "../pages/Decks";
-import { useGuestDecks } from "../guest";
-import { useAuth } from "../auth";
-import { copyShareCode, getErrorMessage } from "../utils";
+import { copyShareCode } from "../utils";
 import { useI18n } from "../i18n";
 
 export interface DeckInfoProps extends DeckInfo {
@@ -30,16 +28,16 @@ export interface DeckInfoProps extends DeckInfo {
 
 function CharacterAvatar(props: { id: number }) {
   const { assetsManager } = useI18n();
-  const [url] = createResource(
-    () => [props.id, assetsManager()] as const,
-    ([id, assetsManager]) =>
-      assetsManager.getImageUrl(id, {
-        type: "icon",
-        thumbnail: true,
-      }),
-    {
-      initialValue: `data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" fill="%23f0f0f0"/></svg>`,
-    },
+  const placeholder = `data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" fill="%23f0f0f0"/></svg>`;
+  const url = createMemo(
+    () =>
+      assetsManager()
+        .getImageUrl(props.id, {
+          type: "icon",
+          thumbnail: true,
+        })
+        .catch(() => placeholder),
+    { loadingValue: placeholder },
   );
   return (
     <img
@@ -53,12 +51,10 @@ function CharacterAvatar(props: { id: number }) {
 export function DeckBriefInfo(props: DeckInfoProps) {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const { status } = useAuth();
-  const [, { removeGuestDeck }] = useGuestDecks();
 
   const viewDeck = (e: MouseEvent) => {
     e.stopPropagation();
-    navigate(`/decks/${props.id}?name=${encodeURIComponent(props.name)}`);
+    navigate(paths.decks(props.id, { name: props.name }));
   };
 
   const copyCode = async (e: MouseEvent) => {
@@ -66,23 +62,10 @@ export function DeckBriefInfo(props: DeckInfoProps) {
     await copyShareCode(props.code, t);
   };
 
-  const deleteDeck = async (e: MouseEvent) => {
+  const deleteDeck = (e: MouseEvent) => {
     e.stopPropagation();
-    const { type } = status();
     if (confirm(t("deleteDeckConfirm", { name: props.name }))) {
-      try {
-        if (type === "guest") {
-          await removeGuestDeck(props.id);
-        } else if (type === "user") {
-          await axios.delete(`decks/${props.id}`);
-        }
-        props.onDelete?.();
-      } catch (e) {
-        if (e instanceof AxiosError) {
-          alert(getErrorMessage(e));
-        }
-        console.error(e);
-      }
+      props.onDelete?.();
     }
   };
 

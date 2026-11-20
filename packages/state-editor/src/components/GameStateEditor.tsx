@@ -6,14 +6,15 @@ import {
   createContext,
   createMemo,
   createSignal,
-  onMount,
-  splitProps,
+  onSettled,
+  omit,
   useContext,
   type Accessor,
-  type ComponentProps,
-  type JSX,
+  createStore,
+  snapshot,
+  untrack,
 } from "solid-js";
-import { createStore, produce, unwrap } from "solid-js/store";
+import type { ComponentProps, JSX } from "@solidjs/web";
 import type { GameState } from "@gi-tcg/core";
 import { Surface } from "./Fields";
 import { CharacterEditor } from "./CharacterEditor";
@@ -94,12 +95,11 @@ function SectionCard(props: {
     <button
       type="button"
       onClick={() => props.onClick()}
-      class={`
-        relative rounded-md @2xl:rounded-2xl border p-1 @2xl:p-3 text-left transition-all duration-200
-        hover:scale-[1.02] hover:shadow-lg overflow-hidden flex flex-col justify-start
-        ${variantStyles[props.config.variant || "default"]}
-        ${activeStyles()}
-      `}
+      class={[
+        "relative rounded-md @2xl:rounded-2xl border p-1 @2xl:p-3 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-lg overflow-hidden flex flex-col justify-start",
+        variantStyles[props.config.variant || "default"],
+        activeStyles(),
+      ]}
       style={gridStyle()}
     >
       {/* 标题 */}
@@ -135,13 +135,9 @@ export const useStateEditorContext = () => {
 };
 
 export function GameStateEditor(props: GameStateEditorProps) {
-  const [local, rest] = splitProps(props, [
-    "initialValue",
-    "onSubmit",
-    "children",
-    "class",
-  ]);
-  const initialState = local.initialValue ?? createDefaultGameState();
+  const rest = omit(props, "initialValue", "onSubmit", "children", "class");
+  const initialState =
+    untrack(() => props.initialValue) ?? createDefaultGameState();
   const [state, setState] = createStore(initialState);
   const catalog = createMemo(() => buildEditorCatalog(state));
   const [selectedSection, setSelectedSection] = createSignal<EditorSection>({
@@ -151,17 +147,18 @@ export function GameStateEditor(props: GameStateEditorProps) {
 
   const errors = createMemo(() => validateGameState(state, catalog()));
   const [formValid, setFormValid] = createSignal(true);
-  // eslint-disable-next-line no-unassigned-vars
   let formRef!: HTMLFormElement;
 
   const refreshFormValidity = () => {
     setFormValid(formRef.checkValidity());
   };
 
-  onMount(() => queueMicrotask(refreshFormValidity));
+  onSettled(() => queueMicrotask(refreshFormValidity));
 
   const updateState: UpdateGameState = (updater) => {
-    setState(produce((draft) => updater(draft as Draft<GameState>)));
+    setState((draft) => {
+      updater(draft as Draft<GameState>);
+    });
     queueMicrotask(refreshFormValidity);
   };
 
@@ -187,8 +184,8 @@ export function GameStateEditor(props: GameStateEditorProps) {
     if (!formValid() || errors().length > 0) {
       return;
     }
-    const nextState = unwrap(state);
-    local.onSubmit(nextState);
+    const nextState = snapshot(state);
+    props.onSubmit(nextState);
   };
 
   const playerLayouts = {
@@ -383,8 +380,8 @@ export function GameStateEditor(props: GameStateEditorProps) {
   });
 
   return (
-    <div {...rest} class={`gi-state-editor ${local.class ?? ""}`}>
-      <StateEditorContext.Provider
+    <div {...rest} class={["gi-state-editor", props.class]}>
+      <StateEditorContext
         value={{
           gameState: () => state,
           updateState,
@@ -422,7 +419,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
                 >
                   完成
                 </button>
-                {local.children}                
+                {props.children}
               </div>
             </div>
           </div>
@@ -513,7 +510,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
           </div>
         </form>
         <For each={modalStack()}>{(modal) => modal()}</For>
-      </StateEditorContext.Provider>
+      </StateEditorContext>
     </div>
   );
 }

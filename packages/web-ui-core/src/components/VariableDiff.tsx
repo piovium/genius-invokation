@@ -55,7 +55,7 @@ export function VariableDiff(props: VariableDiffProps) {
   );
   return (
     <div
-      class={`h-6 grid children:grid-area-[1/1] isolate ${props.class ?? ""}`}
+      class={["h-6 grid children:grid-area-[1/1] isolate", props.class]}
       style={{
         "--bg-color": backgroundColor(),
       }}

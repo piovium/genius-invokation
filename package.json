@@ -33,7 +33,7 @@
     "dependency-graph": "^1.0.0",
     "eslint": "^10.1.0",
     "eslint-plugin-only-warn": "^1.1.0",
-    "eslint-plugin-solid": "^0.14.5",
+    "eslint-plugin-solid": "^0.20.0",
     "execa": "catalog:",
     "jest-extended": "^7.0.0",
     "prettier": "^3.9.5",

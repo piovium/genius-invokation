@@ -17,10 +17,9 @@
 import { DiceType, type PbDiceRequirement } from "@gi-tcg/typings";
 import { Image } from "./Image";
 import { DiceCost } from "./DiceCost";
-import { createMemo, Match, Show, Switch } from "solid-js";
+import { createMemo, Match, Show, Switch, For } from "solid-js";
 import type { ClickSwitchActiveButtonActionStep } from "../action";
 import type { SkillInfo } from "./Chessboard";
-import { Key } from "@solid-primitives/keyed";
 import { DICE_COLOR } from "./Dice";
 import SkillAbandonIcon from "../svg/SkillAbandonIcon.svg?fb";
 import SwitchActiveIcon from "../svg/SwitchActiveIcon.svg?fb";
@@ -55,9 +54,9 @@ function SkillButton(props: SkillButtonProps) {
       <div
         class="grid w-14.5 h-14.5 place-items-center children:grid-area-[1/1] children:pointer-events-none isolate skill-button"
         title={props.step ? props.step.tooltipText : t("skill.notYourTurn")}
-        bool:data-mini={props.isTechnique}
-        bool:data-selected={props.step?.isFocused}
-        bool:data-disabled={!props.step || props.step.isDisabled}
+        data-mini={props.isTechnique}
+        data-selected={props.step?.isFocused}
+        data-disabled={!props.step || props.step.isDisabled}
         onClick={(e) => props.onClick?.(e)}
       >
         {/* with react no render */}
@@ -68,7 +67,7 @@ function SkillButton(props: SkillButtonProps) {
         <Show when={isBurst()}>
           <div
             class="hidden data-[shown]:block w-12 h-12 rounded-full skill-button-burst-animation z-0"
-            bool:data-shown={props.energy === 1}
+            data-shown={props.energy === 1}
           />
           <SkillButtonBurstRing class="w-14.5 h-14.5 z-3" />
           <div
@@ -93,7 +92,7 @@ function SkillButton(props: SkillButtonProps) {
         </Switch>
         <SkillAbandonIcon
           class="w-6 h-6 place-self-end data-[hidden]:hidden z-7"
-          bool:data-hidden={props.step}
+          data-hidden={!!props.step}
         />
       </div>
       <DiceCost
@@ -101,8 +100,8 @@ function SkillButton(props: SkillButtonProps) {
         cost={props.cost}
         diceClass="w-7 h-7 text-3.5 m--1 max-w-7 max-h-7"
         realCost={props.realCost}
-        bool:data-hidden={props.hideDiceCost}
-        bool:data-disabled={!props.step || props.step.isDisabled}
+        data-hidden={props.hideDiceCost}
+        data-disabled={!props.step || props.step.isDisabled}
       />
     </div>
   );
@@ -140,12 +139,13 @@ export function SkillButtonGroup(props: SkillButtonGroupProps) {
   });
   return (
     <div
-      class={`flex flex-row-reverse gap-1 transition-opacity opacity-0 data-[shown]:opacity-100 pointer-events-none data-[shown]:pointer-events-auto ${
-        props.class ?? ""
-      }`}
-      bool:data-shown={props.shown}
+      class={[
+        "flex flex-row-reverse gap-1 transition-opacity opacity-0 data-[shown]:opacity-100 pointer-events-none data-[shown]:pointer-events-auto",
+        props.class,
+      ]}
+      data-shown={props.shown}
     >
-      <Key each={[...skills()].reverse()} by="id">
+      <For each={[...skills()].reverse()} keyed={(item) => item.id}>
         {(skill) => (
           <SkillButton
             {...skill()}
@@ -155,7 +155,7 @@ export function SkillButtonGroup(props: SkillButtonGroupProps) {
             }}
           />
         )}
-      </Key>
+      </For>
     </div>
   );
 }

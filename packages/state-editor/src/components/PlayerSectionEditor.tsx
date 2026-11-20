@@ -18,7 +18,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
   const player = () => getPlayer(props.state, props.who);
 
   return (
-    <PlayerContext.Provider
+    <PlayerContext
       value={{
         who: () => props.who,
         player,
@@ -67,6 +67,6 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
           <DeckImportSection />
         </Match>
       </Switch>
-    </PlayerContext.Provider>
+    </PlayerContext>
   );
 }

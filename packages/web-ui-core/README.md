@@ -20,7 +20,7 @@ function App() {
   game.players[0].io = io0;
   game.players[1].io = io1;
   
-  onMount(() => {
+  onSettled(() => {
     game.start();
   });
 

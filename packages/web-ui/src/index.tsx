@@ -13,8 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { type JSX } from "solid-js";
-import { render } from "solid-js/web";
+import { type JSX, render } from "@solidjs/web";
 import {
   EMPTY_GAME_STATE,
   type WebUiPlayerIO,
@@ -25,7 +24,7 @@ import {
 } from "@gi-tcg/web-ui-core";
 import { DetailLogViewer } from "@gi-tcg/detail-log-viewer";
 import webUiCss from "@gi-tcg/web-ui-core/style.css?inline";
-import { customElement } from "solid-element";
+import { customElement } from "@solidjs/element";
 
 export function createClient(
   element: HTMLElement,

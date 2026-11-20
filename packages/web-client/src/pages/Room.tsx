@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { paths } from "../router";
 import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { Layout } from "../layouts/Layout";
 import {
@@ -23,11 +24,14 @@ import {
 } from "../utils";
 import {
   Show,
+  Loading,
+  Errored,
   createSignal,
-  onMount,
+  onSettled,
+  createMemo,
   createEffect,
-  onCleanup,
-  createResource,
+  getOwner,
+  runWithOwner,
   Switch,
   Match,
   Component,
@@ -43,9 +47,13 @@ import {
   RpcRequest,
   RpcResponse,
 } from "@gi-tcg/typings";
-import { Client, createClient, WebUiPlayerIO } from "@gi-tcg/web-ui-core";
+import {
+  type ClientChessboardProps,
+  createClient,
+  WebUiPlayerIO,
+} from "@gi-tcg/web-ui-core";
 import { useMobile } from "../App";
-import { Dynamic } from "solid-js/web";
+import { dynamic } from "@solidjs/web";
 import { MobileChessboardLayout } from "../layouts/MobileChessboardLayout";
 import type { CancellablePlayerIO } from "@gi-tcg/core";
 import { useAuth } from "../auth";
@@ -180,21 +188,41 @@ const createReconnectSse = <T,>(
 };
 
 export default function Room() {
+  const params = useParams<{ code: string }>();
+  const [searchParams] = useSearchParams<{ player: string; action: string }>();
+  const session = createMemo(() => ({
+    code: params.code,
+    playerId: searchParams.player,
+    action: !!searchParams.action,
+  }));
+  return (
+    <Show keyed when={session()}>
+      {renderRoomSession}
+    </Show>
+  );
+}
+
+function renderRoomSession({
+  code,
+  playerId,
+  action,
+}: {
+  code: string;
+  playerId?: string;
+  action: boolean;
+}) {
+  const owner = getOwner();
   const { t, assetsManager, locale } = useI18n();
-  const params = useParams();
-  const [searchParams] = useSearchParams();
   const checkboxId = createUniqueId();
   const navigate = useNavigate();
-  const code = params.code;
-  const action = !!searchParams.action;
-  const playerId = searchParams.player;
   const id = roomCodeToId(code);
   const { status } = useAuth();
   const [playerIo, setPlayerIo] = createSignal<WebUiPlayerIO>();
   const [initialized, setInitialized] = createSignal<InitializedPayload>();
   const [loading, setLoading] = createSignal(true);
   const [failed, setFailed] = createSignal<null | string>(null);
-  const [chessboard, setChessboard] = createSignal<Component>();
+  const [chessboard, setChessboard] =
+    createSignal<Component<ClientChessboardProps>>();
 
   // Enable opp chessboard & spectator mode
   const [observerMode, setObserverMode] = createSignal(false);
@@ -239,12 +267,14 @@ export default function Room() {
       }
     };
     if (!playerIo()) {
-      const [io, Ui] = createClient(payload.who, {
-        assetsManager: () => assetsManager(profile),
-        locale,
-        onGiveUp,
-        disableAction: !action,
-      });
+      const [io, Ui] = runWithOwner(owner, () =>
+        createClient(payload.who, {
+          assetsManager: () => assetsManager(profile),
+          locale,
+          onGiveUp,
+          disableAction: !action,
+        }),
+      );
       setChessboard(() => Ui);
       setPlayerIo(io);
     }
@@ -332,8 +362,11 @@ export default function Room() {
     }
   };
 
-  const [roomInfo] = createResource(() =>
-    axios.get<{ status: string }>(`rooms/${id}`).then((res) => res.data),
+  const roomInfo = createMemo(() =>
+    axios.get<{ status: string }>(`rooms/${id}`).then(({ data }) => data),
+  );
+  const loadingNotice = () => (
+    <div class="mb-3 alert alert-outline-info">{t("roomLoading")}</div>
   );
 
   const [fetchMyNotification, abortMyNotification] = createReconnectSse(
@@ -430,8 +463,8 @@ export default function Room() {
     reportStreamError,
   );
 
-  createEffect(() => {
-    if (observerMode()) {
+  createEffect(observerMode, (observing) => {
+    if (observing) {
       fetchOppNotification();
     } else {
       abortOppNotification();
@@ -470,24 +503,25 @@ export default function Room() {
 
   const mobile = useMobile();
 
-  onMount(() => {
+  onSettled(() => {
     fetchMyNotification();
     setActionTimer();
+    return () => {
+      abortMyNotification();
+      abortOppNotification();
+      cleanActionTimer();
+    };
   });
 
-  onCleanup(() => {
-    setInitialized();
-    setPlayerIo();
-    cleanActionTimer();
-  });
-
+  const RoomLayout = dynamic(() =>
+    mobile() && !!chessboard() ? MobileChessboardLayout : Layout,
+  );
+  const Chessboard = dynamic(chessboard);
   return (
-    <Dynamic
-      component={mobile() && !!chessboard() ? MobileChessboardLayout : Layout}
-    >
+    <RoomLayout>
       <div
         class="p-0 data-[mobile]:h-100dvh data-[mobile]:overflow-clip container mx-auto flex flex-col group max-w-[calc((100dvh-13.5rem)*160/81)]"
-        bool:data-mobile={mobile() && chessboard()}
+        data-mobile={!!(mobile() && chessboard())}
       >
         <div class="group-data-[mobile]:fixed top-0 right-0 z-100 group-data-[mobile]:translate-x-100% group-data-[mobile]:rotate-90 transform-origin-top-left flex group-data-[mobile]:flex-col flex-row group-data-[mobile]:items-start items-center has-[:where(.visibility-control:checked)]:bg-white group-data-[mobile]:pl-[calc(var(--root-padding-top)+1rem)] group-data-[mobile]:p-4 rounded-br-2xl">
           <input
@@ -554,26 +588,36 @@ export default function Room() {
           <button
             class="hidden group-data-[mobile]:peer-checked:inline-flex btn btn-outline-blue whitespace-normal text-center leading-tight min-h-10 px-4 py-2"
             onClick={() => {
-              navigate("/");
+              navigate(paths());
             }}
           >
             <i class="i-mdi-home" />
             {t("backHome")}
           </button>
         </div>
-        <Switch>
-          <Match when={loading() || roomInfo.loading}>
-            <div class="mb-3 alert alert-outline-info">{t("roomLoading")}</div>
-          </Match>
-          <Match when={roomInfo.state === "ready" && roomInfo()}>
-            {(info) => (
+        <Show when={!loading()} fallback={loadingNotice()}>
+          <Errored
+            fallback={(err) => (
+              <div class="mb-3 alert alert-outline-error">
+                {t("roomLoadFailed", {
+                  message: failed() ?? getErrorMessage(err()),
+                })}
+              </div>
+            )}
+          >
+            <Loading fallback={loadingNotice()}>
               <Switch>
-                <Match when={!initialized() && info().status === "waiting"}>
+                <Match when={failed()}>
+                  <div class="mb-3 alert alert-outline-error">
+                    {t("roomLoadFailed", { message: failed() ?? "" })}
+                  </div>
+                </Match>
+                <Match when={!initialized() && roomInfo().status === "waiting"}>
                   <div class="mb-3 alert alert-outline-info">
                     {t("waitingForOpponent")}
                   </div>
                 </Match>
-                <Match when={info().status === "finished"}>
+                <Match when={roomInfo().status === "finished"}>
                   <div class="mb-3 alert alert-outline-info">
                     {t("roomFinished")}
                     <button
@@ -585,24 +629,16 @@ export default function Room() {
                   </div>
                 </Match>
               </Switch>
-            )}
-          </Match>
-          <Match when={failed()}>
-            <div class="mb-3 alert alert-outline-error">
-              {t("roomLoadFailed", { message: failed() ?? "" })}
-            </div>
-          </Match>
-        </Switch>
+            </Loading>
+          </Errored>
+        </Show>
         <Show when={initialized()}>
           {(payload) => (
             <div class="relative" ref={chessboardContainer}>
-              <Dynamic<Client[1]>
-                component={chessboard()}
+              <Chessboard
                 rotation={mobile() ? 90 : 0}
                 autoHeight={!mobile()}
-                class={`${
-                  mobile() ? "mobile-chessboard h-100dvh w-100dvw" : ""
-                }`}
+                class={mobile() && "mobile-chessboard h-100dvh w-100dvw"}
                 chessboardColor={status().chessboardColor ?? void 0}
                 timer={currentMyTimer() ?? currentOppTimer()}
                 myPlayerInfo={getClientPlayerInfo(payload().myPlayerInfo)}
@@ -624,7 +660,7 @@ export default function Room() {
                       <button
                         class="px-4 py-1 w-36 h-10 mt-20 font-bold font-size-4.5 text-yellow-800 bg-yellow-50 rounded-full border-yellow-800 b-2 active:bg-yellow-800 active:text-yellow-200 hover:shadow-[inset_0_0_16px_white] hover:border-white"
                         onClick={() => {
-                          navigate("/");
+                          navigate(paths());
                         }}
                       >
                         {t("backHome")}
@@ -638,6 +674,6 @@ export default function Room() {
           )}
         </Show>
       </div>
-    </Dynamic>
+    </RoomLayout>
   );
 }
