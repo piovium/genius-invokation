@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { useParams } from "@solidjs/router";
-import { createMemo, refresh, Loading, Errored, Show, affects } from "solid-js";
+import { createMemo, Loading, Errored, Show } from "solid-js";
 import { Layout } from "../layouts/Layout";
 import axios from "axios";
 import { useAuth, UserInfo as UserInfoT } from "../auth";
@@ -27,12 +27,16 @@ export default function User() {
   const params = useParams<{ id: string }>();
   const { status: mine, avatarUrl: myAvatarUrl } = useAuth();
 
-  const userInfo = createMemo(async () => {
+  const userInfo = createMemo(() => {
     const id = params.id;
     if (id.trim() === "" || !Number.isFinite(+id)) {
       throw new Error(`User ID is incorrect: ${id}`);
     }
-    return (await axios.get<UserInfoT>(`users/${id}`)).data;
+    const current = mine();
+    if (current.type === "user" && current.id === +id) {
+      return current;
+    }
+    return axios.get<UserInfoT>(`users/${id}`).then(({ data }) => data);
   });
   const guestMode = () => params.id === "guest";
 
@@ -62,10 +66,6 @@ export default function User() {
               name={userInfo().name}
               avatarUrl={getGithubAvatarUrl(userInfo().id)}
               editable={userInfo().id === mine()?.id}
-              onSubmit={() => {
-                affects(userInfo);
-                void refresh(userInfo);
-              }}
             />
           </Loading>
         </Errored>

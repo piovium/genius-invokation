@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { affects, createMemo, refresh, isPending, Accessor } from "solid-js";
+import { action, affects, createMemo, refresh, isPending, Accessor } from "solid-js";
 import { GuestInfo, useGuestInfo } from "./guest";
 import axios from "axios";
 import { EMPTY_IMAGE, getGithubAvatarUrl, getRandomAvatar } from "./utils";
@@ -73,9 +73,11 @@ const refreshUser = async () => {
   await refresh(userInfo);
 };
 
-const updateUserInfo = async (newInfo: Partial<UserInfo>) => {
-  await axios.patch("users/me", newInfo);
-};
+const updateUserInfo = action(function* (patch: UpdateInfoPatch) {
+  affects(userInfo);
+  yield axios.patch("users/me", patch);
+  yield refresh(userInfo);
+});
 
 export const useAuth = (): Auth => {
   const [guestInfo, setGuestInfo] = useGuestInfo();
@@ -128,7 +130,6 @@ export const useAuth = (): Auth => {
         setGuestInfo({ ...guest, ...patch });
       } else {
         await updateUserInfo(patch);
-        await refreshUser();
       }
     },
     logout: async () => {

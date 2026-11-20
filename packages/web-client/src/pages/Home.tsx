@@ -46,7 +46,7 @@ export default function Home() {
   const { t } = useI18n();
   const { status, loading: userLoading, error: userError, logout } = useAuth();
   const navigate = useNavigate();
-  const { decks } = useDecks();
+  const decks = useDecks();
 
   const [roomCodeValid, setRoomCodeValid] = createSignal(false);
   let createRoomDialogEl!: HTMLDialogElement;
@@ -75,7 +75,7 @@ export default function Home() {
   onSettled(() => {
     const interval = window.setInterval(() => {
       if (status().type !== "notLogin") {
-        refreshAllRooms();
+        void refresh(rooms);
       }
     }, ROOM_REFRESH_INTERVAL_MS);
     return () => clearInterval(interval);

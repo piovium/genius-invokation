@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { paths } from "../router";
-import { affects, refresh, createMemo, Loading, Errored, For } from "solid-js";
+import { action, affects, refresh, createMemo, Loading, Errored, For } from "solid-js";
 import { Layout } from "../layouts/Layout";
 import axios, { AxiosError } from "axios";
 import { DeckBriefInfo } from "../components/DeckBriefInfo";
@@ -39,7 +39,7 @@ interface DecksResponse {
 export function useDecks() {
   const { status } = useAuth();
   const [guestDecks] = useGuestDecks();
-  const decks = createMemo<DecksResponse>(() => {
+  return createMemo<DecksResponse>(() => {
     const { type } = status();
     if (type === "user") {
       return axios.get<DecksResponse>("decks").then(({ data }) => data);
@@ -47,40 +47,50 @@ export function useDecks() {
     const data = type === "guest" ? guestDecks() : [];
     return { count: data.length, data };
   });
-  return {
-    decks,
-    refetch: () => {
-      if (status().type === "user") {
-        affects(decks);
-        return refresh(decks);
-      }
-    },
-  };
 }
 
 export default function Decks() {
   const { t } = useI18n();
   const { status } = useAuth();
-  const { decks, refetch } = useDecks();
-  const [, { pinGuestDeck }] = useGuestDecks();
+  const decks = useDecks();
+  const [, { pinGuestDeck, removeGuestDeck }] = useGuestDecks();
 
-  const pinDeck = async (deck: DeckInfo) => {
+  const pinDeck = action(function* (deck: DeckInfo) {
     const { type } = status();
     try {
       if (type === "guest") {
-        await pinGuestDeck(deck.id);
+        yield pinGuestDeck(deck.id);
       } else if (type === "user") {
-        // trigger updatedAt
-        await axios.patch(`decks/${deck.id}`, { name: deck.name });
+        affects(decks);
+        // Updating the deck bumps updatedAt and puts it first in the list.
+        yield axios.patch(`decks/${deck.id}`, { name: deck.name });
+        yield refresh(decks);
       }
-      await refetch();
     } catch (e) {
       if (e instanceof AxiosError) {
         alert(getErrorMessage(e) || t("pinFailed"));
       }
       console.error(e);
     }
-  };
+  });
+
+  const deleteDeck = action(function* (id: number) {
+    const { type } = status();
+    try {
+      if (type === "guest") {
+        yield removeGuestDeck(id);
+      } else if (type === "user") {
+        affects(decks);
+        yield axios.delete(`decks/${id}`);
+        yield refresh(decks);
+      }
+    } catch (e) {
+      if (e instanceof AxiosError) {
+        alert(getErrorMessage(e));
+      }
+      console.error(e);
+    }
+  });
 
   return (
     <Layout>
@@ -107,7 +117,7 @@ export default function Decks() {
                 {(deckData) => (
                   <DeckBriefInfo
                     editable
-                    onDelete={() => refetch()}
+                    onDelete={() => deleteDeck(deckData.id)}
                     onPin={() => pinDeck(deckData)}
                     {...deckData}
                   />

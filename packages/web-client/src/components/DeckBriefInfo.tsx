@@ -15,12 +15,9 @@
 
 import { paths } from "../router";
 import { useNavigate } from "@solidjs/router";
-import axios, { AxiosError } from "axios";
 import { For, Show, createMemo } from "solid-js";
 import { DeckInfo } from "../pages/Decks";
-import { useGuestDecks } from "../guest";
-import { useAuth } from "../auth";
-import { copyShareCode, getErrorMessage } from "../utils";
+import { copyShareCode } from "../utils";
 import { useI18n } from "../i18n";
 
 export interface DeckInfoProps extends DeckInfo {
@@ -54,8 +51,6 @@ function CharacterAvatar(props: { id: number }) {
 export function DeckBriefInfo(props: DeckInfoProps) {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const { status } = useAuth();
-  const [, { removeGuestDeck }] = useGuestDecks();
 
   const viewDeck = (e: MouseEvent) => {
     e.stopPropagation();
@@ -67,23 +62,10 @@ export function DeckBriefInfo(props: DeckInfoProps) {
     await copyShareCode(props.code, t);
   };
 
-  const deleteDeck = async (e: MouseEvent) => {
+  const deleteDeck = (e: MouseEvent) => {
     e.stopPropagation();
-    const { type } = status();
     if (confirm(t("deleteDeckConfirm", { name: props.name }))) {
-      try {
-        if (type === "guest") {
-          await removeGuestDeck(props.id);
-        } else if (type === "user") {
-          await axios.delete(`decks/${props.id}`);
-        }
-        props.onDelete?.();
-      } catch (e) {
-        if (e instanceof AxiosError) {
-          alert(getErrorMessage(e));
-        }
-        console.error(e);
-      }
+      props.onDelete?.();
     }
   };
 
