@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { AssetFallback } from "./AssetFallback";
 import {
   createEffect,
   createMemo,
@@ -122,17 +123,13 @@ function DamageDescription(props: DamageDescriptionProps) {
       void 0,
     ].indexOf(props.dType);
   const keywordId = () => -(100 + id());
-  const url = createMemo(
-    () =>
-      assetsManager()
-        .getImageUrl(id())
-        .catch(() => void 0),
-    { loadingValue: void 0 },
-  );
+  const url = createMemo(() => assetsManager().getImageUrl(id()));
   return (
     <>
-      <Show when={id() <= 7 && url()}>
-        {(url) => <img src={url()} class="inline-block h-[1.25em]" />}
+      <Show when={id() <= 7}>
+        <AssetFallback on={id()}>
+          <img src={url()} class="inline-block h-[1.25em]" />
+        </AssetFallback>
       </Show>
       <span
         class="cursor-pointer description-underline"
@@ -259,18 +256,15 @@ export function Description(props: DescriptionProps) {
 
 function ReferenceName(props: { definitionId: number }) {
   const { assetsManager } = useAssetsManager();
-  const data = createMemo(
-    () =>
-      assetsManager()
-        .getData(props.definitionId)
-        .catch(() => void 0),
-    { loadingValue: void 0 },
-  );
+  const data = createMemo(() => assetsManager().getData(props.definitionId));
   return (
-    <>
-      {data()?.name ??
-        assetsManager().getNameSync(props.definitionId) ??
-        props.definitionId}
-    </>
+    <AssetFallback
+      on={props.definitionId}
+      fallback={
+        assetsManager().getNameSync(props.definitionId) ?? props.definitionId
+      }
+    >
+      {data().name}
+    </AssetFallback>
   );
 }

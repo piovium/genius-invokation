@@ -1960,20 +1960,15 @@ function HistoryBlockDetailPanel(props: {
         </Show>
         <For each={props.block.children}>
           {(child) => {
-            const childData = createMemo(
-              () =>
-                renderHistoryChild(child, renderBlock().callerId).catch(
-                  () => undefined,
-                ),
-              { loadingValue: undefined },
+            const childData = createMemo(() =>
+              renderHistoryChild(child, renderBlock().callerId),
             );
             return (
-              <Show
-                when={childData()}
-                fallback="" // just hide the child when not ready
-              >
-                {(data) => <HistoryChildBox data={data()} />}
-              </Show>
+              <Errored fallback={null}>
+                <Loading>
+                  <HistoryChildBox data={childData()} />
+                </Loading>
+              </Errored>
             );
           }}
         </For>

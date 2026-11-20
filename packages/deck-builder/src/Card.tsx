@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { Show, Switch, Match, createMemo } from "solid-js";
+import { AssetFallback } from "./AssetFallback";
+import { Switch, Match, createMemo } from "solid-js";
 import { useDeckBuilderContext } from "./DeckBuilder";
 import BrowseIcon from "./Browse.svg";
 import DeleteIcon from "./Delete.svg";
@@ -28,19 +29,15 @@ export interface CardProps {
 export function Card(props: CardProps) {
   const { assetsManager, showCard } = useDeckBuilderContext();
 
-  const url = createMemo(
-    () =>
-      assetsManager()
-        .getImageUrl(props.id, { thumbnail: true })
-        .catch(() => void 0),
-    { loadingValue: void 0 },
+  const url = createMemo(() =>
+    assetsManager().getImageUrl(props.id, { thumbnail: true }),
   );
   const name = () => assetsManager().getNameSync(props.id);
 
   return (
     <div title={name()} class="w-full relative group">
-      <Show
-        when={url() != null}
+      <AssetFallback
+        on={props.id}
         fallback={
           <div class="w-full aspect-ratio-[7/12] bg-gray-200 text-black whitespace-pre overflow-clip">
             {name()}
@@ -53,7 +50,7 @@ export function Card(props: CardProps) {
           draggable="false"
           class="w-full object-cover brightness-[var(--card-brightness,1)] opacity-[var(--card-opacity,1)]"
         />
-      </Show>
+      </AssetFallback>
       <div
         class="absolute left-0 top-0 bg-gray-500/90 h-25% w-full items-center justify-center hidden group-hover:flex"
         onClick={(e) => {
@@ -171,22 +168,18 @@ export interface TinyCardProps {
 export function TinyCharacterCard(props: TinyCardProps) {
   const { assetsManager } = useDeckBuilderContext();
 
-  const url = createMemo(
-    () =>
-      assetsManager()
-        .getImageUrl(props.id, { type: "icon", thumbnail: true })
-        .catch(() => void 0),
-    { loadingValue: void 0 },
+  const url = createMemo(() =>
+    assetsManager().getImageUrl(props.id, { type: "icon", thumbnail: true }),
   );
 
   return (
     <div class="@3xl:hidden DP:hidden w-full h-full rounded-full overflow-clip b-gray-500 border-2 relative group">
-      <Show
-        when={typeof url() === "string"}
+      <AssetFallback
+        on={props.id}
         fallback={<div class="w-full h-full bg-gray-200" />}
       >
         <img src={url()} draggable="false" class="w-full object-cover" />
-      </Show>
+      </AssetFallback>
       <div
         class={`absolute inset-0 data-[warn]:block hidden pointer-events-none 
           text-lg line-height-10 text-white text-center bg-red-500/50`}
@@ -201,22 +194,18 @@ export function TinyCharacterCard(props: TinyCardProps) {
 export function TinyActionCard(props: TinyCardProps) {
   const { assetsManager } = useDeckBuilderContext();
 
-  const url = createMemo(
-    () =>
-      assetsManager()
-        .getImageUrl(props.id, { thumbnail: true })
-        .catch(() => void 0),
-    { loadingValue: void 0 },
+  const url = createMemo(() =>
+    assetsManager().getImageUrl(props.id, { thumbnail: true }),
   );
 
   return (
     <div class="@3xl:hidden DP:hidden w-full rounded-md overflow-clip b-gray-500 border-2 relative group">
-      <Show
-        when={typeof url() === "string"}
+      <AssetFallback
+        on={props.id}
         fallback={<div class="w-full aspect-ratio-[7/12] bg-gray-200" />}
       >
         <img src={url()} draggable="false" class="w-full object-cover" />
-      </Show>
+      </AssetFallback>
       <div
         class={`absolute inset-0 data-[warn]:block hidden pointer-events-none 
           text-lg line-height-10 text-white text-center bg-red-500/50`}

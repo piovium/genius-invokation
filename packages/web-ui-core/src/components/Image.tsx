@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { AssetFallback } from "./AssetFallback";
 import { Match, Show, Switch, createMemo, omit } from "solid-js";
 import type { ComponentProps } from "@solidjs/web";
 import { useUiContext } from "../hooks/context";
@@ -32,38 +33,38 @@ export function Image(props: ImageProps) {
   const rest = omit(props, "imageId", "zero", "fallback", "type");
   const { assetsManager } = useUiContext();
   const imageId = createMemo(() => props.imageId);
-  const url = createMemo(
-    () =>
-      assetsManager()
-        .getImageUrl(imageId(), {
-          type: props.type,
-          thumbnail: true,
-        })
-        .catch(() => void 0),
-    { loadingValue: void 0 },
+  const url = createMemo(() =>
+    assetsManager().getImageUrl(imageId(), {
+      type: props.type,
+      thumbnail: true,
+    }),
   );
 
-  const showImage = () => (imageId() !== 0 || props.zero === "physic") && url();
   const innerProps = createMemo((): ComponentProps<"img"> => ({
     ...rest,
     class: [rest.class, "object-cover"],
-    src: url(),
     alt: assetsManager().getNameSync(imageId()) ?? `${imageId()}`,
     draggable: "false",
   }));
 
+  const fallback = () => (
+    <ImageFallback
+      type={props.fallback}
+      imageId={imageId()}
+      {...innerProps()}
+    />
+  );
   return (
     <Show
-      when={showImage()}
-      fallback={
-        <ImageFallback
-          type={props.fallback}
-          imageId={imageId()}
-          {...innerProps()}
-        />
-      }
+      when={imageId() !== 0 || props.zero === "physic"}
+      fallback={fallback()}
     >
-      <img {...innerProps()} />
+      <AssetFallback
+        on={[imageId(), props.type, assetsManager()]}
+        fallback={fallback()}
+      >
+        <img {...innerProps()} src={url()} />
+      </AssetFallback>
     </Show>
   );
 }

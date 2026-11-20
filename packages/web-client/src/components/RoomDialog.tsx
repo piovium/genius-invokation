@@ -17,6 +17,8 @@ import { paths } from "../router";
 import {
   createSignal,
   Show,
+  Errored,
+  Loading,
   For,
   createEffect,
   omit,
@@ -156,15 +158,9 @@ export function RoomDialog(props: RoomDialogProps) {
     createSignal<string | null>(null),
     { name: "room-profile" },
   );
-  const profiles = createMemo(
-    () =>
-      axios
-        .get<ProfileList>("profiles")
-        .then(({ data }) => data)
-        .catch(() => void 0),
-    { loadingValue: void 0 },
-  );
-  const [profile, setProfile] = createSignal<ProfileSummary>();
+  const [selectedProfile, setSelectedProfile] = createSignal<ProfileSummary>();
+  const profile = () =>
+    props.joiningRoomInfo?.config.profile ?? selectedProfile();
   const [timeConfig, setTimeConfig] = createSignal(TIME_CONFIGS[1]);
   const [isPublic, setIsPublic] = createSignal(true);
   const [watchable, setWatchable] = createSignal(true);
@@ -173,33 +169,6 @@ export function RoomDialog(props: RoomDialogProps) {
   const [loadingDecks, setLoadingDecks] = createSignal(true);
   const [selectedDeck, setSelectedDeck] = createSignal<number | null>(null);
   const [entering, setEntering] = createSignal(false);
-
-  createEffect(
-    () => {
-      const list = profiles();
-      return (
-        props.joiningRoomInfo?.config.profile ??
-        list?.profiles.find((p) => p.id === savedProfile()) ??
-        list?.profiles.find((p) => p.id === list.defaultProfileId)
-      );
-    },
-    (value) => {
-      if (value) {
-        setProfile(value);
-      }
-    },
-  );
-  const setProfileById = (id: string) => {
-    const list = profiles();
-    if (list) {
-      const p = list.profiles.find((p) => p.id === id);
-      if (p) {
-        setProfile(p);
-        return true;
-      }
-    }
-    return false;
-  };
 
   const updateAvailableDecks = async (
     profileId: string,
@@ -337,24 +306,33 @@ export function RoomDialog(props: RoomDialogProps) {
           <div class="flex flex-col w-full md:w-130" data-editable={editable()}>
             <div class="mb-3 flex flex-row gap-4 items-center">
               <h4 class="text-lg">{t("roomProfile")}</h4>
-              <select
-                class="disabled:pointer-events-none appearance-none"
-                value={profile()?.id}
-                onChange={(e) => setProfileById(e.target.value)}
-                disabled={!editable()}
+              <Show
+                when={props.joiningRoomInfo?.config.profile}
+                fallback={
+                  <Errored
+                    fallback={(err) =>
+                      t("loadFailed", { message: getErrorMessage(err()) })
+                    }
+                  >
+                    <Loading fallback={t("loading")}>
+                      <ProfileSelect
+                        savedId={savedProfile()}
+                        selected={selectedProfile()}
+                        onSelect={setSelectedProfile}
+                      />
+                    </Loading>
+                  </Errored>
+                }
               >
-                <For
-                  each={
-                    props.joiningRoomInfo
-                      ? [props.joiningRoomInfo.config.profile]
-                      : (profiles()?.profiles ?? [])
-                  }
-                >
-                  {(profile) => (
-                    <option value={profile.id}>{profile.name}</option>
-                  )}
-                </For>
-              </select>
+                {(fixed) => (
+                  <select
+                    disabled
+                    class="disabled:pointer-events-none appearance-none"
+                  >
+                    <option>{fixed().name}</option>
+                  </select>
+                )}
+              </Show>
             </div>
             <h4 class="text-lg mb-3">{t("thinkingTime")}</h4>
             <div class="w-full grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] md:grid-cols-3 gap-2 mb-3 data-[disabled]:pointer-events-none">
@@ -507,5 +485,45 @@ export function RoomDialog(props: RoomDialogProps) {
         <i class="inline-block h-full w-full i-mdi-window-close" />
       </button>
     </dialog>
+  );
+}
+
+function ProfileSelect(props: {
+  savedId: string | null;
+  selected?: ProfileSummary;
+  onSelect: (profile: ProfileSummary) => void;
+}) {
+  const list = createMemo(() =>
+    axios.get<ProfileList>("profiles").then(({ data }) => data),
+  );
+  createEffect(
+    () => {
+      const { profiles, defaultProfileId } = list();
+      return (
+        profiles.find((p) => p.id === props.savedId) ??
+        profiles.find((p) => p.id === defaultProfileId)
+      );
+    },
+    (profile) => {
+      if (profile) {
+        props.onSelect(profile);
+      }
+    },
+  );
+  return (
+    <select
+      class="appearance-none"
+      value={props.selected?.id}
+      onChange={(e) => {
+        const selected = list().profiles[e.currentTarget.selectedIndex];
+        if (selected) {
+          props.onSelect(selected);
+        }
+      }}
+    >
+      <For each={list().profiles}>
+        {(p) => <option value={p.id}>{p.name}</option>}
+      </For>
+    </select>
   );
 }

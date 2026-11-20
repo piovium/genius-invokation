@@ -14,8 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { AssetFallback } from "./AssetFallback";
 import { DiceType, type PbDiceRequirement } from "@gi-tcg/typings";
-import { createMemo, Show, omit, For } from "solid-js";
+import { createMemo, omit, For } from "solid-js";
 import type { ComponentProps } from "@solidjs/web";
 import { useUiContext } from "../hooks/context";
 import { Cost, type CostTextColor } from "./Dice";
@@ -96,12 +97,8 @@ export interface DiceCostAsyncProps extends ComponentProps<"div"> {
 export const DiceCostAsync = (props: DiceCostAsyncProps) => {
   const restProps = omit(props, "cardDefinitionId");
   const { assetsManager } = useUiContext();
-  const data = createMemo(
-    () =>
-      assetsManager()
-        .getData(props.cardDefinitionId)
-        .catch(() => void 0),
-    { loadingValue: void 0 },
+  const data = createMemo(() =>
+    assetsManager().getData(props.cardDefinitionId),
   );
   const COST_MAP: Record<string, number> = {
     GCG_COST_DICE_VOID: DiceType.Void,
@@ -134,8 +131,8 @@ export const DiceCostAsync = (props: DiceCostAsyncProps) => {
     }
   };
   return (
-    <Show when={data()}>
-      {(data) => <DiceCost cost={renderCost(data())} {...restProps} />}
-    </Show>
+    <AssetFallback on={props.cardDefinitionId}>
+      <DiceCost cost={renderCost(data())} {...restProps} />
+    </AssetFallback>
   );
 };

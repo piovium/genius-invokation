@@ -79,7 +79,7 @@ export default function EditDeck() {
                 )}
               >
                 <Loading fallback={<DeckLoadStatus message={t("loading")} />}>
-                  <DeckLoader id={id} guest={owner === "guest"} />
+                  <DeckEditor id={id} guest={owner === "guest"} />
                 </Loading>
               </Errored>
             )}
@@ -116,44 +116,34 @@ interface DeckRouteProps {
   guest: boolean;
 }
 
-function DeckLoader(props: DeckRouteProps) {
-  const { t } = useI18n();
-  const [guestDecks] = useGuestDecks();
-  const [searchParams] = useSearchParams<{ name: string }>();
-  const initialDeck = createMemo(() => {
-    if (props.id === "new") {
+function DeckEditor(props: DeckRouteProps) {
+  const { t, locale, assetsManager } = useI18n();
+  const [guestDecks, { addGuestDeck, updateGuestDeck }] = useGuestDecks();
+  const [searchParams, setSearchParams] = useSearchParams<{ name: string }>();
+  const isNew = props.id === "new";
+  const deckId = Number(props.id);
+  const initialDeck = createMemo<DeckWithName>(() => {
+    if (isNew) {
       return {
         characters: [],
         cards: [],
         name: searchParams.name ?? t("newDeck"),
       };
     }
-    const id = Number(props.id);
     if (props.guest) {
-      const deck = guestDecks().find((d) => d.id === id);
+      const deck = guestDecks().find((d) => d.id === deckId);
       if (!deck) {
         throw new Error(t("deckNotFound"));
       }
       return snapshot(deck);
     }
-    return axios.get<DeckInfo>(`decks/${id}`).then(({ data }) => data);
+    return axios.get<DeckInfo>(`decks/${deckId}`).then(({ data }) => data);
   });
-  return (
-    <Show when={initialDeck()}>
-      {(deck) => <DeckEditor {...props} initialDeck={deck()} />}
-    </Show>
+  // Seed the editable draft once for this route and owner.
+  const [deckName, setDeckName] = createSignal(() => untrack(initialDeck).name);
+  const [deckValue, setDeckValue] = createSignal<Deck>(() =>
+    untrack(initialDeck),
   );
-}
-
-function DeckEditor(props: DeckRouteProps & { initialDeck: DeckWithName }) {
-  const { t, locale, assetsManager } = useI18n();
-  const [, { addGuestDeck, updateGuestDeck }] = useGuestDecks();
-  const [searchParams, setSearchParams] = useSearchParams<{ name: string }>();
-  const isNew = props.id === "new";
-  const deckId = Number(props.id);
-  const initialDeck = untrack(() => props.initialDeck);
-  const [deckName, setDeckName] = createSignal(initialDeck.name);
-  const [deckValue, setDeckValue] = createSignal<Deck>(initialDeck);
   const [uploading, setUploading] = createSignal(false);
   const [uploadDone, setUploadDone] = createSignal(false);
   onSettled(() => {

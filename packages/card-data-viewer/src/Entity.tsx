@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { AssetFallback } from "./AssetFallback";
 import {
   createMemo,
   Errored,
@@ -205,12 +206,8 @@ export function Skill(props: ExpandableCardDataProps) {
   const { assetsManager, t } = useAssetsManager();
   const data = createDefinition<SkillRawData>(() => props.input.definitionId);
 
-  const icon = createMemo(
-    () =>
-      assetsManager()
-        .getImageUrl(props.input.definitionId)
-        .catch(() => undefined),
-    { loadingValue: undefined },
+  const icon = createMemo(() =>
+    assetsManager().getImageUrl(props.input.definitionId),
   );
   const skillTypeText = () => typeTagText(data().type, t) ?? "";
   return (
@@ -219,14 +216,15 @@ export function Skill(props: ExpandableCardDataProps) {
       open={!props.asChild}
     >
       <summary class="flex flex-row items-center p-[0.25em] gap-[0.25em] cursor-pointer skill-header">
-        <Show when={icon()} fallback={<div class="w-[3em] h-[3em] shrink-0" />}>
-          {(icon) => (
-            <div
-              class="skill-icon shrink-0"
-              style={{ "--mask-image": `url(${icon()})` }}
-            />
-          )}
-        </Show>
+        <AssetFallback
+          on={props.input.definitionId}
+          fallback={<div class="w-[3em] h-[3em] shrink-0" />}
+        >
+          <div
+            class="skill-icon shrink-0"
+            style={{ "--mask-image": `url(${icon()})` }}
+          />
+        </AssetFallback>
         <div class="flex flex-col">
           <DefinitionBoundary nameFor={props.input.definitionId}>
             <h3 class="skill-name">{data().name}</h3>
@@ -265,12 +263,8 @@ export function Entity(props: ExpandableCardDataProps) {
   });
   const { assetsManager, t } = useAssetsManager();
   const data = createDefinition<EntityRawData>(() => props.input.definitionId);
-  const icon = createMemo(
-    () =>
-      assetsManager()
-        .getImageUrl(props.input.definitionId, { type: "icon" })
-        .catch(() => undefined),
-    { loadingValue: undefined },
+  const icon = createMemo(() =>
+    assetsManager().getImageUrl(props.input.definitionId, { type: "icon" }),
   );
   const entityTypeText = () => typeTagText(data().type, t) ?? "";
   return (
@@ -280,9 +274,9 @@ export function Entity(props: ExpandableCardDataProps) {
     >
       <summary class="flex flex-row items-center p-[0.25em] gap-[0.25em] cursor-pointer skill-header">
         <div class="w-[3em] h-[3em] grid children:grid-area-[1/1] shrink-0">
-          <Show when={icon()}>
-            {(icon) => <img src={icon()} class="w-[3em] h-[3em]" />}
-          </Show>
+          <AssetFallback on={props.input.definitionId}>
+            <img src={icon()} class="w-[3em] h-[3em]" />
+          </AssetFallback>
           <Show when={typeof state()?.variableValue === "number"}>
             <div class="place-self-end rounded-full entity-variable">
               {state()!.variableValue}

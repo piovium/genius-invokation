@@ -55,7 +55,6 @@ export interface Auth {
   readonly logout: () => Promise<void>;
 }
 
-// Auth is also read by event handlers and the header, including before the first response.
 const userInfo = createMemo<
   UserInfo | NotLogin | { type: "loading" } | { type: "error"; error: unknown }
 >(
@@ -92,7 +91,7 @@ export const useAuth = (): Auth => {
     loading: () => session().type === "loading" || isPending(session),
     error: () => {
       const current = session();
-      return current.type === "error" ? current.error : undefined;
+      return current.type === "error" ? current.error : void 0;
     },
     refresh: refreshUser,
     loginGuest: async (name: string) => {

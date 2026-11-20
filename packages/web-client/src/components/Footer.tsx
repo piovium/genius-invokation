@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { IS_BETA } from "@gi-tcg/config";
-import { onSettled, Show, createMemo } from "solid-js";
+import { onSettled, Loading, Errored, createMemo } from "solid-js";
 import dayjs from "dayjs";
 import localize from "dayjs/plugin/localizedFormat";
 import "dayjs/locale/zh-cn";
@@ -24,13 +24,8 @@ import axios from "axios";
 
 dayjs.extend(localize);
 
-const versionInfo = createMemo(
-  () =>
-    axios
-      .get("version")
-      .then((res) => res.data)
-      .catch(() => void 0),
-  { loadingValue: void 0 },
+const versionInfo = createMemo(() =>
+  axios.get("version").then(({ data }) => data),
 );
 
 export function Footer() {
@@ -60,30 +55,32 @@ export function Footer() {
           AGPL-3.0-or-later
         </a>
       </div>
-      <Show when={versionInfo()}>
-        <div>
-          {t("gameVersion")}{" "}
-          {IS_BETA ? (
-            <span class="text-red-300">{t("latestBeta")}</span>
-          ) : (
-            versionInfo().currentGameVersion
-          )}
-        </div>
-        <div>
-          {t("simulatorVersion")} {versionInfo().coreVersion} (
-          <a
-            title={versionInfo().revision.message}
-            class="text-blue-400"
-            href={`https://github.com/piovium/genius-invokation/commit/${
-              versionInfo().revision.hash
-            }`}
-            target="_blank"
-          >
-            {dayjs(versionInfo().revision.date).format("YYYY-MM-DD HH:mm:ss")}
-          </a>
-          )
-        </div>
-      </Show>
+      <Errored fallback={null}>
+        <Loading>
+          <div>
+            {t("gameVersion")}{" "}
+            {IS_BETA ? (
+              <span class="text-red-300">{t("latestBeta")}</span>
+            ) : (
+              versionInfo().currentGameVersion
+            )}
+          </div>
+          <div>
+            {t("simulatorVersion")} {versionInfo().coreVersion} (
+            <a
+              title={versionInfo().revision.message}
+              class="text-blue-400"
+              href={`https://github.com/piovium/genius-invokation/commit/${
+                versionInfo().revision.hash
+              }`}
+              target="_blank"
+            >
+              {dayjs(versionInfo().revision.date).format("YYYY-MM-DD HH:mm:ss")}
+            </a>
+            )
+          </div>
+        </Loading>
+      </Errored>
       <div>
         <a class="text-blue-400" href={t("playerGroupLink")} target="_blank">
           {t("joinPlayerGroup")}

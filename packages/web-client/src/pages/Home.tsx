@@ -17,6 +17,7 @@ import { paths } from "../router";
 import {
   affects,
   refresh,
+  resolve,
   Errored,
   Loading,
   isPending,
@@ -45,7 +46,7 @@ export default function Home() {
   const { t } = useI18n();
   const { status, loading: userLoading, error: userError, logout } = useAuth();
   const navigate = useNavigate();
-  const { decks, loading: decksLoading, error: decksError } = useDecks();
+  const { decks } = useDecks();
 
   const [roomCodeValid, setRoomCodeValid] = createSignal(false);
   let createRoomDialogEl!: HTMLDialogElement;
@@ -54,13 +55,11 @@ export default function Home() {
     RoomInfo | undefined
   >();
 
-  const currentRoom = createMemo(
-    () =>
-      axios
-        .get<RoomInfo | null>("rooms/current")
-        .then((r) => r.data)
-        .catch(() => null),
-    { loadingValue: null },
+  const currentRoom = createMemo(() =>
+    axios
+      .get<RoomInfo | null>("rooms/current")
+      .then((r) => r.data)
+      .catch(() => null),
   );
   const rooms = createMemo(() =>
     axios.get<RoomInfo[]>("rooms").then((r) => r.data),
@@ -87,23 +86,30 @@ export default function Home() {
     return type !== "notLogin";
   };
 
-  const createRoom = () => {
-    if (!decks().count) {
+  const requireDeck = async () => {
+    try {
+      if ((await resolve(decks)).count) {
+        return true;
+      }
       alert(t("createDeckFirst"));
       navigate(paths.decks("new"));
-      return;
+    } catch (error) {
+      alert(t("deckInfoLoadFailed", { message: getErrorMessage(error) }));
     }
-    createRoomDialogEl.showModal();
+    return false;
+  };
+  const createRoom = async () => {
+    if (await requireDeck()) {
+      createRoomDialogEl.showModal();
+    }
   };
   const joinRoomBySubmitCode = async (e: SubmitEvent) => {
     e.preventDefault();
-    if (!decks().count) {
-      alert(t("createDeckFirst"));
-      navigate(paths.decks("new"));
-      return;
-    }
     const form = new FormData(e.target as HTMLFormElement);
     const roomCode = form.get("roomCode") as string;
+    if (!(await requireDeck())) {
+      return;
+    }
     const roomId = roomCodeToId(roomCode);
     try {
       const { data } = await axios.get(`rooms/${roomId}`);
@@ -117,10 +123,8 @@ export default function Home() {
       setJoiningRoomInfo();
     }
   };
-  const joinRoomByInfo = (roomInfo: RoomInfo) => {
-    if (!decks().count) {
-      alert(t("createDeckFirst"));
-      navigate(paths.decks("new"));
+  const joinRoomByInfo = async (roomInfo: RoomInfo) => {
+    if (!(await requireDeck())) {
       return;
     }
     setJoiningRoomInfo(roomInfo);
@@ -181,18 +185,21 @@ export default function Home() {
                       </a>
                     </div>
                   </div>
-                  <Switch>
-                    <Match when={decksLoading()}>
-                      <div class="text-gray-500">{t("deckInfoLoading")}</div>
-                    </Match>
-                    <Match when={decksError()}>
+                  <Errored
+                    fallback={(err) => (
                       <div class="text-gray-500">
                         {t("deckInfoLoadFailed", {
-                          message: getErrorMessage(decksError()),
+                          message: getErrorMessage(err()),
                         })}
                       </div>
-                    </Match>
-                    <Match when={true}>
+                    )}
+                  >
+                    <Loading
+                      on={status().type}
+                      fallback={
+                        <div class="text-gray-500">{t("deckInfoLoading")}</div>
+                      }
+                    >
                       <div class="grid w-full grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2 md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] md:gap-3 md:pr-6 md:overflow-y-auto scrollbar-thin-hover">
                         <For
                           each={decks().data}
@@ -211,55 +218,63 @@ export default function Home() {
                           {(deckData) => <DeckBriefInfo {...deckData} />}
                         </For>
                       </div>
-                    </Match>
-                  </Switch>
+                    </Loading>
+                  </Errored>
                 </div>
                 <div class="b-r-gray-200 b-1 hidden md:block mr-8" />
                 <div class="flex-grow flex flex-col md:min-w-128">
                   <h4 class="text-xl font-bold mb-5">{t("startGame")}</h4>
-                  <Show
-                    when={!currentRoom()}
+                  <Loading
                     fallback={
-                      <div class="mb-8 grid gap-3 grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(360px,1fr))]">
-                        <RoomInfo {...currentRoom()!} />
-                      </div>
+                      <div class="text-gray-500">{t("roomInfoLoading")}</div>
                     }
                   >
-                    <div class="flex flex-col md:flex-row gap-2 md:gap-5 items-center mb-8">
-                      <button
-                        class="flex-shrink-0 w-full md:w-35 btn btn-solid-green h-2.3rem"
-                        onClick={createRoom}
-                      >
-                        {t("createRoom")}
-                      </button>
-                      <span class="flex-shrink-0">{t("or")}</span>
-                      <form
-                        class="flex-grow flex flex-row w-full md:w-unset"
-                        onSubmit={joinRoomBySubmitCode}
-                      >
-                        <input
-                          type="text"
-                          class="input input-solid rounded-r-0 b-r-0 flex-grow md:flex-grow-0 text-1rem line-height-none h-9 text-4"
-                          name="roomCode"
-                          placeholder={t("enterRoomCode")}
-                          inputmode="numeric"
-                          pattern="\d{4}"
-                          onInput={(e) =>
-                            setRoomCodeValid(e.target.checkValidity())
-                          }
-                          autofocus
-                          required
-                        />
-                        <button
-                          type="submit"
-                          class="flex-shrink-0 btn btn-solid rounded-l-0 h-9 text-4"
-                          disabled={!roomCodeValid()}
-                        >
-                          {t("joinRoom")}
-                        </button>
-                      </form>
-                    </div>
-                  </Show>
+                    <Show
+                      when={currentRoom()}
+                      fallback={
+                        <div class="flex flex-col md:flex-row gap-2 md:gap-5 items-center mb-8">
+                          <button
+                            class="flex-shrink-0 w-full md:w-35 btn btn-solid-green h-2.3rem"
+                            onClick={createRoom}
+                          >
+                            {t("createRoom")}
+                          </button>
+                          <span class="flex-shrink-0">{t("or")}</span>
+                          <form
+                            class="flex-grow flex flex-row w-full md:w-unset"
+                            onSubmit={joinRoomBySubmitCode}
+                          >
+                            <input
+                              type="text"
+                              class="input input-solid rounded-r-0 b-r-0 flex-grow md:flex-grow-0 text-1rem line-height-none h-9 text-4"
+                              name="roomCode"
+                              placeholder={t("enterRoomCode")}
+                              inputmode="numeric"
+                              pattern="\d{4}"
+                              onInput={(e) =>
+                                setRoomCodeValid(e.target.checkValidity())
+                              }
+                              autofocus
+                              required
+                            />
+                            <button
+                              type="submit"
+                              class="flex-shrink-0 btn btn-solid rounded-l-0 h-9 text-4"
+                              disabled={!roomCodeValid()}
+                            >
+                              {t("joinRoom")}
+                            </button>
+                          </form>
+                        </div>
+                      }
+                    >
+                      {(room) => (
+                        <div class="mb-8 grid gap-3 grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(360px,1fr))]">
+                          <RoomInfo {...room()} />
+                        </div>
+                      )}
+                    </Show>
+                  </Loading>
                   <h4 class="text-xl font-bold mb-5 flex flex-row items-center gap-2">
                     {t("currentGames")}
                     <button

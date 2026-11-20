@@ -14,16 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { paths } from "../router";
-import {
-  affects,
-  refresh,
-  createMemo,
-  isPending,
-  For,
-  Match,
-  Switch,
-  Accessor,
-} from "solid-js";
+import { affects, refresh, createMemo, Loading, Errored, For } from "solid-js";
 import { Layout } from "../layouts/Layout";
 import axios, { AxiosError } from "axios";
 import { DeckBriefInfo } from "../components/DeckBriefInfo";
@@ -45,50 +36,23 @@ interface DecksResponse {
   data: DeckInfo[];
 }
 
-export interface UseDecksResult {
-  readonly decks: Accessor<DecksResponse>;
-  readonly loading: Accessor<boolean>;
-  readonly error: Accessor<unknown>;
-  readonly refetch: () => void;
-}
-
-export function useDecks(): UseDecksResult {
+export function useDecks() {
   const { status } = useAuth();
-  const EMPTY = { count: 0, data: [] };
-  const userDecks = createMemo(
-    () =>
-      status().type === "user"
-        ? axios.get<DecksResponse>("decks").then(
-            ({ data }) => ({ decks: data, error: undefined }),
-            (error: unknown) => ({ decks: EMPTY, error }),
-          )
-        : { decks: EMPTY, error: undefined },
-    { loadingValue: undefined },
-  );
   const [guestDecks] = useGuestDecks();
+  const decks = createMemo<DecksResponse>(() => {
+    const { type } = status();
+    if (type === "user") {
+      return axios.get<DecksResponse>("decks").then(({ data }) => data);
+    }
+    const data = type === "guest" ? guestDecks() : [];
+    return { count: data.length, data };
+  });
   return {
-    decks: () => {
-      const { type } = status();
-      if (type === "guest") {
-        const data = guestDecks();
-        return {
-          data,
-          count: data.length,
-        };
-      } else if (type === "user") {
-        return userDecks()?.decks ?? EMPTY;
-      } else {
-        return EMPTY;
-      }
-    },
-    loading: () =>
-      status().type === "user" &&
-      (typeof userDecks() === "undefined" || isPending(userDecks)),
-    error: () => (status().type === "user" ? userDecks()?.error : void 0),
+    decks,
     refetch: () => {
       if (status().type === "user") {
-        affects(userDecks);
-        return refresh(userDecks);
+        affects(decks);
+        return refresh(decks);
       }
     },
   };
@@ -97,7 +61,7 @@ export function useDecks(): UseDecksResult {
 export default function Decks() {
   const { t } = useI18n();
   const { status } = useAuth();
-  const { decks, loading, error, refetch } = useDecks();
+  const { decks, refetch } = useDecks();
   const [, { pinGuestDeck }] = useGuestDecks();
 
   const pinDeck = async (deck: DeckInfo) => {
@@ -109,7 +73,7 @@ export default function Decks() {
         // trigger updatedAt
         await axios.patch(`decks/${deck.id}`, { name: deck.name });
       }
-      refetch();
+      await refetch();
     } catch (e) {
       if (e instanceof AxiosError) {
         alert(getErrorMessage(e) || t("pinFailed"));
@@ -127,12 +91,12 @@ export default function Decks() {
             <i class="i-mdi-plus" /> {t("add")}
           </a>
         </div>
-        <Switch>
-          <Match when={loading()}>{t("loading")}</Match>
-          <Match when={error()}>
-            {t("loadFailed", { message: getErrorMessage(error()) })}
-          </Match>
-          <Match when={true}>
+        <Errored
+          fallback={(err) =>
+            t("loadFailed", { message: getErrorMessage(err()) })
+          }
+        >
+          <Loading on={status().type} fallback={t("loading")}>
             <ul class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2 md:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] md:gap-3 md:overflow-y-auto scrollbar-thin-hover">
               <For
                 each={decks().data}
@@ -150,8 +114,8 @@ export default function Decks() {
                 )}
               </For>
             </ul>
-          </Match>
-        </Switch>
+          </Loading>
+        </Errored>
       </div>
     </Layout>
   );

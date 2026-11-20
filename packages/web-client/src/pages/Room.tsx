@@ -24,6 +24,8 @@ import {
 } from "../utils";
 import {
   Show,
+  Loading,
+  Errored,
   createSignal,
   onSettled,
   createMemo,
@@ -360,13 +362,11 @@ function renderRoomSession({
     }
   };
 
-  const roomInfo = createMemo(
-    () =>
-      axios
-        .get<{ status: string }>(`rooms/${id}`)
-        .then((res) => res.data)
-        .catch(() => null),
-    { loadingValue: undefined },
+  const roomInfo = createMemo(() =>
+    axios.get<{ status: string }>(`rooms/${id}`).then(({ data }) => data),
+  );
+  const loadingNotice = () => (
+    <div class="mb-3 alert alert-outline-info">{t("roomLoading")}</div>
   );
 
   const [fetchMyNotification, abortMyNotification] = createReconnectSse(
@@ -595,19 +595,29 @@ function renderRoomSession({
             {t("backHome")}
           </button>
         </div>
-        <Switch>
-          <Match when={loading() || typeof roomInfo() === "undefined"}>
-            <div class="mb-3 alert alert-outline-info">{t("roomLoading")}</div>
-          </Match>
-          <Match when={roomInfo()}>
-            {(info) => (
+        <Show when={!loading()} fallback={loadingNotice()}>
+          <Errored
+            fallback={(err) => (
+              <div class="mb-3 alert alert-outline-error">
+                {t("roomLoadFailed", {
+                  message: failed() ?? getErrorMessage(err()),
+                })}
+              </div>
+            )}
+          >
+            <Loading fallback={loadingNotice()}>
               <Switch>
-                <Match when={!initialized() && info().status === "waiting"}>
+                <Match when={failed()}>
+                  <div class="mb-3 alert alert-outline-error">
+                    {t("roomLoadFailed", { message: failed() ?? "" })}
+                  </div>
+                </Match>
+                <Match when={!initialized() && roomInfo().status === "waiting"}>
                   <div class="mb-3 alert alert-outline-info">
                     {t("waitingForOpponent")}
                   </div>
                 </Match>
-                <Match when={info().status === "finished"}>
+                <Match when={roomInfo().status === "finished"}>
                   <div class="mb-3 alert alert-outline-info">
                     {t("roomFinished")}
                     <button
@@ -619,14 +629,9 @@ function renderRoomSession({
                   </div>
                 </Match>
               </Switch>
-            )}
-          </Match>
-          <Match when={failed()}>
-            <div class="mb-3 alert alert-outline-error">
-              {t("roomLoadFailed", { message: failed() ?? "" })}
-            </div>
-          </Match>
-        </Switch>
+            </Loading>
+          </Errored>
+        </Show>
         <Show when={initialized()}>
           {(payload) => (
             <div class="relative" ref={chessboardContainer}>

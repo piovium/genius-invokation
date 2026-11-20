@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { AssetFallback } from "./AssetFallback";
 import { createMemo, Match, Show, Switch, type Component } from "solid-js";
 import { type ComponentProps, dynamic } from "@solidjs/web";
 import { cssPropertyOfTransform } from "../ui_state";
@@ -39,13 +40,8 @@ export interface EntityProps extends EntityInfo {
 
 const EntityTopHint = (props: { cardDefinitionId: number; value: number }) => {
   const { assetsManager } = useUiContext();
-  const defId = createMemo(() => props.cardDefinitionId);
-  const data = createMemo(
-    () =>
-      assetsManager()
-        .getData(defId())
-        .catch(() => void 0),
-    { loadingValue: void 0 },
+  const data = createMemo(() =>
+    assetsManager().getData(props.cardDefinitionId),
   );
   const ICON_MAP: Record<
     string,
@@ -56,23 +52,23 @@ const EntityTopHint = (props: { cardDefinitionId: number; value: number }) => {
     GCG_TOKEN_ICON_BARRIER_SHIELD: BarrierIcon,
   };
   const hintComponent = createMemo(() => {
-    if (data() != null) {
-      return ICON_MAP[(data() as EntityRawData).shownIcon as string];
-    }
+    return ICON_MAP[(data() as EntityRawData).shownIcon as string];
   });
   const HintIcon = dynamic(hintComponent);
   return (
-    <Show when={hintComponent()}>
-      <div class="absolute w-7 h-7 top--2.5 right--3 grid children:grid-area-[1/1] z-3">
-        <HintIcon class="w-full h-full" />
-        <StrokedText
-          class="place-self-center text-white font-bold"
-          strokeWidth={2}
-          strokeColor="#000000aa"
-          text={String(props.value)}
-        />
-      </div>
-    </Show>
+    <AssetFallback on={props.cardDefinitionId}>
+      <Show when={hintComponent()}>
+        <div class="absolute w-7 h-7 top--2.5 right--3 grid children:grid-area-[1/1] z-3">
+          <HintIcon class="w-full h-full" />
+          <StrokedText
+            class="place-self-center text-white font-bold"
+            strokeWidth={2}
+            strokeColor="#000000aa"
+            text={String(props.value)}
+          />
+        </div>
+      </Show>
+    </AssetFallback>
   );
 };
 
@@ -166,7 +162,10 @@ export function Entity(props: EntityProps) {
         </Match>
         <Match when={props.selecting}>
           {/* with animate no render */}
-          <SelectingIcon noRender class="place-self-center w-21 h-21 m--2.5 max-w-21 z-4" />
+          <SelectingIcon
+            noRender
+            class="place-self-center w-21 h-21 m--2.5 max-w-21 z-4"
+          />
         </Match>
       </Switch>
     </div>

@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { Show, createMemo } from "solid-js";
+import { AssetFallback } from "./AssetFallback";
+import { createMemo } from "solid-js";
 import { useAssetsManager } from "./context";
 
 export const UI_ASSET_URL_BASE = "https://ui-assets.piovium.org/";
@@ -24,19 +25,16 @@ export interface CardFaceProps {
 
 export function CardFace(props: CardFaceProps) {
   const { assetsManager } = useAssetsManager();
-  const image = createMemo(
-    () =>
-      assetsManager()
-        .getImageUrl(props.defId)
-        .catch(() => void 0),
-    { loadingValue: void 0 },
-  );
+  const image = createMemo(() => assetsManager().getImageUrl(props.defId));
   const frameUrl = `${UI_ASSET_URL_BASE}CardFrameNormal.svg.webp`;
   return (
     <div class="grid children:grid-area-[1/1] card-face">
-      <Show when={image()} fallback={<div class="w-full h-full bg-black/50 rounded-[1em]" />}>
-        {(image) => <img src={image()} class="w-full h-full" />}
-      </Show>
+      <AssetFallback
+        on={props.defId}
+        fallback={<div class="w-full h-full bg-black/50 rounded-[1em]" />}
+      >
+        <img src={image()} class="w-full h-full" />
+      </AssetFallback>
       <img src={frameUrl} class="w-full h-full" />
     </div>
   );
