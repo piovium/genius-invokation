@@ -75,10 +75,7 @@ import {
 } from "../ui_state";
 import type { ParsedMutation } from "../mutations";
 import type { PlayerInfo } from "../client";
-import {
-  KeyWithAnimation,
-  type UpdateSignal,
-} from "../primitives/key_with_animation";
+import { ChildrenCluster } from "../primitives/children_cluster";
 import { NotificationBox } from "./NotificationBox";
 import { Entity } from "./Entity";
 import { PlayerInfoBox, type PlayerInfoProps } from "./PlayerInfoBox";
@@ -614,12 +611,15 @@ export interface TuningAreaInfo {
   transform: Transform;
 }
 
-interface ChessboardChildren {
+export interface ChessboardChildren {
   characters: CharacterInfo[];
   cards: CardInfo[];
   entities: EntityInfo[];
   cardCountHints: CardCountHintInfo[];
   tuningArea: TuningAreaInfo | null;
+}
+export interface ChessboardChildrenUpdate extends ChessboardChildren {
+  forceUpdate: boolean;
 }
 
 function rerenderChildren(opt: {
@@ -1146,9 +1146,9 @@ export function Chessboard(props: ChessboardProps) {
   });
   const resizeObserver = new ResizeObserver(onResizeDebouncer.call);
   const [children, setChildren] = createSignal<
-    ChessboardChildren & UpdateSignal
+    ChessboardChildrenUpdate
   >({
-    force: true,
+    forceUpdate: true,
     characters: [],
     cards: [],
     entities: [],
@@ -1197,7 +1197,7 @@ export function Chessboard(props: ChessboardProps) {
     (options, previous) => {
       setChildren({
         ...rerenderChildren(options),
-        force: options.data !== previous?.data,
+        forceUpdate: options.data !== previous?.data,
       });
     },
   );
@@ -1839,9 +1839,9 @@ export function Chessboard(props: ChessboardProps) {
             perspective: `${PERSPECTIVE / 4}rem`,
           }}
         >
-          <KeyWithAnimation
-            each={children().characters}
-            updateWhen={children()}
+          <ChildrenCluster
+            input={children()}
+            path="characters"
           >
             {(character) => (
               <CharacterArea
@@ -1851,8 +1851,8 @@ export function Chessboard(props: ChessboardProps) {
                 onClick={(e, t) => onCharacterAreaClick(e, t, character())}
               />
             )}
-          </KeyWithAnimation>
-          <KeyWithAnimation each={children().cards} updateWhen={children()}>
+          </ChildrenCluster>
+          <ChildrenCluster input={children()} path="cards">
             {(card) => (
               <Card
                 {...card()}
@@ -1882,8 +1882,8 @@ export function Chessboard(props: ChessboardProps) {
                 onPointerUp={(e, t) => onCardPointerUp(e, t, card())}
               />
             )}
-          </KeyWithAnimation>
-          <KeyWithAnimation each={children().entities} updateWhen={children()}>
+          </ChildrenCluster>
+          <ChildrenCluster input={children()} path="entities">
             {(entity) => (
               <Entity
                 {...entity()}
@@ -1892,7 +1892,7 @@ export function Chessboard(props: ChessboardProps) {
                 onClick={(e, t) => onEntityClick(e, t, entity())}
               />
             )}
-          </KeyWithAnimation>
+          </ChildrenCluster>
           <For each={children().cardCountHints} keyed={(item) => item.area}>
             {(hint) => (
               <CardCountHint
