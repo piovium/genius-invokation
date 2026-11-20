@@ -13,10 +13,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { For, Match, Switch, createResource, Accessor } from "solid-js";
+import { paths } from "../router";
+import { action, affects, refresh, createMemo, Loading, Errored, For } from "solid-js";
 import { Layout } from "../layouts/Layout";
 import axios, { AxiosError } from "axios";
-import { A } from "@solidjs/router";
 import { DeckBriefInfo } from "../components/DeckBriefInfo";
 import type { Deck } from "@gi-tcg/typings";
 import { useGuestDecks } from "../guest";
@@ -36,84 +36,77 @@ interface DecksResponse {
   data: DeckInfo[];
 }
 
-export interface UseDecksResult {
-  readonly decks: Accessor<DecksResponse>;
-  readonly loading: Accessor<boolean>;
-  readonly error: Accessor<any>;
-  readonly refetch: () => void;
-}
-
-export function useDecks(): UseDecksResult {
+export function useDecks() {
   const { status } = useAuth();
-  const EMPTY = { count: 0, data: [] };
-  const [userDecks, { refetch }] = createResource(
-    status,
-    () => axios.get<DecksResponse>("decks").then((res) => res.data),
-    {
-      initialValue: EMPTY,
-    },
-  );
   const [guestDecks] = useGuestDecks();
-  return {
-    decks: () => {
-      const { type } = status();
-      if (type === "guest") {
-        const data = guestDecks();
-        return {
-          data,
-          count: data.length,
-        };
-      } else if (type === "user" && userDecks.state === "ready") {
-        return userDecks();
-      } else {
-        return EMPTY;
-      }
-    },
-    loading: () => status().type === "user" && userDecks.loading,
-    error: () => (status().type === "user" ? userDecks.error : void 0),
-    refetch: () => (status().type === "user" ? refetch() : void 0),
-  };
+  return createMemo<DecksResponse>(() => {
+    const { type } = status();
+    if (type === "user") {
+      return axios.get<DecksResponse>("decks").then(({ data }) => data);
+    }
+    const data = type === "guest" ? guestDecks() : [];
+    return { count: data.length, data };
+  });
 }
 
 export default function Decks() {
   const { t } = useI18n();
   const { status } = useAuth();
-  const { decks, loading, error, refetch } = useDecks();
-  const [, { pinGuestDeck }] = useGuestDecks();
+  const decks = useDecks();
+  const [, { pinGuestDeck, removeGuestDeck }] = useGuestDecks();
 
-  const pinDeck = async (deck: DeckInfo) => {
+  const pinDeck = action(function* (deck: DeckInfo) {
     const { type } = status();
     try {
       if (type === "guest") {
-        await pinGuestDeck(deck.id);
+        yield pinGuestDeck(deck.id);
       } else if (type === "user") {
-        // trigger updatedAt
-        await axios.patch(`decks/${deck.id}`, { name: deck.name });
+        affects(decks);
+        // Updating the deck bumps updatedAt and puts it first in the list.
+        yield axios.patch(`decks/${deck.id}`, { name: deck.name });
+        yield refresh(decks);
       }
-      refetch();
     } catch (e) {
       if (e instanceof AxiosError) {
         alert(getErrorMessage(e) || t("pinFailed"));
       }
       console.error(e);
     }
-  };
+  });
+
+  const deleteDeck = action(function* (id: number) {
+    const { type } = status();
+    try {
+      if (type === "guest") {
+        yield removeGuestDeck(id);
+      } else if (type === "user") {
+        affects(decks);
+        yield axios.delete(`decks/${id}`);
+        yield refresh(decks);
+      }
+    } catch (e) {
+      if (e instanceof AxiosError) {
+        alert(getErrorMessage(e));
+      }
+      console.error(e);
+    }
+  });
 
   return (
     <Layout>
       <div class="container mx-auto h-full px-2 flex flex-col">
         <div class="flex flex-row gap-4 justify-between items-center mb-5">
           <h2 class="text-2xl font-bold">{t("myDecks")}</h2>
-          <A class="btn btn-outline-green" href="/decks/new">
+          <a class="btn btn-outline-green" href={paths.decks("new")}>
             <i class="i-mdi-plus" /> {t("add")}
-          </A>
+          </a>
         </div>
-        <Switch>
-          <Match when={loading()}>{t("loading")}</Match>
-          <Match when={error()}>
-            {t("loadFailed", { message: getErrorMessage(error()) })}
-          </Match>
-          <Match when={true}>
+        <Errored
+          fallback={(err) =>
+            t("loadFailed", { message: getErrorMessage(err()) })
+          }
+        >
+          <Loading on={status().type} fallback={t("loading")}>
             <ul class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2 md:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] md:gap-3 md:overflow-y-auto scrollbar-thin-hover">
               <For
                 each={decks().data}
@@ -124,15 +117,15 @@ export default function Decks() {
                 {(deckData) => (
                   <DeckBriefInfo
                     editable
-                    onDelete={() => refetch()}
+                    onDelete={() => deleteDeck(deckData.id)}
                     onPin={() => pinDeck(deckData)}
                     {...deckData}
                   />
                 )}
               </For>
             </ul>
-          </Match>
-        </Switch>
+          </Loading>
+        </Errored>
       </div>
     </Layout>
   );

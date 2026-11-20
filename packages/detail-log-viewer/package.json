@@ -15,6 +15,7 @@
     "build": "vite build"
   },
   "peerDependencies": {
+    "@solidjs/web": "catalog:",
     "solid-js": "catalog:"
   },
   "dependencies": {
@@ -24,10 +25,9 @@
     "@gi-tcg/core": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
     "rollup-plugin-node-externals": "catalog:",
-    "solid-devtools": "^0.29.2",
     "unocss": "catalog:",
     "vite": "catalog:",
     "unplugin-dts": "catalog:",
-    "vite-plugin-solid": "catalog:"
+    "@solidjs/vite-plugin": "catalog:"
   }
 }

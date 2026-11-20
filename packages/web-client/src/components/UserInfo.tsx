@@ -13,13 +13,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { createResource, For, Match, Show, Switch } from "solid-js";
-import { A } from "@solidjs/router";
+import { paths } from "../router";
+import { createMemo, Loading, Errored, For, Show } from "solid-js";
 import axios from "axios";
 import { GameInfo } from "./GameInfo";
 import { ChessboardColor } from "./ChessboardColor";
 import { useI18n } from "../i18n";
-import { Portal } from "solid-js/web";
+import { Portal } from "@solidjs/web";
 import { AvatarSelector } from "./AvatarSelector";
 import { useAuth } from "../auth";
 import { TextFieldEdit } from "./TextFieldEdit";
@@ -31,12 +31,11 @@ export interface UserInfoProps {
   name: string;
   avatarUrl?: string;
   editable?: boolean;
-  onSubmit?: () => void;
 }
 
 export function UserInfo(props: UserInfoProps) {
   const { t } = useI18n();
-  const [games] = createResource(() =>
+  const games = createMemo(() =>
     axios.get<{ data: any[] }>(`games/mine`).then((res) => res.data),
   );
 
@@ -49,7 +48,6 @@ export function UserInfo(props: UserInfoProps) {
     if (newName.trim()) {
       try {
         await updateInfo({ name: newName });
-        props.onSubmit?.();
         return true;
       } catch (err) {
         console.error(err);
@@ -122,20 +120,17 @@ export function UserInfo(props: UserInfoProps) {
           <div class="flex flex-col gap-4">
             <dt class="font-bold">{t("gameRecords")}</dt>
             <dd class="flex flex-col gap-1">
-              <Switch>
-                <Match when={props.type === "guest"}>
-                  {t("guestNoGameRecords")}
-                </Match>
-                <Match when={games.loading}>{t("loading")}</Match>
-                <Match when={games.error}>
-                  {t("loadFailed", {
-                    message: getErrorMessage(games.error),
-                  })}
-                </Match>
-                <Match when={!games()?.data.length}>{t("noGameRecords")}</Match>
-                <Match when={games()}>
-                  {(games) => (
-                    <For each={games().data}>
+              <Show
+                when={props.type !== "guest"}
+                fallback={t("guestNoGameRecords")}
+              >
+                <Errored
+                  fallback={(error) =>
+                    t("loadFailed", { message: getErrorMessage(error()) })
+                  }
+                >
+                  <Loading fallback={t("loading")}>
+                    <For each={games().data} fallback={t("noGameRecords")}>
                       {(data) => (
                         <GameInfo
                           gameId={data.game.id}
@@ -144,16 +139,16 @@ export function UserInfo(props: UserInfoProps) {
                         />
                       )}
                     </For>
-                  )}
-                </Match>
-              </Switch>
+                  </Loading>
+                </Errored>
+              </Show>
             </dd>
           </div>
           <hr class="h-1 w-full text-gray-4 my-4" />
           <div class="flex items-center gap-3">
-            <A class="btn btn-ghost font-bold" href="/decks">
+            <a class="btn btn-ghost font-bold" href={paths.decks()}>
               {t("myDecksMore")}
-            </A>
+            </a>
           </div>
         </Show>
       </div>

@@ -19,10 +19,9 @@ import type {
   PbEntityState,
 } from "@gi-tcg/typings";
 import {
-  createEffect,
   createMemo,
   createSignal,
-  ErrorBoundary,
+  Errored,
   For,
   Match,
   Show,
@@ -121,16 +120,14 @@ function CardDataViewer(props: CardDataViewerProps) {
 
   return (
     <div class="gi-tcg-card-data-viewer reset">
-      <ErrorBoundary
+      <Errored
         fallback={(err, reset) => (
           <div class="card-panel">
             <p>
               {t("loadFailed")}
               <button onClick={reset}>{t("retry")}</button>
             </p>
-            <pre class="whitespace-pre-wrap">
-              {"message" in err ? (console.error(err), err.message) : `${err}`}
-            </pre>
+            <pre class="whitespace-pre-wrap">{String(err())}</pre>
           </div>
         )}
       >
@@ -161,7 +158,7 @@ function CardDataViewer(props: CardDataViewerProps) {
                       {(entityType) => (
                         <h3
                           class="w-full text-center rounded-full entity-category"
-                          bool:data-show-combine-button={showCombineButton(
+                          data-show-combine-button={showCombineButton(
                             entityType(),
                           )}
                           onClick={() => {
@@ -203,7 +200,7 @@ function CardDataViewer(props: CardDataViewerProps) {
             </div>
           )}
         </Show>
-      </ErrorBoundary>
+      </Errored>
     </div>
   );
 }

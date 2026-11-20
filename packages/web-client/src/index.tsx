@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { render } from "solid-js/web";
+import { render } from "@solidjs/web";
 import { I18nProvider } from "./i18n";
 
 import "./style.css";

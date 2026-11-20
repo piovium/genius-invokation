@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { A, useNavigate } from "@solidjs/router";
+import { paths } from "../router";
+import { useNavigate } from "@solidjs/router";
 import { Show } from "solid-js";
 import { IS_BETA } from "@gi-tcg/config";
 import Logo from "./Logo.svg";
@@ -33,11 +34,11 @@ export function Header() {
       <img src={Logo} class="h-10 md:h-12" />
       <div class="flex-grow flex flex-col md:flex-row items-start md:items-end gap-1 md:gap-2">
         <h1 class="text-xl line-height-none font-bold">
-          <A href="/">
+          <a href={paths()}>
             <Show when={USE_LOGO} fallback={t("platformTitle")}>
               <img src={Title} class="h-5 md:h-6" alt={t("platformLogoAlt")} />
             </Show>
-          </A>
+          </a>
         </h1>
         <div class="flex flex-row gap-2">
           <Show when={IS_BETA}>
@@ -64,20 +65,20 @@ export function Header() {
         />
       </div>
       <Show when={status().type !== "notLogin"}>
-        <A
-          href={
-            status().type === "guest" ? `/user/guest` : `/user/${status().id}`
-          }
+        <a
+          href={paths.user(
+            status().type === "guest" ? "guest" : String(status().id),
+          )}
         >
           <div class="rounded-full w-10 h-10 md:w-12 md:h-12 b-solid b-1 b-gray-200 flex items-center justify-center">
             <img src={avatarUrl()} class="w-85% h-85% [clip-path:circle()]" />
           </div>
-        </A>
+        </a>
         <button
           class="btn btn-outline-red"
           onClick={() => {
             logout();
-            navigate("/");
+            navigate(paths());
           }}
         >
           <i class="i-mdi-logout" />

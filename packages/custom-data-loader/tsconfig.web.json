@@ -4,10 +4,13 @@
     "target": "ES2023",
     "module": "Preserve",
     "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "emitDeclarationOnly": true,
+    "skipLibCheck": true,
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
 
     "jsx": "preserve",
-    "jsxImportSource": "solid-js",
+    "jsxImportSource": "@solidjs/web",
 
     "resolveJsonModule": true,
     "isolatedModules": true,

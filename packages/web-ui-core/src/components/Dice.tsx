@@ -15,14 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DiceType } from "@gi-tcg/typings";
-import {
-  Show,
-  splitProps,
-  type Component,
-  type ComponentProps,
-} from "solid-js";
+import { Show, omit, type Component } from "solid-js";
+import { type ComponentProps, dynamic } from "@solidjs/web";
 import { StrokedText } from "./StrokedText";
-import { Dynamic } from "solid-js/web";
 
 import DiceCryoS from "../svg/DiceCryoS.svg?fb";
 import DiceHydroS from "../svg/DiceHydroS.svg?fb";
@@ -66,7 +61,10 @@ export const DICE_COLOR: Record<number, string> = {
   // [DiceType.Legend]: "",
 };
 
-export const DICE_COMPONENT_MAP: Record<number, Component> = {
+export const DICE_COMPONENT_MAP: Record<
+  number,
+  Component<Pick<ComponentProps<"div">, "class" | "style">>
+> = {
   // [DiceType.Void]: ,
   [DiceType.Cryo]: DiceCryoS,
   [DiceType.Hydro]: DiceHydroS,
@@ -81,7 +79,10 @@ export const DICE_COMPONENT_MAP: Record<number, Component> = {
   // [DiceType.Legend]: ,
 };
 
-export const COST_COMPONENT_MAP: Record<number, Component> = {
+export const COST_COMPONENT_MAP: Record<
+  number,
+  Component<Pick<ComponentProps<"div">, "class" | "style">>
+> = {
   [DiceType.Void]: DiceVoid,
   [DiceType.Cryo]: DiceCryo,
   [DiceType.Hydro]: DiceHydro,
@@ -107,13 +108,13 @@ export interface DiceProps extends ComponentProps<"div"> {
 }
 
 export function Dice(props: DiceProps) {
-  const [local, rest] = splitProps(props, ["class", "type", "selected"]);
+  const rest = omit(props, "class", "type", "selected");
   return (
-    <div class={`grid ${local.class ?? "w-6 h-6"}`} {...rest}>
+    <div class={["grid", props.class ?? "w-6 h-6"]} {...rest}>
       <DiceContent
         class="w-full h-full"
-        type={local.type}
-        selected={local.selected}
+        type={props.type}
+        selected={props.selected}
         col={1}
         row={1}
       />
@@ -131,10 +132,10 @@ export interface DiceContentProps {
 
 /** You can only use this component within a **grid** container. Otherwise, please use ```<Dice/>``` instead. */
 export function DiceContent(props: DiceContentProps) {
+  const DiceIcon = dynamic(() => DICE_COMPONENT_MAP[props.type]);
   return (
     <>
-      <Dynamic<Component<ComponentProps<"div">>>
-        component={DICE_COMPONENT_MAP[props.type]}
+      <DiceIcon
         class={props.class ?? "w-6 h-6"}
         style={{ "grid-column": props.col, "grid-row": props.row }}
       />
@@ -156,12 +157,10 @@ export interface CostProps {
 }
 
 export function Cost(props: CostProps) {
+  const CostIcon = dynamic(() => COST_COMPONENT_MAP[props.type]);
   return (
-    <div class={`grid children:grid-area-[1/1] ${props.class}`}>
-      <Dynamic<Component<ComponentProps<"div">>>
-        component={COST_COMPONENT_MAP[props.type]}
-        class="w-full h-full"
-      />
+    <div class={["grid children:grid-area-[1/1]", props.class]}>
+      <CostIcon class="w-full h-full" />
       <Show when={props.type !== DiceType.Legend}>
         <StrokedText
           class={`place-self-center
@@ -184,10 +183,6 @@ export interface InlineDiceProps {
 }
 
 export function InlineDice(props: InlineDiceProps) {
-  return (
-    <Dynamic<Component<ComponentProps<"div">>>
-      component={DICE_COMPONENT_MAP[props.type]}
-      class={props.class}
-    />
-  );
+  const DiceIcon = dynamic(() => DICE_COMPONENT_MAP[props.type]);
+  return <DiceIcon class={props.class} />;
 }

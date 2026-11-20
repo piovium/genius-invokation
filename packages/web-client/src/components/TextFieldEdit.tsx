@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { createEffect, createSignal, on, Show } from "solid-js";
+import { createEffect, createSignal, Show } from "solid-js";
 
 export interface TextFieldEditProps {
   value: string;
@@ -32,16 +32,14 @@ export function TextFieldEdit(props: TextFieldEditProps) {
 
   let inputEl: HTMLInputElement | undefined;
 
-  createEffect(
-    on(editing, () => {
-      if (!inputEl) {
-        return;
-      }
-      inputEl.value = props.value;
-      inputEl.focus();
-      inputEl.select();
-    }),
-  );
+  createEffect(editing, () => {
+    if (!inputEl) {
+      return;
+    }
+    inputEl.value = props.value;
+    inputEl.focus();
+    inputEl.select();
+  });
 
   const submit = async (e: SubmitEvent) => {
     e.preventDefault();
@@ -62,7 +60,7 @@ export function TextFieldEdit(props: TextFieldEditProps) {
       when={editing() && !props.disable}
       fallback={
         <div class="flex flex-row items-center gap-2">
-          <h2 class={`min-w-0 overflow-hidden whitespace-nowrap text-ellipsis flex-shrink-0 ${props.class}`}>
+          <h2 class={["min-w-0 overflow-hidden whitespace-nowrap text-ellipsis flex-shrink-0", props.class]}>
             {props.value}
           </h2>
           <button

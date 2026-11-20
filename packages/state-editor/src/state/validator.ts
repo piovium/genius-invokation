@@ -10,7 +10,11 @@ function collectEntityIds(entity: EntityState, ids: number[]) {
   }
 }
 
-function validateSafeInteger(value: number, label: string, errors: string[]) {
+function validateSafeInteger(
+  value: number | undefined,
+  label: string,
+  errors: string[],
+) {
   if (!Number.isSafeInteger(value)) {
     errors.push(`${label} 不是安全整数`);
   }

@@ -49,7 +49,7 @@ export function ChessboardColor(props: ChessboardColorProps) {
               setDirty(true);
               setColor(presetColor);
             }}
-            bool:data-selected={color() === presetColor}
+            data-selected={color() === presetColor}
           >
             <div
               class="h-6 w-6 rounded-full"
@@ -70,7 +70,7 @@ export function ChessboardColor(props: ChessboardColorProps) {
         />
         <div
           class="absolute h-8 w-8 flex items-center justify-center rounded-full cursor-pointer border b-1 b-gray-300 data-[selected]:b-3 data-[selected]:b-gray-600 bg-white pointer-events-none"
-          bool:data-selected={!CHESSBOARD_COLORS.includes(color() ?? "")}
+          data-selected={!CHESSBOARD_COLORS.includes(color() ?? "")}
         >
           <div
             class="h-6 w-6 rounded-full"

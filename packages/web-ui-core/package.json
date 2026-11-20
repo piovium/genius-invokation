@@ -31,11 +31,11 @@
     "@gi-tcg/assets-manager": "workspace:*",
     "@gi-tcg/card-data-viewer": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
-    "@solid-primitives/i18n": "^2.2.1",
-    "@solid-primitives/keyed": "^1.4.0",
+    "@solid-primitives/i18n": "^3.0.0",
     "remeda": "^2.39.0"
   },
   "peerDependencies": {
+    "@solidjs/web": "catalog:",
     "solid-js": "catalog:"
   },
   "devDependencies": {
@@ -49,11 +49,10 @@
     "puppeteer-core": "^25.0.4",
     "puppeteer-screen-recorder": "^3.0.6",
     "rollup-plugin-node-externals": "catalog:",
-    "solid-devtools": "^0.29.2",
     "svgo": "^4.0.0",
     "unocss": "catalog:",
     "unplugin-dts": "catalog:",
     "vite": "catalog:",
-    "vite-plugin-solid": "catalog:"
+    "@solidjs/vite-plugin": "catalog:"
   }
 }

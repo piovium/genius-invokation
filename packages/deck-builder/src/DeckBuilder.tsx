@@ -14,21 +14,16 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
-  type JSX,
+  Errored,
+  Loading,
   createContext,
-  splitProps,
+  omit,
   useContext,
-  untrack,
   createSignal,
-  createEffect,
   createMemo,
-  Show,
-  createResource,
-  Switch,
-  Match,
   createUniqueId,
-  onCleanup,
 } from "solid-js";
+import type { JSX } from "@solidjs/web";
 import { AllCards } from "./AllCards";
 import { CurrentDeck } from "./CurrentDeck";
 import type { Deck } from "@gi-tcg/typings";
@@ -36,11 +31,13 @@ import { createCardDataViewer } from "@gi-tcg/card-data-viewer";
 import {
   DEFAULT_ASSETS_MANAGER,
   type AssetsManager,
-  type DeckData,
 } from "@gi-tcg/assets-manager";
 import { translations, type Locale } from "./i18n";
 import type { I18nKey } from "./locales";
-import { resolveTemplate, translator } from "@solid-primitives/i18n";
+import {
+  resolveTemplate,
+  translator as createTranslator,
+} from "@solid-primitives/i18n";
 
 export interface DeckBuilderProps extends JSX.HTMLAttributes<HTMLDivElement> {
   assetsManager?: AssetsManager;
@@ -67,18 +64,15 @@ const EMPTY_DECK: Deck = {
 };
 
 export function DeckBuilder(props: DeckBuilderProps) {
-  const [local, rest] = splitProps(props, ["assetsManager", "locale", "class"]);
+  const rest = omit(props, "assetsManager", "locale", "class");
   let container!: HTMLDivElement;
   const assetsManager = createMemo(
-    () => local.assetsManager ?? DEFAULT_ASSETS_MANAGER,
+    () => props.assetsManager ?? DEFAULT_ASSETS_MANAGER,
   );
-  const locale = createMemo(() => local.locale ?? "zh-CN");
-  const dict = createMemo(() => translations[locale()]);
-  const t = translator(dict, resolveTemplate);
+  const locale = createMemo(() => props.locale ?? "zh-CN");
+  const t = createTranslator(() => translations[locale()], resolveTemplate);
 
-  const [deckData] = createResource(assetsManager, (manager) =>
-    manager.getDeckData(),
-  );
+  const deckData = createMemo(() => assetsManager().getDeckData());
 
   const { CardDataViewer, showCard, showCharacter, hide } =
     createCardDataViewer({
@@ -89,25 +83,21 @@ export function DeckBuilder(props: DeckBuilderProps) {
   const [cardDataViewerOffsetX, setCardDataViewerOffsetX] = createSignal(0);
   const [cardDataViewerOffsetY, setCardDataViewerOffsetY] = createSignal(0);
 
-  const [version, setVersion] = createSignal(0);
-  const allVersions = () => deckData()?.allVersions;
+  const allVersions = () => deckData().allVersions;
   const versionSpecified = () =>
-    !!props.version && allVersions()?.includes(props.version);
+    !!props.version && allVersions().includes(props.version);
 
-  createEffect(() => {
-    if (deckData.state === "ready") {
-      if (versionSpecified()) {
-        setVersion(deckData().allVersions.indexOf(props.version!));
-      } else {
-        setVersion(deckData().allVersions.length - 1);
-      }
-    }
+  const [version, setVersion] = createSignal(() => {
+    const versions = allVersions();
+    return versionSpecified()
+      ? versions.indexOf(props.version!)
+      : Math.max(versions.length - 1, 0);
   });
 
   const deckPageControlId = createUniqueId();
 
   return (
-    <DeckBuilderContext.Provider
+    <DeckBuilderContext
       value={{
         assetsManager,
         locale,
@@ -143,7 +133,7 @@ export function DeckBuilder(props: DeckBuilderProps) {
       }}
     >
       <div
-        class={`gi-tcg-deck-builder @container groupxxx reset ${local.class}`}
+        class={["gi-tcg-deck-builder @container groupxxx reset", props.class]}
         ref={container}
       >
         <input
@@ -157,45 +147,40 @@ export function DeckBuilder(props: DeckBuilderProps) {
           {...rest}
           onClick={() => hide()}
         >
-          <Switch>
-            <Match when={deckData.loading}>
-              <div class="flex-grow">{t("loadingCards")}</div>
-            </Match>
-            <Match when={deckData.error}>
-              <div class="flex-grow">{t("loadCardsFailed")}</div>
-            </Match>
-            <Match when={deckData()}>
-              {(deckData) => (
-                <AllCards
-                  version={version()}
-                  versionSpecified={versionSpecified()}
-                  deck={props.deck ?? EMPTY_DECK}
-                  onChangeDeck={props.onChangeDeck}
-                  onSetVersion={setVersion}
-                  {...deckData()}
-                />
-              )}
-            </Match>
-          </Switch>
-          <div class="b-r-1 b-b-1 b-gray DP:mt-3 @3xl:mt-0 DP:@3xl:mt-0" />
-          <div class="h-3 w-full @3xl:hidden flex relative DP:mb-2 DP:flex-shrink-0">
-            <label
-              for={deckPageControlId}
-              class="absolute z-10 h-16 w-16 rounded-full b-1 b-white b-t-gray bg-white top-0 right-0 translate-y--15.5%"
+          <Errored
+            fallback={<div class="flex-grow">{t("loadCardsFailed")}</div>}
+          >
+            <Loading
+              on={assetsManager()}
+              fallback={<div class="flex-grow">{t("loadingCards")}</div>}
             >
-              <div class="absolute top-3 left-6 h-4 w-4 rounded-lt-1 b-t-3 b-l-3 b-yellow-5 rotate-45 DP:rotate-225 DP:top-2" />
-            </label>
-          </div>
-          <Show when={deckData()}>
-            {(deckData) => (
+              <AllCards
+                version={version()}
+                versionSpecified={versionSpecified()}
+                deck={props.deck ?? EMPTY_DECK}
+                onChangeDeck={props.onChangeDeck}
+                onSetVersion={setVersion}
+                {...deckData()}
+              />
+
+              <div class="b-r-1 b-b-1 b-gray DP:mt-3 @3xl:mt-0 DP:@3xl:mt-0" />
+              <div class="h-3 w-full @3xl:hidden flex relative DP:mb-2 DP:flex-shrink-0">
+                <label
+                  for={deckPageControlId}
+                  class="absolute z-10 h-16 w-16 rounded-full b-1 b-white b-t-gray bg-white top-0 right-0 translate-y--15.5%"
+                >
+                  <div class="absolute top-3 left-6 h-4 w-4 rounded-lt-1 b-t-3 b-l-3 b-yellow-5 rotate-45 DP:rotate-225 DP:top-2" />
+                </label>
+              </div>
+
               <CurrentDeck
                 version={version()}
                 deck={props.deck ?? EMPTY_DECK}
                 onChangeDeck={props.onChangeDeck}
                 {...deckData()}
               />
-            )}
-          </Show>
+            </Loading>
+          </Errored>
         </div>
         <div
           class="absolute right-0 bottom-0 pointer-events-none z-50"
@@ -207,6 +192,6 @@ export function DeckBuilder(props: DeckBuilderProps) {
           <CardDataViewer />
         </div>
       </div>
-    </DeckBuilderContext.Provider>
+    </DeckBuilderContext>
   );
 }

@@ -42,11 +42,12 @@ export function AvatarSelector(props: AvatarSelectorProps) {
             <For each={avatarUrls}>
               {(avatarUrl) => (
                 <button
-                  class={`relative aspect-square rounded-full overflow-hidden border-2 transition-all hover:scale-105 ${
+                  class={[
+                    "relative aspect-square rounded-full overflow-hidden border-2 transition-all hover:scale-105",
                     props.value === avatarUrl
                       ? "border-blue-500 ring-2 ring-blue-300"
-                      : "border-gray-200"
-                  }`}
+                      : "border-gray-200",
+                  ]}
                   onClick={() => props.onChange?.(avatarUrl)}
                 >
                   <img src={avatarUrl} class="w-full h-full object-cover" />

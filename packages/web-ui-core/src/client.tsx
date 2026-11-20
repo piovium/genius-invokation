@@ -33,13 +33,12 @@ import {
   type PbExposedMutation,
 } from "@gi-tcg/typings";
 import {
-  createMemo,
   createEffect,
   createSignal,
   type Accessor,
-  type ComponentProps,
-  type JSX,
+  createStore,
 } from "solid-js";
+import type { ComponentProps, JSX } from "@solidjs/web";
 import {
   Chessboard,
   type ChessboardViewType,
@@ -54,7 +53,7 @@ import type {
 } from "@gi-tcg/core";
 import { QueueManager } from "./queue_manager";
 import { parseMutations, type ParseMutationContext } from "./mutations";
-import { translations, UiContext, type Locale } from "./hooks/context";
+import { createUiTranslator, UiContext, type Locale } from "./hooks/context";
 import {
   createActionState,
   createChooseActiveState,
@@ -67,7 +66,6 @@ import {
   updateHistory,
   type HistoryData,
 } from "./history/parser";
-import { createStore, produce } from "solid-js/store";
 import type { Rotation } from "./components/TransformWrapper";
 import type { CancellablePlayerIO } from "@gi-tcg/core";
 import {
@@ -76,7 +74,6 @@ import {
   type OppInfo,
 } from "./opp";
 import { flip } from "@gi-tcg/utils";
-import { flatten, resolveTemplate, translator } from "@solid-primitives/i18n";
 
 const EMPTY_PLAYER_DATA: PbPlayerState = {
   activeCharacterId: 0,
@@ -172,12 +169,11 @@ export interface ClientChessboardProps extends ComponentProps<"div"> {
 export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   const getAssetsManager = () =>
     option.assetsManager?.() ?? DEFAULT_ASSETS_MANAGER;
-  createEffect(() => {
-    void prepareActionCardsCache(getAssetsManager());
+  createEffect(getAssetsManager, (manager) => {
+    void prepareActionCardsCache(manager);
   });
   const getLocale = () => option.locale?.() ?? "zh-CN";
-  const dict = createMemo(() => flatten(translations[getLocale()]));
-  const t = translator(dict, resolveTemplate);
+  const t = createUiTranslator(getLocale);
 
   const [data, setData] = createSignal<ChessboardData>({
     raw: [],
@@ -429,9 +425,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         async () => {
           state = oppController.mergeState(state!);
           const parsed = parseMutations(mutation, parseMutationContext);
-          setHistory(
-            produce((history) => updateHistory(savedState, mutation, history)),
-          );
+          setHistory((history) => updateHistory(savedState, mutation, history));
           const { promise, resolve } = Promise.withResolvers<void>();
           setData({
             previousState: savedState ?? state,
@@ -543,7 +537,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   };
 
   const Wrapper = (props: ComponentProps<"div">) => (
-    <UiContext.Provider
+    <UiContext
       value={{
         ...option,
         assetsManager: getAssetsManager,
@@ -569,7 +563,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         opp={opp()}
         {...props}
       />
-    </UiContext.Provider>
+    </UiContext>
   );
 
   return [io, Wrapper];

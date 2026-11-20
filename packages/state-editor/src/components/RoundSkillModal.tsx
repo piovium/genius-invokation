@@ -101,18 +101,22 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
   });
 
   // 重置状态当modal打开/关闭时
-  createEffect(() => {
-    if (isEditing() && props.editingCharacterId) {
-      setSelectedCharacterId(props.editingCharacterId);
-      setSelectedSkillIds(props.editingSkillIds ?? []);
-    } else {
-      setSelectedCharacterId(null);
-      setSelectedSkillIds([]);
-    }
-    setShowOtherCharacterSelect(false);
-    setShowOtherSkillSelect(false);
-    setOtherSkillQuery("");
-  });
+  createEffect(
+    () =>
+      [isEditing(), props.editingCharacterId, props.editingSkillIds] as const,
+    ([editing, characterId, skillIds]) => {
+      if (editing && characterId) {
+        setSelectedCharacterId(characterId);
+        setSelectedSkillIds(skillIds ?? []);
+      } else {
+        setSelectedCharacterId(null);
+        setSelectedSkillIds([]);
+      }
+      setShowOtherCharacterSelect(false);
+      setShowOtherSkillSelect(false);
+      setOtherSkillQuery("");
+    },
+  );
 
   // 切换技能选择
   const toggleSkill = (skillId: number) => {
@@ -176,13 +180,14 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
                       }
                     }}
                     disabled={isDisabled()}
-                    class={`px-4 py-2 rounded-xl border text-sm transition ${
+                    class={[
+                      "px-4 py-2 rounded-xl border text-sm transition",
                       isSelected()
                         ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-50"
                         : isDisabled()
                           ? "bg-slate-800/50 border-white/10 text-slate-600 cursor-not-allowed"
-                          : "bg-slate-800 border-white/20 text-slate-200 hover:bg-slate-700"
-                    }`}
+                          : "bg-slate-800 border-white/20 text-slate-200 hover:bg-slate-700",
+                    ]}
                   >
                     {character.name}
                   </button>
@@ -194,11 +199,12 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
             <button
               type="button"
               onClick={() => setShowOtherCharacterSelect(true)}
-              class={`px-4 py-2 rounded-xl border text-sm transition ${
+              class={[
+                "px-4 py-2 rounded-xl border text-sm transition",
                 showOtherCharacterSelect()
                   ? "bg-amber-500/20 border-amber-500/50 text-amber-50"
-                  : "bg-slate-800 border-white/20 text-slate-200 hover:bg-slate-700"
-              }`}
+                  : "bg-slate-800 border-white/20 text-slate-200 hover:bg-slate-700",
+              ]}
             >
               + 其他角色
             </button>
@@ -254,11 +260,12 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
                     <button
                       type="button"
                       onClick={() => toggleSkill(skill.id)}
-                      class={`px-3 py-1.5 rounded-full border text-xs transition ${
+                      class={[
+                        "px-3 py-1.5 rounded-full border text-xs transition",
                         isSelected()
                           ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-50"
-                          : "bg-slate-800 border-white/20 text-slate-200 hover:bg-slate-700"
-                      }`}
+                          : "bg-slate-800 border-white/20 text-slate-200 hover:bg-slate-700",
+                      ]}
                     >
                       {skill.name} #{skill.id}
                     </button>
@@ -270,11 +277,12 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
               <button
                 type="button"
                 onClick={() => setShowOtherSkillSelect(true)}
-                class={`px-3 py-1.5 rounded-full border text-xs transition ${
+                class={[
+                  "px-3 py-1.5 rounded-full border text-xs transition",
                   showOtherSkillSelect()
                     ? "bg-amber-500/20 border-amber-500/50 text-amber-50"
-                    : "bg-slate-800 border-white/20 text-slate-200 hover:bg-slate-700"
-                }`}
+                    : "bg-slate-800 border-white/20 text-slate-200 hover:bg-slate-700",
+                ]}
               >
                 + 其他技能
               </button>

@@ -14,13 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  createSignal,
-  For,
-  Show,
-  splitProps,
-  type ComponentProps,
-} from "solid-js";
+import { createSignal, For, Show, omit } from "solid-js";
+import type { ComponentProps } from "@solidjs/web";
 import { Button } from "./Button";
 import { Image } from "./Image";
 import CardFrameNormal from "../svg/CardFrameNormal.svg?fb";
@@ -42,7 +37,7 @@ export function SelectCardView(props: SelectCardViewProps) {
   return (
     <div
       class="w-full h-full hidden data-[shown]:flex flex-col items-center justify-center select-none z-3 min-w-0 min-h-0 "
-      bool:data-shown={props.shown}
+      data-shown={props.shown}
     >
       <h3 class="h-10 font-bold text-3xl text-white/80">
         {t("view.chooseCard")}
@@ -67,7 +62,7 @@ export function SelectCardView(props: SelectCardViewProps) {
       </div>
       <Button
         class="visible data-[hidden]:invisible"
-        bool:data-hidden={selectedId() === null}
+        data-hidden={selectedId() === null}
         onClick={() => {
           const id = selectedId();
           if (id !== null) {
@@ -87,33 +82,28 @@ export interface StaticCardProps extends ComponentProps<"div"> {
 }
 
 export function StaticCard(props: StaticCardProps) {
-  const [local, rest] = splitProps(props, [
-    "cardDefinitionId",
-    "selected",
-    "class",
-    "children",
-  ]);
+  const rest = omit(props, "cardDefinitionId", "selected", "class", "children");
   return (
     <div
-      class={`w-21 h-36 grid relative children:grid-area-[1/1] ${local.class ?? ""}`}
+      class={["w-21 h-36 grid relative children:grid-area-[1/1]", props.class]}
       {...rest}
     >
       <Image
         class="h-full w-full p-1% text-3"
-        imageId={local.cardDefinitionId}
+        imageId={props.cardDefinitionId}
         fallback="card"
       />
       <CardFrameNormal class="h-full w-full pointer-events-none" />
-      <Show when={local.selected}>
+      <Show when={props.selected}>
         {/* with animate no render */}
         <SelectingIcon noRender class="w-21 h-21 place-self-center" />
       </Show>
       <DiceCostAsync
-        cardDefinitionId={local.cardDefinitionId}
+        cardDefinitionId={props.cardDefinitionId}
         class="absolute left-2 top--0.5 translate-x--50% flex flex-col gap-1"
         diceClass="w-9 h-9 text-4.5 m--1 max-w-9 max-h-9"
       />
-      {local.children}
+      {props.children}
     </div>
   );
 }

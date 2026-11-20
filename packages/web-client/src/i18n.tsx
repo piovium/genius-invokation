@@ -1,6 +1,5 @@
 import {
   ParentProps,
-  createMemo,
   createContext,
   createSignal,
   useContext,
@@ -13,7 +12,7 @@ import zhCN from "./locales/zh-CN";
 import en from "./locales/en";
 import {
   resolveTemplate,
-  translator,
+  translator as createTranslator,
   Translator as SolidTranslator,
 } from "@solid-primitives/i18n";
 
@@ -56,8 +55,7 @@ export function I18nProvider(props: ParentProps) {
     return manager;
   };
 
-  const dict = createMemo(() => translations[locale()]);
-  const t = translator(dict, resolveTemplate);
+  const t = createTranslator(() => translations[locale()], resolveTemplate);
 
   const value: I18nContextValue = {
     locale,
@@ -66,9 +64,7 @@ export function I18nProvider(props: ParentProps) {
     t,
   };
 
-  return (
-    <I18nContext.Provider value={value}>{props.children}</I18nContext.Provider>
-  );
+  return <I18nContext value={value}>{props.children}</I18nContext>;
 }
 
 export function useI18n() {

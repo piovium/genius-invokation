@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* @refresh reload */
-import { render } from "solid-js/web";
+import { render } from "@solidjs/web";
 import { inject } from "@vercel/analytics";
 
 import "./style.css";

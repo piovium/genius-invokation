@@ -13,9 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { onMount } from "solid-js";
+import { onSettled } from "solid-js";
 import { createCardDataViewer } from ".";
-import { render } from "solid-js/web";
+import { render } from "@solidjs/web";
 import { AssetsManager } from "@gi-tcg/assets-manager";
 
 function App() {
@@ -25,7 +25,7 @@ function App() {
       assetsManager: () => enAssetsManager,
       locale: () => "zh-CN",
     });
-  onMount(() => {
+  onSettled(() => {
     showState(
       "character",
       {

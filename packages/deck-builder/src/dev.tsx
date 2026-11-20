@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { render } from "solid-js/web";
+import { render } from "@solidjs/web";
 import { DeckBuilder } from ".";
 import type { Deck } from "@gi-tcg/typings";
 import { createEffect, createSignal } from "solid-js";
@@ -26,8 +26,8 @@ const EMPTY_DECK: Deck = {
 
 function App() {
   const [deck, setDeck] = createSignal<Deck>(EMPTY_DECK);
-  createEffect(() => {
-    console.log(deck());
+  createEffect(deck, (value) => {
+    console.log(value);
   });
   const assetsManager = new AssetsManager({
     apiBaseUrl: `https://static-data.piovium.org/`,

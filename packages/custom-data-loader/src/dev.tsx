@@ -17,13 +17,12 @@ import {
   Show,
   createEffect,
   createSignal,
-  on,
-  onMount,
+  onSettled,
   createMemo,
   type Component,
 } from "solid-js";
 import { CustomDataLoader } from "..";
-import { render, Dynamic } from "solid-js/web";
+import { render, dynamic } from "@solidjs/web";
 
 import { AssetsManager } from "@gi-tcg/assets-manager";
 import { DeckBuilder } from "@gi-tcg/deck-builder";
@@ -43,13 +42,17 @@ interface MonacoEditorProps {
 
 const MonacoEditor = (props: MonacoEditorProps) => {
   let container!: HTMLDivElement;
-  onMount(async () => {
-    const { setupEditor } = await import("./dev-editor");
-    const editor = await setupEditor(container, props.code ?? "");
-    editor.onDidChangeModelContent(() => {
-      const newCode = editor.getValue();
-      props.onCodeChange?.(newCode);
+  onSettled(() => {
+    const editor = import("./dev-editor").then(({ setupEditor }) =>
+      setupEditor(container, props.code ?? ""),
+    );
+    void editor.then((instance) => {
+      const handleChange = () => props.onCodeChange?.(instance.getValue());
+      instance.onDidChangeModelContent(handleChange);
     });
+    return () => {
+      void editor.then((instance) => instance.dispose());
+    };
   });
   return <div class="editor" ref={container} />;
 };
@@ -227,40 +230,43 @@ define card {
     gameInstance.start();
   };
 
-  createEffect(
-    on(code, () => {
-      setStep1Complete(false);
-    }),
-  );
+  createEffect(code, () => {
+    setStep1Complete(false);
+  });
 
   createEffect(
-    on([deck0, deck1], () => {
+    () => [deck0(), deck1()] as const,
+    () => {
       setStep2Complete(false);
-    }),
+    },
   );
 
+  const Chessboard0 = dynamic(chessboard0);
+  const Chessboard1 = dynamic(chessboard1);
   return (
     <div class="app">
       {/* 选项卡导航 */}
       <div class="tabs">
         <div
-          class={`tab ${activeTab() === 0 ? "active" : ""}`}
+          class={["tab", { active: activeTab() === 0 }]}
           onClick={() => setActiveTab(0)}
         >
           编辑模组代码
         </div>
         <div
-          class={`tab ${activeTab() === 1 ? "active" : ""} ${
-            !step1Complete() ? "disabled" : ""
-          }`}
+          class={[
+            "tab",
+            { active: activeTab() === 1, disabled: !step1Complete() },
+          ]}
           onClick={() => step1Complete() && setActiveTab(1)}
         >
           构建你的卡组
         </div>
         <div
-          class={`tab ${activeTab() === 2 ? "active" : ""} ${
-            !step2Complete() ? "disabled" : ""
-          }`}
+          class={[
+            "tab",
+            { active: activeTab() === 2, disabled: !step2Complete() },
+          ]}
           onClick={() => step2Complete() && setActiveTab(2)}
         >
           开始游戏！
@@ -270,7 +276,7 @@ define card {
       {/* 选项卡内容 */}
       <div class="content">
         {/* 步骤1：Mod代码编辑器 */}
-        <div class={`tab-content ${activeTab() === 0 ? "active" : ""}`}>
+        <div class={["tab-content", { active: activeTab() === 0 }]}>
           <MonacoEditor code={code()} onCodeChange={setCode} />
           <div class="button-container">
             <button onClick={loadMod}>继续</button>
@@ -278,7 +284,7 @@ define card {
         </div>
 
         {/* 步骤2：卡组构建器 */}
-        <div class={`tab-content ${activeTab() === 1 ? "active" : ""}`}>
+        <div class={["tab-content", { active: activeTab() === 1 }]}>
           {" "}
           <div class="deck-buttons">
             <button onClick={() => setDeck1(deck0())}>复制：先手→后手</button>
@@ -375,10 +381,10 @@ define card {
         </div>
 
         {/* 步骤3：游戏界面 */}
-        <div class={`tab-content ${activeTab() === 2 ? "active" : ""}`}>
+        <div class={["tab-content", { active: activeTab() === 2 }]}>
           <div class="game-container">
-            <Dynamic component={chessboard0()} />
-            <Dynamic component={chessboard1()} />
+            <Chessboard0 />
+            <Chessboard1 />
           </div>
         </div>
       </div>

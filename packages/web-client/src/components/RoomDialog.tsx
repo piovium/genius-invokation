@@ -13,16 +13,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import { paths } from "../router";
 import {
   createSignal,
-  createResource,
   Show,
+  Errored,
+  Loading,
   For,
   createEffect,
-  onCleanup,
-  JSX,
-  splitProps,
+  omit,
+  createMemo,
 } from "solid-js";
+import type { JSX } from "@solidjs/web";
 import { makePersisted } from "@solid-primitives/storage";
 import axios, { AxiosError } from "axios";
 import { ToggleSwitch } from "./ToggleSwitch";
@@ -38,11 +40,7 @@ function SelectableDeckInfo(
   props: DeckInfoProps & Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "id">,
 ) {
   const { assetsManager } = useI18n();
-  const [deckInfo, inputProps] = splitProps(props, [
-    "characters",
-    "name",
-    "id",
-  ]);
+  const inputProps = omit(props, "characters", "name", "id");
   return (
     <label class="relative group cursor-pointer min-w-15 w-full">
       <input
@@ -54,7 +52,7 @@ function SelectableDeckInfo(
       />
       <div class="pl-10 pr-4 flex flex-row">
         <div class="flex flex-row items-center gap-1">
-          <For each={deckInfo.characters}>
+          <For each={props.characters}>
             {(id) => (
               <img
                 class="h-12 w-12 b-2 b-yellow-100 rounded-full"
@@ -67,7 +65,7 @@ function SelectableDeckInfo(
         </div>
       </div>
       <div class="pl-8 pb-1 text-yellow-800 peer-checked:text-yellow-100 transition-colors">
-        {deckInfo.name}
+        {props.name}
       </div>
       <div class="absolute bottom-7 left-0 hidden peer-checked:flex text-6 line-height-6 w-8 h-8  items-center justify-center text-red bg-white b-yellow-800 b-2 rounded-full">
         &#10003;
@@ -160,10 +158,9 @@ export function RoomDialog(props: RoomDialogProps) {
     createSignal<string | null>(null),
     { name: "room-profile" },
   );
-  const [profiles] = createResource(() =>
-    axios.get<ProfileList>("profiles").then(({ data }) => data),
-  );
-  const [profile, setProfile] = createSignal<ProfileSummary>();
+  const [selectedProfile, setSelectedProfile] = createSignal<ProfileSummary>();
+  const profile = () =>
+    props.joiningRoomInfo?.config.profile ?? selectedProfile();
   const [timeConfig, setTimeConfig] = createSignal(TIME_CONFIGS[1]);
   const [isPublic, setIsPublic] = createSignal(true);
   const [watchable, setWatchable] = createSignal(true);
@@ -172,31 +169,6 @@ export function RoomDialog(props: RoomDialogProps) {
   const [loadingDecks, setLoadingDecks] = createSignal(true);
   const [selectedDeck, setSelectedDeck] = createSignal<number | null>(null);
   const [entering, setEntering] = createSignal(false);
-
-  createEffect(() => {
-    const list = profiles();
-    if (props.joiningRoomInfo) {
-      setProfile(props.joiningRoomInfo.config.profile);
-    } else {
-      const saved = savedProfile();
-      if (saved && setProfileById(saved)) {
-        void 0;
-      } else if (list) {
-        setProfileById(list.defaultProfileId);
-      }
-    }
-  });
-  const setProfileById = (id: string) => {
-    const list = profiles();
-    if (list) {
-      const p = list.profiles.find((p) => p.id === id);
-      if (p) {
-        setProfile(p);
-        return true;
-      }
-    }
-    return false;
-  };
 
   const updateAvailableDecks = async (
     profileId: string,
@@ -245,14 +217,16 @@ export function RoomDialog(props: RoomDialogProps) {
     setLoadingDecks(false);
   };
 
-  createEffect(() => {
-    const profileId = profile()?.id;
-    if (profileId) {
-      const controller = new AbortController();
-      onCleanup(() => controller.abort());
-      updateAvailableDecks(profileId, controller.signal);
-    }
-  });
+  createEffect(
+    () => [profile()?.id, status(), guestDecks().slice()] as const,
+    ([profileId]) => {
+      if (profileId) {
+        const controller = new AbortController();
+        void updateAvailableDecks(profileId, controller.signal);
+        return () => controller.abort();
+      }
+    },
+  );
 
   const enterRoom = async () => {
     setEntering(true);
@@ -307,7 +281,7 @@ export function RoomDialog(props: RoomDialogProps) {
         setGuestInfo((info) => info && { ...info, id: response.playerId });
       }
       const roomCode = roomIdToCode(roomId);
-      navigate(`/rooms/${roomCode}?player=${playerId}&action=1`);
+      navigate(paths.rooms(roomCode, { player: playerId, action: 1 }));
     } catch (e) {
       if (e instanceof Error) {
         alert(getErrorMessage(e));
@@ -326,33 +300,42 @@ export function RoomDialog(props: RoomDialogProps) {
       <div class="flex flex-col md:min-h-full md:h-min w-full gap-5">
         <h3 class="flex-shrink-0 text-xl font-bold">{t("roomConfig")}</h3>
         <div
-          class="flex-grow min-h-0 flex flex-col md:flex-row gap-4 data-[disabled=true]:cursor-not-allowed mb-[calc(4.5rem+var(--root-padding-bottom))] md:mb-0"
+          class="flex-grow min-h-0 flex flex-col md:flex-row gap-4 data-[disabled]:cursor-not-allowed mb-[calc(4.5rem+var(--root-padding-bottom))] md:mb-0"
           data-disabled={!editable()}
         >
           <div class="flex flex-col w-full md:w-130" data-editable={editable()}>
             <div class="mb-3 flex flex-row gap-4 items-center">
               <h4 class="text-lg">{t("roomProfile")}</h4>
-              <select
-                class="disabled:pointer-events-none appearance-none"
-                value={profile()?.id}
-                onChange={(e) => setProfileById(e.target.value)}
-                disabled={!editable()}
+              <Show
+                when={props.joiningRoomInfo?.config.profile}
+                fallback={
+                  <Errored
+                    fallback={(err) =>
+                      t("loadFailed", { message: getErrorMessage(err()) })
+                    }
+                  >
+                    <Loading fallback={t("loading")}>
+                      <ProfileSelect
+                        savedId={savedProfile()}
+                        selected={selectedProfile()}
+                        onSelect={setSelectedProfile}
+                      />
+                    </Loading>
+                  </Errored>
+                }
               >
-                <For
-                  each={
-                    props.joiningRoomInfo
-                      ? [props.joiningRoomInfo.config.profile]
-                      : (profiles()?.profiles ?? [])
-                  }
-                >
-                  {(profile) => (
-                    <option value={profile.id}>{profile.name}</option>
-                  )}
-                </For>
-              </select>
+                {(fixed) => (
+                  <select
+                    disabled
+                    class="disabled:pointer-events-none appearance-none"
+                  >
+                    <option>{fixed().name}</option>
+                  </select>
+                )}
+              </Show>
             </div>
             <h4 class="text-lg mb-3">{t("thinkingTime")}</h4>
-            <div class="w-full grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] md:grid-cols-3 gap-2 mb-3 data-[disabled=true]:pointer-events-none">
+            <div class="w-full grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] md:grid-cols-3 gap-2 mb-3 data-[disabled]:pointer-events-none">
               <For
                 each={
                   props.joiningRoomInfo
@@ -362,24 +345,24 @@ export function RoomDialog(props: RoomDialogProps) {
               >
                 {(config) => (
                   <div
-                    class="b-1 b-gray-400 rounded-lg p-2 md:p-12px group data-[active=true]:b-slate-500 data-[active=true]:b-2 md:data-[active=true]:p-11px cursor-pointer data-[active=true]:cursor-default select-none transition-colors"
+                    class="b-1 b-gray-400 rounded-lg p-2 md:p-12px group data-[active]:b-slate-500 data-[active]:b-2 md:data-[active]:p-11px cursor-pointer data-[active]:cursor-default select-none transition-colors"
                     data-active={
                       !!props.joiningRoomInfo || config === timeConfig()
                     }
                     onClick={() => setTimeConfig(config)}
                   >
-                    <h5 class="font-bold text-gray-400 group-data-[active=true]:text-black transition-colors">
+                    <h5 class="font-bold text-gray-400 group-data-[active]:text-black transition-colors">
                       {config.nameKey
                         ? t(config.nameKey)
                         : `${config.roundTotalActionTime} + ${config.actionTime}`}
                     </h5>
-                    <h5 class="text-gray-400 group-data-[active=true]:text-gray-600 transition-colors md:mb-1 font-size-80%">
+                    <h5 class="text-gray-400 group-data-[active]:text-gray-600 transition-colors md:mb-1 font-size-80%">
                       {config.estimationTime &&
                         t("estimatedEachRound", {
                           minutes: config.estimationTime,
                         })}
                     </h5>
-                    <ul class="hidden md:block pl-3 list-disc text-gray-400 font-size-80% text-sm group-data-[active=true]:text-slate-500 transition-colors">
+                    <ul class="hidden md:block pl-3 list-disc text-gray-400 font-size-80% text-sm group-data-[active]:text-slate-500 transition-colors">
                       <li>
                         {t("initTotalActionTime", {
                           seconds: config.initTotalActionTime,
@@ -463,7 +446,7 @@ export function RoomDialog(props: RoomDialogProps) {
               </For>
             </ul>
             <div
-              class="absolute inset-0 opacity-0 bg-white text-gray-500 pointer-events-none data-[loading=true]:opacity-80 transition flex items-center justify-center"
+              class="absolute inset-0 opacity-0 bg-white text-gray-500 pointer-events-none data-[loading]:opacity-80 transition flex items-center justify-center"
               data-loading={loadingDecks()}
             >
               {t("loadingEllipsis")}
@@ -502,5 +485,45 @@ export function RoomDialog(props: RoomDialogProps) {
         <i class="inline-block h-full w-full i-mdi-window-close" />
       </button>
     </dialog>
+  );
+}
+
+function ProfileSelect(props: {
+  savedId: string | null;
+  selected?: ProfileSummary;
+  onSelect: (profile: ProfileSummary) => void;
+}) {
+  const list = createMemo(() =>
+    axios.get<ProfileList>("profiles").then(({ data }) => data),
+  );
+  createEffect(
+    () => {
+      const { profiles, defaultProfileId } = list();
+      return (
+        profiles.find((p) => p.id === props.savedId) ??
+        profiles.find((p) => p.id === defaultProfileId)
+      );
+    },
+    (profile) => {
+      if (profile) {
+        props.onSelect(profile);
+      }
+    },
+  );
+  return (
+    <select
+      class="appearance-none"
+      value={props.selected?.id}
+      onChange={(e) => {
+        const selected = list().profiles[e.currentTarget.selectedIndex];
+        if (selected) {
+          props.onSelect(selected);
+        }
+      }}
+    >
+      <For each={list().profiles}>
+        {(p) => <option value={p.id}>{p.name}</option>}
+      </For>
+    </select>
   );
 }

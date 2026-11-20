@@ -39,7 +39,7 @@ export function TuningArea(props: TuningAreaProps) {
         opacity-0 data-[status=shown]:opacity-75 data-[status=shown-hovering]:opacity-100
         invisible data-[status^=shown]:visible tuning-area`}
       data-status={status()}
-      bool:data-card-hovering={props.cardHovering}
+      data-card-hovering={props.cardHovering}
       style={cssPropertyOfTransform(props.transform)}
     >
       <TuningIcon class="w-8 h-8 m-3" />

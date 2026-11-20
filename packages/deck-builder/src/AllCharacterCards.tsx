@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { createSignal } from "solid-js";
+import { createSignal, For } from "solid-js";
 import { PoolCard } from "./Card";
 import type { AllCardsProps } from "./AllCards";
 import {
@@ -22,7 +22,6 @@ import {
   WEAPON_TAG_IMG_NAME_MAP,
 } from "./TagIcon";
 import { FilterBar } from "./FilterBar";
-import { Key } from "@solid-primitives/keyed";
 import type { DeckDataCharacterInfo } from "@gi-tcg/assets-manager";
 import { useDeckBuilderContext } from "./DeckBuilder";
 
@@ -123,12 +122,15 @@ export function AllCharacterCards(props: AllCardsProps) {
         ]}
       />
       <ul class="flex-grow overflow-auto grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-2 pb-2 @3xl:pb-0 [scrollbar-width:thin]">
-        <Key each={props.characters.values().toArray()} by="id">
+        <For
+          each={props.characters.values().toArray()}
+          keyed={(item) => item.id}
+        >
           {(ch) => (
             <li
               class="hidden data-[shown]-block relative cursor-pointer data-[disabled]:cursor-not-allowed data-[disabled]:opacity-60 data-[disabled]:filter-none hover:brightness-110 transition-all"
-              bool:data-shown={shown(ch())}
-              bool:data-disabled={fullCharacters() && !selected(ch().id)}
+              data-shown={shown(ch())}
+              data-disabled={fullCharacters() && !selected(ch().id)}
               onClick={() => toggleCharacter(ch().id)}
             >
               <PoolCard
@@ -138,7 +140,7 @@ export function AllCharacterCards(props: AllCardsProps) {
               />
             </li>
           )}
-        </Key>
+        </For>
       </ul>
     </div>
   );

@@ -19,7 +19,7 @@ import "./index";
 
 import { makePersisted } from "@solid-primitives/storage";
 import { createMemo, createSignal } from "solid-js";
-import { render } from "solid-js/web";
+import { render } from "@solidjs/web";
 
 import getData from "@gi-tcg/data";
 import {
@@ -45,7 +45,6 @@ function downloadState(serialized: string) {
 
 function App() {
   const [persistedState, setPersistedState] = makePersisted(
-    // eslint-disable-next-line solid/reactivity
     createSignal<string | null>(null),
     {
       storage: localStorage,

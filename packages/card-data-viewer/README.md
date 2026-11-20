@@ -11,7 +11,7 @@ const App = () => {
         // assetsManager?: Accessor<AssetsManager>;
         // locale?: Accessor<Locale>;
     });
-  onMount(() => {
+  onSettled(() => {
     showState(
       "character",
       /* character state data */,

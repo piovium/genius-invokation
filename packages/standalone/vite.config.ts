@@ -15,7 +15,7 @@
 
 import { defineConfig } from "vite";
 import gts from "@gi-tcg/unplugin-gts/rolldown";
-import solid from "vite-plugin-solid";
+import solid from "@solidjs/vite-plugin";
 import babel from "@rollup/plugin-babel";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 

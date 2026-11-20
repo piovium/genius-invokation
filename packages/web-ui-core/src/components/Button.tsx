@@ -14,27 +14,28 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { children, splitProps, type ComponentProps, type JSX } from "solid-js";
+import { children, omit } from "solid-js";
+import type { ComponentProps, JSX } from "@solidjs/web";
 import ButtonNormal from "../svg/ButtonNormal.svg?fb";
 import ButtonHover from "../svg/ButtonHover.svg?fb";
 import ButtonActive from "../svg/ButtonActive.svg?fb";
 import { AutoResizeText } from "./AutoResizeText";
 
 export interface ButtonProps extends ComponentProps<"button"> {
-  class?: string;
   children: JSX.Element;
   onClick: (e: MouseEvent) => void;
 }
 
 export function Button(props: ButtonProps) {
-  const [local, rest] = splitProps(props, ["class", "children", "onClick"]);
-  const ch = children(() => local.children);
+  const rest = omit(props, "class", "children", "onClick");
+  const ch = children(() => props.children);
   return (
     <button
-      class={`w-40 h-10 grid children:grid-area-[1/1] group/confirm_btn bg-transparent ${
-        local.class ?? ""
-      }`}
-      onClick={(e) => local.onClick(e)}
+      class={[
+        "w-40 h-10 grid children:grid-area-[1/1] group/confirm_btn bg-transparent",
+        props.class,
+      ]}
+      onClick={(e) => props.onClick(e)}
       {...rest}
     >
       <ButtonNormal />
