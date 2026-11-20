@@ -16,7 +16,7 @@
 
 import { DiceType } from "@gi-tcg/typings";
 import { Show, omit, type Component } from "solid-js";
-import { type ComponentProps, Dynamic } from "@solidjs/web";
+import { type ComponentProps, dynamic } from "@solidjs/web";
 import { StrokedText } from "./StrokedText";
 
 import DiceCryoS from "../svg/DiceCryoS.svg?fb";
@@ -61,7 +61,10 @@ export const DICE_COLOR: Record<number, string> = {
   // [DiceType.Legend]: "",
 };
 
-export const DICE_COMPONENT_MAP: Record<number, Component> = {
+export const DICE_COMPONENT_MAP: Record<
+  number,
+  Component<Pick<ComponentProps<"div">, "class" | "style">>
+> = {
   // [DiceType.Void]: ,
   [DiceType.Cryo]: DiceCryoS,
   [DiceType.Hydro]: DiceHydroS,
@@ -76,7 +79,10 @@ export const DICE_COMPONENT_MAP: Record<number, Component> = {
   // [DiceType.Legend]: ,
 };
 
-export const COST_COMPONENT_MAP: Record<number, Component> = {
+export const COST_COMPONENT_MAP: Record<
+  number,
+  Component<Pick<ComponentProps<"div">, "class" | "style">>
+> = {
   [DiceType.Void]: DiceVoid,
   [DiceType.Cryo]: DiceCryo,
   [DiceType.Hydro]: DiceHydro,
@@ -126,10 +132,10 @@ export interface DiceContentProps {
 
 /** You can only use this component within a **grid** container. Otherwise, please use ```<Dice/>``` instead. */
 export function DiceContent(props: DiceContentProps) {
+  const DiceIcon = dynamic(() => DICE_COMPONENT_MAP[props.type]);
   return (
     <>
-      <Dynamic<Component<ComponentProps<"div">>>
-        component={DICE_COMPONENT_MAP[props.type]}
+      <DiceIcon
         class={props.class ?? "w-6 h-6"}
         style={{ "grid-column": props.col, "grid-row": props.row }}
       />
@@ -151,12 +157,10 @@ export interface CostProps {
 }
 
 export function Cost(props: CostProps) {
+  const CostIcon = dynamic(() => COST_COMPONENT_MAP[props.type]);
   return (
     <div class={["grid children:grid-area-[1/1]", props.class]}>
-      <Dynamic<Component<ComponentProps<"div">>>
-        component={COST_COMPONENT_MAP[props.type]}
-        class="w-full h-full"
-      />
+      <CostIcon class="w-full h-full" />
       <Show when={props.type !== DiceType.Legend}>
         <StrokedText
           class={`place-self-center
@@ -179,10 +183,6 @@ export interface InlineDiceProps {
 }
 
 export function InlineDice(props: InlineDiceProps) {
-  return (
-    <Dynamic<Component<ComponentProps<"div">>>
-      component={DICE_COMPONENT_MAP[props.type]}
-      class={props.class}
-    />
-  );
+  const DiceIcon = dynamic(() => DICE_COMPONENT_MAP[props.type]);
+  return <DiceIcon class={props.class} />;
 }

@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  isPending,
   createContext,
   omit,
   useContext,
@@ -24,7 +25,6 @@ import {
   Match,
   createUniqueId,
 } from "solid-js";
-import { createRequest } from "@gi-tcg/utils/solid";
 import type { JSX } from "@solidjs/web";
 import { AllCards } from "./AllCards";
 import { CurrentDeck } from "./CurrentDeck";
@@ -74,8 +74,13 @@ export function DeckBuilder(props: DeckBuilderProps) {
   const locale = createMemo(() => props.locale ?? "zh-CN");
   const t = createTranslator(() => translations[locale()], resolveTemplate);
 
-  const deckDataRequest = createRequest(() => assetsManager().getDeckData());
-  const deckData = deckDataRequest.value;
+  const deckData = createMemo(
+    () =>
+      assetsManager()
+        .getDeckData()
+        .catch(() => null),
+    { loadingValue: undefined },
+  );
 
   const { CardDataViewer, showCard, showCharacter, hide } =
     createCardDataViewer({
@@ -151,10 +156,12 @@ export function DeckBuilder(props: DeckBuilderProps) {
           onClick={() => hide()}
         >
           <Switch>
-            <Match when={deckDataRequest.loading()}>
+            <Match
+              when={typeof deckData() === "undefined" || isPending(deckData)}
+            >
               <div class="flex-grow">{t("loadingCards")}</div>
             </Match>
-            <Match when={deckDataRequest.error()}>
+            <Match when={deckData() === null}>
               <div class="flex-grow">{t("loadCardsFailed")}</div>
             </Match>
             <Match when={deckData()}>

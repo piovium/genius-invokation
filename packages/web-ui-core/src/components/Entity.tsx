@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { createMemo, Match, Show, Switch, type Component } from "solid-js";
-import { type ComponentProps, Dynamic } from "@solidjs/web";
+import { type ComponentProps, dynamic } from "@solidjs/web";
 import { cssPropertyOfTransform } from "../ui_state";
 import type { EntityInfo } from "./Chessboard";
 import { Image } from "./Image";
@@ -47,7 +47,10 @@ const EntityTopHint = (props: { cardDefinitionId: number; value: number }) => {
         .catch(() => void 0),
     { loadingValue: void 0 },
   );
-  const ICON_MAP: Record<string, Component> = {
+  const ICON_MAP: Record<
+    string,
+    Component<Pick<ComponentProps<"div">, "class">>
+  > = {
     GCG_TOKEN_ICON_CLOCK: ClockIcon,
     GCG_TOKEN_ICON_HOURGLASS: HourglassIcon,
     GCG_TOKEN_ICON_BARRIER_SHIELD: BarrierIcon,
@@ -57,13 +60,11 @@ const EntityTopHint = (props: { cardDefinitionId: number; value: number }) => {
       return ICON_MAP[(data() as EntityRawData).shownIcon as string];
     }
   });
+  const HintIcon = dynamic(hintComponent);
   return (
     <Show when={hintComponent()}>
       <div class="absolute w-7 h-7 top--2.5 right--3 grid children:grid-area-[1/1] z-3">
-        <Dynamic<Component<ComponentProps<"div">>>
-          component={hintComponent()}
-          class="w-full h-full"
-        />
+        <HintIcon class="w-full h-full" />
         <StrokedText
           class="place-self-center text-white font-bold"
           strokeWidth={2}

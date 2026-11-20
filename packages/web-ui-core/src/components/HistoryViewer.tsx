@@ -16,6 +16,8 @@
 
 import { DamageType, DiceType, Reaction } from "@gi-tcg/typings";
 import {
+  Errored,
+  Loading,
   createSignal,
   createContext,
   useContext,
@@ -26,7 +28,6 @@ import {
   createMemo,
   createEffect,
 } from "solid-js";
-import { createRequest } from "@gi-tcg/utils/solid";
 import type { JSX } from "@solidjs/web";
 import { useUiContext } from "../hooks/context";
 import type {
@@ -1062,29 +1063,21 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
 
 const CardDescriptionPart = (props: { cardDefinitionId: number }) => {
   const { assetsManager, t } = useUiContext();
-  const dataRequest = createRequest(() =>
-    assetsManager().getData(props.cardDefinitionId),
+  const data = createMemo(
+    () =>
+      assetsManager().getData(props.cardDefinitionId) as Promise<EntityRawData>,
   );
-  const data = dataRequest.value;
   return (
-    <Switch>
-      <Match when={props.cardDefinitionId === 0}>
-        <p>???</p>
-      </Match>
-      <Match when={dataRequest.loading()}>
-        <p>{t("history.loading")}</p>
-      </Match>
-      <Match when={dataRequest.error()}>
-        <p>{t("history.loadFailed")}</p>
-      </Match>
-      <Match when={data()}>
-        {(data) => (
-          <p class="whitespace-pre-wrap">
-            {(data() as EntityRawData).description}
-          </p>
-        )}
-      </Match>
-    </Switch>
+    <Show when={props.cardDefinitionId !== 0} fallback={<p>???</p>}>
+      <Errored fallback={<p>{t("history.loadFailed")}</p>}>
+        <Loading
+          on={props.cardDefinitionId}
+          fallback={<p>{t("history.loading")}</p>}
+        >
+          <p class="whitespace-pre-wrap">{data().description}</p>
+        </Loading>
+      </Errored>
+    </Show>
   );
 };
 

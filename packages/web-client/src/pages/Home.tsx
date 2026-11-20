@@ -15,6 +15,11 @@
 
 import { paths } from "../router";
 import {
+  affects,
+  refresh,
+  Errored,
+  Loading,
+  isPending,
   Show,
   Switch,
   Match,
@@ -23,7 +28,6 @@ import {
   onSettled,
   createMemo,
 } from "solid-js";
-import { createRequest } from "@gi-tcg/utils/solid";
 import { Layout } from "../layouts/Layout";
 import { useNavigate } from "@solidjs/router";
 import axios, { AxiosError } from "axios";
@@ -58,13 +62,16 @@ export default function Home() {
         .catch(() => null),
     { loadingValue: null },
   );
-  const allRoomsRequest = createRequest(() =>
+  const rooms = createMemo(() =>
     axios.get<RoomInfo[]>("rooms").then((r) => r.data),
   );
   const allRooms = createMemo(() =>
-    allRoomsRequest.value()?.filter((room) => room.id !== currentRoom()?.id),
+    rooms().filter((room) => room.id !== currentRoom()?.id),
   );
-  const refreshAllRooms = allRoomsRequest.refetch;
+  const refreshAllRooms = () => {
+    affects(rooms);
+    void refresh(rooms);
+  };
   const ROOM_REFRESH_INTERVAL_MS = 10000;
   onSettled(() => {
     const interval = window.setInterval(() => {
@@ -263,25 +270,30 @@ export default function Home() {
                     </button>
                   </h4>
                   <ul class="grid scrollbar-thin-hover grid w-full grid-cols-1 gap-2 md:grid-cols-[repeat(auto-fill,minmax(360px,1fr))] md:gap-3 md:overflow-y-auto">
-                    <Switch>
-                      <Match when={allRoomsRequest.error()}>
+                    <Errored
+                      fallback={(error) => (
                         <div class="text-red-500">
                           {t("roomInfoLoadFailed", {
-                            message: getErrorMessage(allRoomsRequest.error()),
+                            message: getErrorMessage(error()),
                           })}
                         </div>
-                      </Match>
-                      {/* show loading text when no rooms and loading/refetching */}
-                      <Match
-                        when={allRoomsRequest.loading() && !allRooms()?.length}
+                      )}
+                    >
+                      <Loading
+                        fallback={
+                          <div class="text-gray-500">
+                            {t("roomInfoLoading")}
+                          </div>
+                        }
                       >
-                        <div class="text-gray-500">{t("roomInfoLoading")}</div>
-                      </Match>
-                      <Match when={true}>
                         <For
                           each={allRooms()}
                           fallback={
-                            <div class="text-gray-500">{t("noGames")}</div>
+                            <div class="text-gray-500">
+                              {isPending(rooms)
+                                ? t("roomInfoLoading")
+                                : t("noGames")}
+                            </div>
                           }
                         >
                           {(roomInfo) => (
@@ -290,8 +302,8 @@ export default function Home() {
                             </li>
                           )}
                         </For>
-                      </Match>
-                    </Switch>
+                      </Loading>
+                    </Errored>
                   </ul>
                 </div>
               </div>

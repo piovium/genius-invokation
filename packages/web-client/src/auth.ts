@@ -13,8 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Accessor } from "solid-js";
-import { createRequest } from "@gi-tcg/utils/solid";
+import { affects, createMemo, refresh, isPending, Accessor } from "solid-js";
 import { GuestInfo, useGuestInfo } from "./guest";
 import axios from "axios";
 import { EMPTY_IMAGE, getGithubAvatarUrl, getRandomAvatar } from "./utils";
@@ -47,7 +46,7 @@ export interface UpdateInfoPatch {
 export interface Auth {
   readonly status: Accessor<AuthStatus>;
   readonly loading: Accessor<boolean>;
-  readonly error: Accessor<any>;
+  readonly error: Accessor<unknown>;
   readonly refresh: () => Promise<void>;
   readonly loginGuest: (name: string) => void;
   readonly setGuestId: (id: string) => void;
@@ -56,18 +55,24 @@ export interface Auth {
   readonly logout: () => Promise<void>;
 }
 
-const userRequest = createRequest<UserInfo | NotLogin>(() =>
-  axios.get<UserInfo>("users/me").then(({ data }) =>
-    data
-      ? {
-          ...data,
-          type: "user",
-          name: data.name ?? data.login,
-        }
-      : NOT_LOGIN,
-  ),
+// Auth is also read by event handlers and the header, including before the first response.
+const userInfo = createMemo<
+  UserInfo | NotLogin | { type: "loading" } | { type: "error"; error: unknown }
+>(
+  () =>
+    axios.get<UserInfo | null>("users/me").then(
+      ({ data }) =>
+        data
+          ? { ...data, type: "user" as const, name: data.name ?? data.login }
+          : NOT_LOGIN,
+      (error: unknown) => ({ type: "error" as const, error }),
+    ),
+  { loadingValue: { type: "loading" as const } },
 );
-const user = () => userRequest.value() ?? NOT_LOGIN;
+const refreshUser = async () => {
+  affects(userInfo);
+  await refresh(userInfo);
+};
 
 const updateUserInfo = async (newInfo: Partial<UserInfo>) => {
   await axios.patch("users/me", newInfo);
@@ -75,13 +80,21 @@ const updateUserInfo = async (newInfo: Partial<UserInfo>) => {
 
 export const useAuth = (): Auth => {
   const [guestInfo, setGuestInfo] = useGuestInfo();
+  const session = () => guestInfo() ?? userInfo();
+  const status = (): AuthStatus => {
+    const current = session();
+    return current.type === "user" || current.type === "guest"
+      ? current
+      : NOT_LOGIN;
+  };
   return {
-    status: () => guestInfo() ?? user(),
-    loading: () => guestInfo() === null && userRequest.loading(),
-    error: () => (guestInfo() === null ? userRequest.error() : void 0),
-    refresh: async () => {
-      await userRequest.refetch();
+    status,
+    loading: () => session().type === "loading" || isPending(session),
+    error: () => {
+      const current = session();
+      return current.type === "error" ? current.error : undefined;
     },
+    refresh: refreshUser,
     loginGuest: async (name: string) => {
       setGuestInfo({
         type: "guest",
@@ -92,14 +105,12 @@ export const useAuth = (): Auth => {
       });
     },
     avatarUrl: () => {
-      const guest = guestInfo();
-      if (guest) {
-        return guest.avatarUrl ?? getRandomAvatar(guest.name);
-      } else {
-        const u = user();
-        if (u.id) {
-          return getGithubAvatarUrl(u.id);
-        }
+      const current = status();
+      if (current.type === "guest") {
+        return current.avatarUrl ?? getRandomAvatar(current.name);
+      }
+      if (current.type === "user") {
+        return getGithubAvatarUrl(current.id);
       }
       return EMPTY_IMAGE;
     },
@@ -118,12 +129,12 @@ export const useAuth = (): Auth => {
         setGuestInfo({ ...guest, ...patch });
       } else {
         await updateUserInfo(patch);
-        await userRequest.refetch();
+        await refreshUser();
       }
     },
     logout: async () => {
       localStorage.removeItem("accessToken");
-      await userRequest.refetch();
+      await refreshUser();
       setGuestInfo(null);
     },
   };

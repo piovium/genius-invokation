@@ -14,10 +14,6 @@
       "development": ["./src/index.ts", "./dist/index.js"],
       "import": "./dist/index.js"
     },
-    "./solid": {
-      "types": "./dist/solid.d.ts",
-      "import": "./dist/solid.js"
-    },
     "./reset.css": "./src/reset.css"
   },
   "publishConfig": {
@@ -25,10 +21,6 @@
       ".": {
         "types": "./dist/index.d.ts",
         "import": "./dist/index.js"
-      },
-      "./solid": {
-        "types": "./dist/solid.d.ts",
-        "import": "./dist/solid.js"
       },
       "./reset.css": "./src/reset.css"
     }
@@ -40,14 +32,7 @@
   "scripts": {
     "build": "tsdown"
   },
-  "peerDependencies": {
-    "solid-js": "catalog:"
-  },
-  "peerDependenciesMeta": {
-    "solid-js": { "optional": true }
-  },
   "devDependencies": {
-    "solid-js": "catalog:",
     "@gi-tcg/typings": "workspace:*"
   },
   "dependencies": {

@@ -35,7 +35,6 @@ import {
   Component,
   createUniqueId,
 } from "solid-js";
-import { createRequest } from "@gi-tcg/utils/solid";
 import axios, { AxiosError } from "axios";
 import "@gi-tcg/web-ui-core/style.css";
 import EventSourceStream from "@server-sent-stream/web";
@@ -46,9 +45,13 @@ import {
   RpcRequest,
   RpcResponse,
 } from "@gi-tcg/typings";
-import { Client, createClient, WebUiPlayerIO } from "@gi-tcg/web-ui-core";
+import {
+  type ClientChessboardProps,
+  createClient,
+  WebUiPlayerIO,
+} from "@gi-tcg/web-ui-core";
 import { useMobile } from "../App";
-import { Dynamic } from "@solidjs/web";
+import { dynamic } from "@solidjs/web";
 import { MobileChessboardLayout } from "../layouts/MobileChessboardLayout";
 import type { CancellablePlayerIO } from "@gi-tcg/core";
 import { useAuth } from "../auth";
@@ -216,7 +219,8 @@ function renderRoomSession({
   const [initialized, setInitialized] = createSignal<InitializedPayload>();
   const [loading, setLoading] = createSignal(true);
   const [failed, setFailed] = createSignal<null | string>(null);
-  const [chessboard, setChessboard] = createSignal<Component>();
+  const [chessboard, setChessboard] =
+    createSignal<Component<ClientChessboardProps>>();
 
   // Enable opp chessboard & spectator mode
   const [observerMode, setObserverMode] = createSignal(false);
@@ -356,10 +360,14 @@ function renderRoomSession({
     }
   };
 
-  const roomInfoRequest = createRequest(() =>
-    axios.get<{ status: string }>(`rooms/${id}`).then((res) => res.data),
+  const roomInfo = createMemo(
+    () =>
+      axios
+        .get<{ status: string }>(`rooms/${id}`)
+        .then((res) => res.data)
+        .catch(() => null),
+    { loadingValue: undefined },
   );
-  const roomInfo = roomInfoRequest.value;
 
   const [fetchMyNotification, abortMyNotification] = createReconnectSse(
     `rooms/${id}/players/${playerId}/notification`,
@@ -505,10 +513,12 @@ function renderRoomSession({
     };
   });
 
+  const RoomLayout = dynamic(() =>
+    mobile() && !!chessboard() ? MobileChessboardLayout : Layout,
+  );
+  const Chessboard = dynamic(chessboard);
   return (
-    <Dynamic
-      component={mobile() && !!chessboard() ? MobileChessboardLayout : Layout}
-    >
+    <RoomLayout>
       <div
         class="p-0 data-[mobile]:h-100dvh data-[mobile]:overflow-clip container mx-auto flex flex-col group max-w-[calc((100dvh-13.5rem)*160/81)]"
         data-mobile={!!(mobile() && chessboard())}
@@ -586,7 +596,7 @@ function renderRoomSession({
           </button>
         </div>
         <Switch>
-          <Match when={loading() || roomInfoRequest.loading()}>
+          <Match when={loading() || typeof roomInfo() === "undefined"}>
             <div class="mb-3 alert alert-outline-info">{t("roomLoading")}</div>
           </Match>
           <Match when={roomInfo()}>
@@ -620,8 +630,7 @@ function renderRoomSession({
         <Show when={initialized()}>
           {(payload) => (
             <div class="relative" ref={chessboardContainer}>
-              <Dynamic<Client[1]>
-                component={chessboard()}
+              <Chessboard
                 rotation={mobile() ? 90 : 0}
                 autoHeight={!mobile()}
                 class={mobile() && "mobile-chessboard h-100dvh w-100dvw"}
@@ -660,6 +669,6 @@ function renderRoomSession({
           )}
         </Show>
       </div>
-    </Dynamic>
+    </RoomLayout>
   );
 }

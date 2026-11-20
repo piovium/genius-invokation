@@ -23,7 +23,7 @@ import DiceCountYellow from "../svg/DiceCountYellow.svg?fb";
 import DiceCountBlue from "../svg/DiceCountBlue.svg?fb";
 import DiceLegend from "../svg/DiceLegend.svg?fb";
 import DiceLegendBg from "../svg/DiceLegendBg.svg?fb";
-import { Dynamic } from "@solidjs/web";
+import { dynamic } from "@solidjs/web";
 
 export interface PlayerInfoProps {
   class?: string;
@@ -47,6 +47,9 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
     [PbPlayerStatus.SELECTING_CARDS]: t("player.selectingCards"),
     [PbPlayerStatus.SELECTING_OPTIONS]: t("player.selectingOptions"),
   }));
+  const DiceCount = dynamic(() =>
+    props.opp ? DiceCountBlue : DiceCountYellow,
+  );
   return (
     <div
       class={[
@@ -56,10 +59,7 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
       data-opp={props.opp}
     >
       <div class="grid place-items-center w-18 h-9 my-9 children:grid-area-[1/1] info-dice-count">
-        <Dynamic
-          component={props.opp ? DiceCountBlue : DiceCountYellow}
-          class="h-9 w-9"
-        />
+        <DiceCount class="h-9 w-9" />
         <StrokedText
           text={String(props.diceCount)}
           strokeWidth={2}

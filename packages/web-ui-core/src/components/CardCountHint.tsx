@@ -19,7 +19,7 @@ import type { CardArea, CardCountHintInfo } from "./Chessboard";
 import CardCountHintBlue from "../svg/CardCountHintBlue.svg?fb";
 import CardCountHintYellow from "../svg/CardCountHintYellow.svg?fb";
 import type { Component } from "solid-js";
-import { type ComponentProps, Dynamic } from "@solidjs/web";
+import { type ComponentProps, dynamic } from "@solidjs/web";
 import { StrokedText } from "./StrokedText";
 
 export interface CardCountHintProps extends CardCountHintInfo {
@@ -28,7 +28,10 @@ export interface CardCountHintProps extends CardCountHintInfo {
 
 export const HINT_STYLE_MAP: Record<
   CardArea,
-  { component: Component; rotate: number }
+  {
+    component: Component<Pick<ComponentProps<"div">, "class" | "style">>;
+    rotate: number;
+  }
 > = {
   myHand: { component: CardCountHintYellow, rotate: 0 },
   oppHand: { component: CardCountHintBlue, rotate: 180 },
@@ -38,14 +41,14 @@ export const HINT_STYLE_MAP: Record<
 
 export function CardCountHint(props: CardCountHintProps) {
   const hintStyle = () => HINT_STYLE_MAP[props.area];
+  const HintIcon = dynamic(() => hintStyle().component);
   return (
     <div
       class="pointer-events-none absolute left-0 top-0 h-9 w-9 hidden data-[shown]:grid isolate children:grid-area-[1/1]"
       style={cssPropertyOfTransform(props.transform)}
       data-shown={props.shown}
     >
-      <Dynamic<Component<ComponentProps<"div">>>
-        component={hintStyle().component}
+      <HintIcon
         class="w-9 h-9"
         style={{ transform: `rotate(${hintStyle().rotate}deg)` }}
       />

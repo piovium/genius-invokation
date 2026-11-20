@@ -14,8 +14,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { paths } from "../router";
-import { For, Match, Switch, Accessor } from "solid-js";
-import { createRequest } from "@gi-tcg/utils/solid";
+import {
+  affects,
+  refresh,
+  createMemo,
+  isPending,
+  For,
+  Match,
+  Switch,
+  Accessor,
+} from "solid-js";
 import { Layout } from "../layouts/Layout";
 import axios, { AxiosError } from "axios";
 import { DeckBriefInfo } from "../components/DeckBriefInfo";
@@ -40,17 +48,22 @@ interface DecksResponse {
 export interface UseDecksResult {
   readonly decks: Accessor<DecksResponse>;
   readonly loading: Accessor<boolean>;
-  readonly error: Accessor<any>;
+  readonly error: Accessor<unknown>;
   readonly refetch: () => void;
 }
 
 export function useDecks(): UseDecksResult {
   const { status } = useAuth();
   const EMPTY = { count: 0, data: [] };
-  const userDecksRequest = createRequest(() =>
-    status().type === "user"
-      ? axios.get<DecksResponse>("decks").then((res) => res.data)
-      : EMPTY,
+  const userDecks = createMemo(
+    () =>
+      status().type === "user"
+        ? axios.get<DecksResponse>("decks").then(
+            ({ data }) => ({ decks: data, error: undefined }),
+            (error: unknown) => ({ decks: EMPTY, error }),
+          )
+        : { decks: EMPTY, error: undefined },
+    { loadingValue: undefined },
   );
   const [guestDecks] = useGuestDecks();
   return {
@@ -63,15 +76,21 @@ export function useDecks(): UseDecksResult {
           count: data.length,
         };
       } else if (type === "user") {
-        return userDecksRequest.value() ?? EMPTY;
+        return userDecks()?.decks ?? EMPTY;
       } else {
         return EMPTY;
       }
     },
-    loading: () => status().type === "user" && userDecksRequest.loading(),
-    error: () => (status().type === "user" ? userDecksRequest.error() : void 0),
-    refetch: () =>
-      status().type === "user" ? userDecksRequest.refetch() : void 0,
+    loading: () =>
+      status().type === "user" &&
+      (typeof userDecks() === "undefined" || isPending(userDecks)),
+    error: () => (status().type === "user" ? userDecks()?.error : void 0),
+    refetch: () => {
+      if (status().type === "user") {
+        affects(userDecks);
+        return refresh(userDecks);
+      }
+    },
   };
 }
 

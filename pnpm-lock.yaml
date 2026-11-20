@@ -933,9 +933,6 @@ importers:
       '@gi-tcg/typings':
         specifier: workspace:*
         version: link:../typings
-      solid-js:
-        specifier: 'catalog:'
-        version: 2.0.1
 
   packages/web-client:
     dependencies:
@@ -948,9 +945,6 @@ importers:
       '@gi-tcg/typings':
         specifier: workspace:*
         version: link:../typings
-      '@gi-tcg/utils':
-        specifier: workspace:*
-        version: link:../utils
       '@gi-tcg/web-ui-core':
         specifier: workspace:*
         version: link:../web-ui-core

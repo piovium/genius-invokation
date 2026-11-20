@@ -13,7 +13,6 @@
   "dependencies": {
     "@gi-tcg/assets-manager": "workspace:*",
     "@gi-tcg/deck-builder": "workspace:*",
-    "@gi-tcg/utils": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/web-ui-core": "workspace:*",
     "@server-sent-stream/web": "^1.0.3",

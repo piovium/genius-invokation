@@ -22,7 +22,7 @@ import {
   type Component,
 } from "solid-js";
 import { CustomDataLoader } from "..";
-import { render, Dynamic } from "@solidjs/web";
+import { render, dynamic } from "@solidjs/web";
 
 import { AssetsManager } from "@gi-tcg/assets-manager";
 import { DeckBuilder } from "@gi-tcg/deck-builder";
@@ -241,6 +241,8 @@ define card {
     },
   );
 
+  const Chessboard0 = dynamic(chessboard0);
+  const Chessboard1 = dynamic(chessboard1);
   return (
     <div class="app">
       {/* 选项卡导航 */}
@@ -381,8 +383,8 @@ define card {
         {/* 步骤3：游戏界面 */}
         <div class={["tab-content", { active: activeTab() === 2 }]}>
           <div class="game-container">
-            <Dynamic component={chessboard0()} />
-            <Dynamic component={chessboard1()} />
+            <Chessboard0 />
+            <Chessboard1 />
           </div>
         </div>
       </div>

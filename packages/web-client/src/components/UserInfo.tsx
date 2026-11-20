@@ -14,8 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { paths } from "../router";
-import { For, Match, Show, Switch } from "solid-js";
-import { createRequest } from "@gi-tcg/utils/solid";
+import { createMemo, Loading, Errored, For, Show } from "solid-js";
 import axios from "axios";
 import { GameInfo } from "./GameInfo";
 import { ChessboardColor } from "./ChessboardColor";
@@ -37,10 +36,9 @@ export interface UserInfoProps {
 
 export function UserInfo(props: UserInfoProps) {
   const { t } = useI18n();
-  const gamesRequest = createRequest(() =>
+  const games = createMemo(() =>
     axios.get<{ data: any[] }>(`games/mine`).then((res) => res.data),
   );
-  const games = gamesRequest.value;
 
   let avatarSelectorEl: HTMLDialogElement | undefined;
 
@@ -124,20 +122,17 @@ export function UserInfo(props: UserInfoProps) {
           <div class="flex flex-col gap-4">
             <dt class="font-bold">{t("gameRecords")}</dt>
             <dd class="flex flex-col gap-1">
-              <Switch>
-                <Match when={props.type === "guest"}>
-                  {t("guestNoGameRecords")}
-                </Match>
-                <Match when={gamesRequest.loading()}>{t("loading")}</Match>
-                <Match when={gamesRequest.error()}>
-                  {t("loadFailed", {
-                    message: getErrorMessage(gamesRequest.error()),
-                  })}
-                </Match>
-                <Match when={!games()?.data.length}>{t("noGameRecords")}</Match>
-                <Match when={games()}>
-                  {(games) => (
-                    <For each={games().data}>
+              <Show
+                when={props.type !== "guest"}
+                fallback={t("guestNoGameRecords")}
+              >
+                <Errored
+                  fallback={(error) =>
+                    t("loadFailed", { message: getErrorMessage(error()) })
+                  }
+                >
+                  <Loading fallback={t("loading")}>
+                    <For each={games().data} fallback={t("noGameRecords")}>
                       {(data) => (
                         <GameInfo
                           gameId={data.game.id}
@@ -146,9 +141,9 @@ export function UserInfo(props: UserInfoProps) {
                         />
                       )}
                     </For>
-                  )}
-                </Match>
-              </Switch>
+                  </Loading>
+                </Errored>
+              </Show>
             </dd>
           </div>
           <hr class="h-1 w-full text-gray-4 my-4" />

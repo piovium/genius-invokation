@@ -19,7 +19,7 @@ import { For, Show } from "solid-js";
 import { Dice, DiceContent } from "./Dice";
 import DiceCountHintBlue from "../svg/DiceCountHintBlue.svg?fb";
 import DiceCountHintYellow from "../svg/DiceCountHintYellow.svg?fb";
-import { Dynamic } from "@solidjs/web";
+import { dynamic } from "@solidjs/web";
 
 export type DicePanelState = "hidden" | "wrapped" | "visible";
 
@@ -33,6 +33,9 @@ export interface DiceBarProps {
 }
 
 export function DiceBar(props: DiceBarProps) {
+  const DiceCountHint = dynamic(() =>
+    props.opp ? DiceCountHintBlue : DiceCountHintYellow,
+  );
   return (
     <div
       class={[
@@ -42,10 +45,7 @@ export function DiceBar(props: DiceBarProps) {
       data-wrapped={props.state === "wrapped"}
       data-shown={props.state !== "visible" || props.spectatorMode}
     >
-      <Dynamic
-        component={props.opp ? DiceCountHintBlue : DiceCountHintYellow}
-        class="grid-area-[1/1] w-9 h-9 m--1 max-w-9 max-h-9"
-      />
+      <DiceCountHint class="grid-area-[1/1] w-9 h-9 m--1 max-w-9 max-h-9" />
       <div class="grid-area-[1/1] text-white font-bold">
         {props.dice.length}
       </div>
