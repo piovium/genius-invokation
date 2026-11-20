@@ -17,7 +17,7 @@
 import { PbPhaseType } from "@gi-tcg/typings";
 import { Button } from "./Button";
 import { useUiContext } from "../hooks/context";
-import { createEffect, createMemo, createSignal, on } from "solid-js";
+import { createEffect, createMemo, createSignal } from "solid-js";
 import RoundButton from "../svg/RoundButton.svg?fb";
 import RoundTurnYellow from "../svg/RoundTurnYellow.svg?fb";
 import RoundTurnBlue from "../svg/RoundTurnBlue.svg?fb";
@@ -65,12 +65,10 @@ export function TimerBar(props: TimerBarProps) {
     "stroke-dashoffset 1s linear",
   );
   const timingMine = createMemo(() => props.timingMine);
-  createEffect(
-    on(timingMine, () => {
-      setTransition("none");
-      setTimeout(() => setTransition("stroke-dashoffset 1s linear"), 100);
-    }),
-  );
+  createEffect(timingMine, () => {
+    setTransition("none");
+    setTimeout(() => setTransition("stroke-dashoffset 1s linear"), 100);
+  });
   return (
     <svg
       viewBox="0 0 100 100"
@@ -128,18 +126,19 @@ export function DeclareEndMarker(props: DeclareEndMarkerProps) {
   const currentTime = () => Math.min(props.currentTime, props.totalTime);
   return (
     <div
-      class={`grid grid-cols-[4.5rem_10rem] grid-rows-1 w-58 h-22 pointer-events-none select-none justify-items-center ${
-        props.class ?? ""
-      }`}
+      class={[
+        "grid grid-cols-[4.5rem_10rem] grid-rows-1 w-58 h-22 pointer-events-none select-none justify-items-center",
+        props.class,
+      ]}
     >
       <RoundButton class="grid-area-[1/1] w-18 h-18 self-center" />
       <RoundTurnBlue
         class="grid-area-[1/1] w-16 h-8.4 self-start hidden data-[shown]:block"
-        bool:data-shown={!props.timingMine && props.phase !== PbPhaseType.END}
+        data-shown={!props.timingMine && props.phase !== PbPhaseType.END}
       />
       <RoundTurnYellow
         class="grid-area-[1/1] w-16 h-8.4 self-end hidden data-[shown]:block"
-        bool:data-shown={props.timingMine && props.phase !== PbPhaseType.END}
+        data-shown={props.timingMine && props.phase !== PbPhaseType.END}
       />
       <TimerBar
         currentTime={currentTime()}
@@ -154,17 +153,17 @@ export function DeclareEndMarker(props: DeclareEndMarkerProps) {
           hover:b-#fffd79 hover:bg-#ffd954
           active:b-#ef9b32 active:bg-#ba6c10`}
         onClick={onClick}
-        bool:data-clickable={props.markerClickable}
+        data-clickable={props.markerClickable}
       />
       <div
         class="grid-area-[1/1] self-center text-3 font-bold line-height-none text-white/60 data-[button]:text-black/60"
-        bool:data-button={props.markerClickable}
+        data-button={props.markerClickable}
       >
         T{props.roundNumber}
       </div>
       <Button
         class="hidden data-[shown]:grid pointer-events-auto grid-area-[1/2] self-center"
-        bool:data-shown={props.showButton}
+        data-shown={props.showButton}
         onClick={onClick}
       >
         {t("ui.buttonDeclareEnd")}
@@ -173,7 +172,7 @@ export function DeclareEndMarker(props: DeclareEndMarkerProps) {
         class={`grid-area-[1/2] self-start hidden data-[shown]:block
           bg-#71553f rounded-2 px-3 py-0.5 b-#816246 b-2
           text-white/80 text-2.5 font-bold select-none`}
-        bool:data-shown={props.showButton && props.willGetFirst}
+        data-shown={props.showButton && props.willGetFirst}
       >
         {t("ui.willGetFirst")}
       </div>

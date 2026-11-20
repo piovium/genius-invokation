@@ -44,7 +44,7 @@ export function TimerAlert(props: TimerProps) {
     <Show when={props.timer && props.timer.current <= 20}>
       <div
         class="self-start mt-6 bg-black/80 text-white py-2 px-4 rounded-lg z-7 font-bold data-[alert]:text-red pointer-events-none select-none"
-        bool:data-alert={props.timer!.current <= 10}
+        data-alert={props.timer!.current <= 10}
       >
         {parseTime(props.timer!.current)}
       </div>

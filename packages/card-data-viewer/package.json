@@ -24,12 +24,13 @@
     "build": "vite build"
   },
   "peerDependencies": {
+    "@solidjs/web": "catalog:",
     "solid-js": "catalog:"
   },
   "dependencies": {
     "@gi-tcg/assets-manager": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
-    "@solid-primitives/i18n": "^2.2.1"
+    "@solid-primitives/i18n": "^3.0.0"
   },
   "devDependencies": {
     "@gi-tcg/core": "workspace:*",
@@ -37,7 +38,7 @@
     "unocss": "catalog:",
     "vite": "catalog:",
     "unplugin-dts": "catalog:",
-    "vite-plugin-solid": "catalog:",
+    "@solidjs/vite-plugin": "catalog:",
     "rollup-plugin-node-externals": "catalog:"
   }
 }

@@ -29,6 +29,7 @@
     "build": "pnpm build:vite"
   },
   "peerDependencies": {
+    "@solidjs/web": "catalog:",
     "solid-js": "catalog:"
   },
   "dependencies": {
@@ -36,17 +37,15 @@
     "@gi-tcg/card-data-viewer": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
-    "@solid-primitives/i18n": "^2.2.1",
-    "@solid-primitives/keyed": "^1.4.0",
+    "@solid-primitives/i18n": "^3.0.0",
     "long-press-event": "^2.5.0"
   },
   "devDependencies": {
     "@gi-tcg/config": "workspace:*",
     "rollup-plugin-node-externals": "catalog:",
-    "solid-devtools": "^0.29.2",
     "unocss": "catalog:",
     "vite": "catalog:",
     "unplugin-dts": "catalog:",
-    "vite-plugin-solid": "catalog:"
+    "@solidjs/vite-plugin": "catalog:"
   }
 }

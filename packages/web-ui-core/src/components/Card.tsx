@@ -128,10 +128,6 @@ const opacityKeyframes = (uiState: CardAnimatingUiState): Keyframe[] => {
 const EFFECTLESS_DEFINITION_ID = 208;
 
 export function Card(props: CardProps) {
-  // const [data] = createResource(
-  //   () => props.data.definitionId,
-  //   (id) => getData(id),
-  // );
   let el!: HTMLDivElement;
   const data = createMemo(() => props.data);
   const realCost = createMemo(() => props.realCost);
@@ -163,45 +159,37 @@ export function Card(props: CardProps) {
     return result;
   });
 
-  // onMount(() => {
-  //   console.log(el);
-  // });
-
-  // createEffect(() => {
-  //   if (props.data.id === -500039) {
-  //     console.log(el);
-  //   }
-  // });
-
-  createEffect(() => {
-    const uiState = props.uiState;
-    if (uiState.type === "cardAnimation") {
-      const { delayMs, durationMs, onAnimationFinish } = uiState;
-      const transformKf = transformKeyframes(uiState);
-      const opacityKf = opacityKeyframes(uiState);
-      const opt: KeyframeAnimationOptions = {
-        delay: delayMs,
-        duration: durationMs,
-        fill: "both",
-        // easing: "cubic-bezier(0.4, 0, 0.2, 1)",
-      };
-      const applyAndWait = (el: Element, kf: Keyframe[]) => {
-        const animation = el.animate(kf, opt);
-        return animation.finished.then(() => {
-          try {
-            animation.commitStyles();
-          } catch {}
-          animation.cancel();
+  createEffect(
+    () => props.uiState,
+    (uiState) => {
+      if (uiState.type === "cardAnimation") {
+        const { delayMs, durationMs, onAnimationFinish } = uiState;
+        const transformKf = transformKeyframes(uiState);
+        const opacityKf = opacityKeyframes(uiState);
+        const opt: KeyframeAnimationOptions = {
+          delay: delayMs,
+          duration: durationMs,
+          fill: "both",
+          // easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+        };
+        const applyAndWait = (el: Element, kf: Keyframe[]) => {
+          const animation = el.animate(kf, opt);
+          return animation.finished.then(() => {
+            try {
+              animation.commitStyles();
+            } catch {}
+            animation.cancel();
+          });
+        };
+        Promise.all([
+          applyAndWait(el, transformKf),
+          ...[...el.children].map((e) => applyAndWait(e, opacityKf)),
+        ]).then(() => {
+          onAnimationFinish?.();
         });
-      };
-      Promise.all([
-        applyAndWait(el, transformKf),
-        ...[...el.children].map((e) => applyAndWait(e, opacityKf)),
-      ]).then(() => {
-        onAnimationFinish?.();
-      });
-    }
-  });
+      }
+    },
+  );
 
   return (
     <div
@@ -209,17 +197,15 @@ export function Card(props: CardProps) {
       class={`absolute top-0 left-0 h-36 w-21 grid rounded-md [&_*]:backface-hidden
         preserve-3d transform-origin-tl pointer-events-auto children:grid-area-[1/1] card`}
       style={style()}
-      bool:data-opp-hand={props.kind === "oppHand"}
-      bool:data-hidden={props.hidden}
-      bool:data-transition-transform={props.enableTransition}
-      bool:data-shadow={props.enableShadow}
-      bool:data-triggered={
+      data-opp-hand={props.kind === "oppHand"}
+      data-hidden={props.hidden}
+      data-transition-transform={props.enableTransition}
+      data-shadow={props.enableShadow}
+      data-triggered={
         props.uiState.type === "cardStatic" && props.uiState.triggered
       }
-      bool:data-playable={
-        props.kind !== "switching" && props.playStep?.playable
-      }
-      bool:data-dragging-end={
+      data-playable={props.kind !== "switching" && props.playStep?.playable}
+      data-dragging-end={
         props.uiState.type === "cardStatic" &&
         props.uiState.draggingEndAnimation
       }
@@ -283,8 +269,10 @@ export function Card(props: CardProps) {
         {/* with animate no render */}
         <ConductiveEffect
           noRender
-          class={`m--3 w-27 h-42 max-w-27 max-h-42
-            ${props.kind === "oppHand" ? "rotate-y-180 translate-z--0.2px" : ""}`}
+          class={[
+            "m--3 w-27 h-42 max-w-27 max-h-42",
+            props.kind === "oppHand" && "rotate-y-180 translate-z--0.2px",
+          ]}
         />
       </Show>
     </div>

@@ -14,17 +14,16 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { PbExposedMutation, PbGameState } from "@gi-tcg/typings";
-import { createMemo, splitProps, untrack, type ComponentProps } from "solid-js";
+import { createMemo, omit } from "solid-js";
+import type { ComponentProps } from "@solidjs/web";
 import { Chessboard, type ChessboardData } from "./components/Chessboard";
-import { translations, UiContext, type Locale } from "./hooks/context";
+import { createUiTranslator, UiContext, type Locale } from "./hooks/context";
 import { parseMutations } from "./mutations";
 import {
   type AssetsManager,
   DEFAULT_ASSETS_MANAGER,
 } from "@gi-tcg/assets-manager";
-import { updateHistory, type HistoryData } from "./history/parser";
 import type { HistoryBlock } from "./history/typings";
-import { resolveTemplate, translator } from "@solid-primitives/i18n";
 
 export interface StandaloneChessboardProps extends ComponentProps<"div"> {
   who: 0 | 1;
@@ -35,17 +34,17 @@ export interface StandaloneChessboardProps extends ComponentProps<"div"> {
 }
 
 export function StandaloneChessboard(props: StandaloneChessboardProps) {
-  const [localProps, elProps] = splitProps(props, [
+  const elProps = omit(
+    props,
     "who",
     "assetsManager",
     "locale",
     "state",
     "mutations",
-  ]);
+  );
 
-  const getLocale = () => localProps.locale ?? "zh-CN";
-  const dict = createMemo(() => translations[getLocale()]);
-  const t = translator(dict, resolveTemplate);
+  const getLocale = () => props.locale ?? "zh-CN";
+  const t = createUiTranslator(getLocale);
 
   const history = createMemo<HistoryBlock[]>(() => {
     return [];
@@ -60,15 +59,15 @@ export function StandaloneChessboard(props: StandaloneChessboardProps) {
     };
   });
   return (
-    <UiContext.Provider
+    <UiContext
       value={{
-        assetsManager: () => localProps.assetsManager ?? DEFAULT_ASSETS_MANAGER,
+        assetsManager: () => props.assetsManager ?? DEFAULT_ASSETS_MANAGER,
         locale: getLocale,
         t,
       }}
     >
       <Chessboard
-        who={localProps.who}
+        who={props.who}
         data={data()}
         actionState={null}
         history={history()}
@@ -78,6 +77,6 @@ export function StandaloneChessboard(props: StandaloneChessboardProps) {
         opp={null}
         {...elProps}
       />
-    </UiContext.Provider>
+    </UiContext>
   );
 }

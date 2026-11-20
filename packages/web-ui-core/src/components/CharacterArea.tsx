@@ -25,19 +25,17 @@ import {
   DiceType,
   PbEquipmentType,
 } from "@gi-tcg/typings";
-import { Key } from "@solid-primitives/keyed";
 import {
   createEffect,
   createMemo,
   createSignal,
   For,
-  Index,
   Match,
   Show,
   Switch,
   type Component,
-  type ComponentProps,
 } from "solid-js";
+import { type ComponentProps, dynamic } from "@solidjs/web";
 import { Image } from "./Image";
 import type {
   CharacterInfo,
@@ -72,7 +70,6 @@ import CardFrameNormal from "../svg/CardFrameNormal.svg?fb";
 import CardbackNormal from "../svg/CardbackNormal.svg?fb";
 import { Reaction, REACTION_TEXT_MAP } from "./Reaction";
 import { NightsoulsBlessing } from "./NightsoulsBlessing";
-import { Dynamic } from "solid-js/web";
 
 export interface DamageSourceAnimation {
   type: "damageSource";
@@ -348,19 +345,14 @@ export function CharacterArea(props: CharacterAreaProps) {
   //   }
   // });
 
-  createEffect(() => {
-    const {
-      damages,
-      animation: propAnimation,
-      transform,
-      onAnimationFinish,
-    } = props.uiState;
-
-    let damageDelay =
-      damages[0]?.type === "damage" && damages[0].isAfterSkillMainDamage
-        ? DAMAGE_TARGET_ANIMATION_DELAY
-        : 0;
-    const animations: Promise<void>[] = [];
+  createEffect(
+    () => props.uiState,
+    ({ damages, animation: propAnimation, transform, onAnimationFinish }) => {
+      let damageDelay =
+        damages[0]?.type === "damage" && damages[0].isAfterSkillMainDamage
+          ? DAMAGE_TARGET_ANIMATION_DELAY
+          : 0;
+      const animations: Promise<void>[] = [];
 
     if (propAnimation.type === "damageTarget") {
       damageDelay = DAMAGE_TARGET_ANIMATION_DELAY;
@@ -433,7 +425,7 @@ export function CharacterArea(props: CharacterAreaProps) {
   const defeated = createMemo(() => data().defeated);
   const triggered = createMemo(() => props.triggered);
 
-  const energyBarComponent = createMemo(() => {
+  const EnergyBar = dynamic(() => {
     const SPECIAL_ENERGY_MAP: Record<string, Component<EnergyBarProps>> = {
       serpentsSubtlety: SkirkEnergyBar,
       fightingSpirit: MavuikaEnergyBar,
@@ -469,7 +461,7 @@ export function CharacterArea(props: CharacterAreaProps) {
         e.stopPropagation();
         props.onClick?.(e, e.currentTarget);
       }}
-      bool:data-hidden={props.hidden}
+      data-hidden={props.hidden}
     >
       {/* Elemente */}
       <Show
@@ -487,7 +479,7 @@ export function CharacterArea(props: CharacterAreaProps) {
       {/* Card Area */}
       <div
         class="grid-area-[2/1] relative preserve-3d grid rounded-md transition-shadow children:grid-area-[1/1] clickable-outline"
-        bool:data-clickable={
+        data-clickable={
           props.clickStep && props.clickStep.ui >= ActionStepEntityUi.Outlined
         }
       >
@@ -499,8 +491,7 @@ export function CharacterArea(props: CharacterAreaProps) {
             bondOfLife={!!(data().tags & CHARACTER_TAG_BOND_OF_LIFE)}
           />
           <div class="absolute z-1 right-0.5 top-3 translate-x-50% flex flex-col items-center">
-            <Dynamic
-              component={energyBarComponent()}
+            <EnergyBar
               current={energy()}
               preview={props.preview?.newEnergy ?? null}
               total={data().maxEnergy}
@@ -546,7 +537,7 @@ export function CharacterArea(props: CharacterAreaProps) {
                 />
               )}
             </Show>
-            <Key each={otherEquipments()} by="id">
+            <For each={otherEquipments()} keyed={(item) => item.id}>
               {(et) => (
                 <Equipment
                   data={et()}
@@ -554,7 +545,7 @@ export function CharacterArea(props: CharacterAreaProps) {
                   replace={props.clickStep?.equip === PbEquipmentType.OTHER}
                 />
               )}
-            </Key>
+            </For>
           </div>
         </Show>
         <Show when={damageSourceColor()}>
@@ -573,11 +564,11 @@ export function CharacterArea(props: CharacterAreaProps) {
           imageId={data().definitionId}
           class="h-full w-full p-1% text-3 data-[defeated]:brightness-50"
           fallback="card"
-          bool:data-defeated={defeated()}
+          data-defeated={defeated()}
         />
         <CardFrameNormal
           class="pointer-events-none data-[defeated]:brightness-50"
-          bool:data-defeated={defeated()}
+          data-defeated={defeated()}
         />
         <CardbackNormal class="rotate-y-180 translate-z--0.1px" />
         <StatusGroup
@@ -625,7 +616,7 @@ function Aura(props: AuraProps) {
   return (
     <div
       class="grid-area-[1/1] flex flex-nowrap justify-center items-center z-10 aura"
-      bool:data-preview={props.preview}
+      data-preview={props.preview}
     >
       <For each={props.previewReaction}>
         {(reaction) => (
@@ -657,7 +648,10 @@ interface EnergyBarProps {
 }
 
 interface EnergyCellBarProps extends EnergyBarProps {
-  cellComponentMap: Record<number, Component>;
+  cellComponentMap: Record<
+    number,
+    Component<Pick<ComponentProps<"div">, "class" | "style">>
+  >;
 }
 
 function EnergyCellBar(props: EnergyCellBarProps) {
@@ -680,23 +674,27 @@ function EnergyCellBar(props: EnergyCellBarProps) {
       style={{ "--total": props.total }}
     >
       <For each={currentStates()}>
-        {(comp, idx) => (
-          <Dynamic<Component<ComponentProps<"div">>>
-            component={props.cellComponentMap[comp]}
-            class="w-9 h-6 grid-area-[var(--row-idx)/1] my--1"
-            style={{ "--row-idx": idx() + 1 }}
-          />
-        )}
+        {(comp, idx) => {
+          const Cell = dynamic(() => props.cellComponentMap[comp]);
+          return (
+            <Cell
+              class="w-9 h-6 grid-area-[var(--row-idx)/1] my--1"
+              style={{ "--row-idx": idx() + 1 }}
+            />
+          );
+        }}
       </For>
       <Show when={props.preview !== null && props.preview > props.current}>
         <For each={previewStates()}>
-          {(comp, idx) => (
-            <Dynamic<Component<ComponentProps<"div">>>
-              component={props.cellComponentMap[comp]}
-              class="w-9 h-6 grid-area-[var(--row-idx)/1] my--1 energy-preview"
-              style={{ "--row-idx": idx() + 1 }}
-            />
-          )}
+          {(comp, idx) => {
+            const Cell = dynamic(() => props.cellComponentMap[comp]);
+            return (
+              <Cell
+                class="w-9 h-6 grid-area-[var(--row-idx)/1] my--1 energy-preview"
+                style={{ "--row-idx": idx() + 1 }}
+              />
+            );
+          }}
         </For>
       </Show>
     </div>
@@ -704,7 +702,7 @@ function EnergyCellBar(props: EnergyCellBarProps) {
 }
 
 function NormalEnergyBar(props: EnergyBarProps) {
-  const energyMap: Record<number, Component> = {
+  const energyMap = {
     0: EnergyIconEmpty,
     1: EnergyIconActive,
   };
@@ -719,7 +717,7 @@ function NormalEnergyBar(props: EnergyBarProps) {
 }
 
 function MavuikaEnergyBar(props: EnergyBarProps) {
-  const energyMap: Record<number, Component> = {
+  const energyMap = {
     0: EnergyIconEmptyMavuika,
     1: EnergyIconActiveMavuika,
     2: EnergyIconExtraMavuika,
@@ -798,7 +796,7 @@ function CharacterTagMasks(props: CharacterTagMasksProps) {
     // "UI_GCG_Dizzy",
   };
   return (
-    <Index each={Object.keys(TAG_MASK_MAP)}>
+    <For keyed={false} each={Object.keys(TAG_MASK_MAP)}>
       {(flag) => (
         <Show when={props.tags & Number(flag())}>
           <img
@@ -808,7 +806,7 @@ function CharacterTagMasks(props: CharacterTagMasksProps) {
           />
         </Show>
       )}
-    </Index>
+    </For>
   );
 }
 
@@ -826,8 +824,8 @@ function Technique(props: TechniqueProps) {
         imageId={data().data.definitionId}
         type={"icon"}
         fallback="technique"
-        bool:data-entering={data().animation === "entering"}
-        bool:data-disposing={data().animation === "disposing"}
+        data-entering={data().animation === "entering"}
+        data-disposing={data().animation === "disposing"}
       />
       <Show when={props.replace}>
         {/* with animate no render */}
@@ -835,10 +833,10 @@ function Technique(props: TechniqueProps) {
       </Show>
       <div
         class="rounded-full technique-effect"
-        bool:data-usable={data().data.hasUsagePerRound}
-        bool:data-entering={data().animation === "entering"}
-        bool:data-disposing={data().animation === "disposing"}
-        bool:data-triggered={data().triggered}
+        data-usable={data().data.hasUsagePerRound}
+        data-entering={data().animation === "entering"}
+        data-disposing={data().animation === "disposing"}
+        data-triggered={data().triggered}
       />
     </div>
   );
@@ -846,19 +844,19 @@ function Technique(props: TechniqueProps) {
 
 interface EquipmentProps {
   data: StatusInfo;
-  icon: Component;
+  icon: Component<Pick<ComponentProps<"div">, "class" | "style">>;
   replace: boolean;
 }
 
 function Equipment(props: EquipmentProps) {
   const data = createMemo(() => props.data);
+  const EquipmentIcon = dynamic(() => props.icon);
   return (
     <div class="w-7 h-7 mb--0.5 grid children:grid-area-[1/1]">
-      <Dynamic<Component<ComponentProps<"div">>>
-        component={props.icon}
+      <EquipmentIcon
         class="w-7 h-7 equipment-icon"
-        bool:data-entering={data().animation === "entering"}
-        bool:data-disposing={data().animation === "disposing"}
+        data-entering={data().animation === "entering"}
+        data-disposing={data().animation === "disposing"}
       />
       <Show when={props.replace}>
         {/* with animate no render */}
@@ -866,10 +864,10 @@ function Equipment(props: EquipmentProps) {
       </Show>
       <div
         class="rounded-full equipment-effect"
-        bool:data-usable={data().data.hasUsagePerRound}
-        bool:data-entering={data().animation === "entering"}
-        bool:data-disposing={data().animation === "disposing"}
-        bool:data-triggered={data().triggered}
+        data-usable={data().data.hasUsagePerRound}
+        data-entering={data().animation === "entering"}
+        data-disposing={data().animation === "disposing"}
+        data-triggered={data().triggered}
       />
     </div>
   );

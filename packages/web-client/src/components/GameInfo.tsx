@@ -15,7 +15,7 @@
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { onMount, Show } from "solid-js";
+import { onSettled, Show } from "solid-js";
 import axios from "axios";
 import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
@@ -32,7 +32,7 @@ export interface GameInfoProps {
 export function GameInfo(props: GameInfoProps) {
   const { status } = useAuth();
   const { t, locale } = useI18n();
-  onMount(() => {
+  onSettled(() => {
     dayjs.locale(locale().toLocaleLowerCase());
   });
 

@@ -16,15 +16,20 @@
 import type { AssetsManager } from "@gi-tcg/assets-manager";
 import { createContext, useContext } from "solid-js";
 import type { Translator } from "../locales";
+import { flatten, resolveTemplate, translator } from "@solid-primitives/i18n";
 import zhCN from "../locales/zh-CN";
 import en from "../locales/en";
 
 export type Locale = "zh-CN" | "en";
 
-export const translations = {
-  "zh-CN": zhCN,
-  en: en,
+const translations = {
+  "zh-CN": flatten(zhCN),
+  en: flatten(en),
 };
+
+export function createUiTranslator(locale: () => Locale): Translator {
+  return translator(() => translations[locale()], resolveTemplate);
+}
 
 export interface UiContextValue {
   assetsManager: () => AssetsManager;

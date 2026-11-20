@@ -20,12 +20,13 @@
     "build": "vite build"
   },
   "devDependencies": {
-    "solid-element": "^1.8.0",
+    "@solidjs/element": "^2.0.0",
+    "@solidjs/web": "catalog:",
     "solid-js": "catalog:",
     "@gi-tcg/web-ui-core": "workspace:*",
     "@gi-tcg/detail-log-viewer": "workspace:*",
     "vite": "catalog:",
     "unplugin-dts": "catalog:",
-    "vite-plugin-solid": "catalog:"
+    "@solidjs/vite-plugin": "catalog:"
   }
 }

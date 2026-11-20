@@ -39,18 +39,18 @@ export function Damage(props: DamageProps) {
   return (
     <div
       class={`self-center z-5 w-21 h-21 hidden data-[shown]:grid preserve-3d children:grid-area-[1/1] damage`}
-      bool:data-shown={props.shown}
+      data-shown={props.shown}
       style={{
         color: `var(--c-${DAMAGE_COLOR[damageType() ?? 0]})`,
       }}    
     >
       <HealIcon
         class="h-full w-full data-[hidden]:hidden"
-        bool:data-hidden={damageType() !== DamageType.Heal}
+        data-hidden={damageType() !== DamageType.Heal}
       />
       <DamageIcon
         class="h-full w-full data-[hidden]:hidden"
-        bool:data-hidden={damageType() === DamageType.Heal}
+        data-hidden={damageType() === DamageType.Heal}
       />
       <StrokedText
         class="font-bold text-center text-9 self-center text-nowrap"

@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { splitProps, type ComponentProps } from "solid-js";
+import { omit } from "solid-js";
+import type { ComponentProps } from "@solidjs/web";
 
 export interface StrokedTextProps extends ComponentProps<"div"> {
   text: string;
@@ -23,23 +24,18 @@ export interface StrokedTextProps extends ComponentProps<"div"> {
 }
 
 export function StrokedText(props: StrokedTextProps) {
-  const [local, rest] = splitProps(props, [
-    "text",
-    "class",
-    "strokeWidth",
-    "strokeColor",
-  ]);
+  const rest = omit(props, "text", "class", "strokeWidth", "strokeColor");
   return (
     <div
-      class={`pointer-events-none select-none ${local.class ?? ""}`}
+      class={["pointer-events-none select-none", props.class]}
       style={{
         "paint-order": "stroke fill",
-        "-webkit-text-stroke-color": local.strokeColor,
-        "-webkit-text-stroke-width": `${local.strokeWidth}px`,
+        "-webkit-text-stroke-color": props.strokeColor,
+        "-webkit-text-stroke-width": `${props.strokeWidth}px`,
       }}
       {...rest}
     >
-      {local.text}
+      {props.text}
     </div>
   );
 }

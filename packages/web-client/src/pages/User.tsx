@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { useParams } from "@solidjs/router";
-import { createResource, Switch, Match } from "solid-js";
+import { createMemo, Loading, Errored, Show } from "solid-js";
 import { Layout } from "../layouts/Layout";
 import axios from "axios";
 import { useAuth, UserInfo as UserInfoT } from "../auth";
@@ -24,28 +24,27 @@ import { getErrorMessage, getGithubAvatarUrl } from "../utils";
 
 export default function User() {
   const { t } = useI18n();
-  const params = useParams();
+  const params = useParams<{ id: string }>();
   const { status: mine, avatarUrl: myAvatarUrl } = useAuth();
 
-  const [userInfo, { refetch }] = createResource(
-    () => params.id,
-    async (id) => {
-      if (id.trim() === "" || !Number.isFinite(+id)) {
-        throw new Error(`User ID is incorrect: ${id}`);
-      } else {
-        return await axios
-          .get(`users/${params.id}`)
-          .then((res) => res.data as UserInfoT);
-      }
-    },
-  );
-
+  const userInfo = createMemo(() => {
+    const id = params.id;
+    if (id.trim() === "" || !Number.isFinite(+id)) {
+      throw new Error(`User ID is incorrect: ${id}`);
+    }
+    const current = mine();
+    if (current.type === "user" && current.id === +id) {
+      return current;
+    }
+    return axios.get<UserInfoT>(`users/${id}`).then(({ data }) => data);
+  });
   const guestMode = () => params.id === "guest";
 
   return (
     <Layout>
-      <Switch>
-        <Match when={guestMode()}>
+      <Show
+        when={!guestMode()}
+        fallback={
           <UserInfo
             type="guest"
             idText={t("guestIdentity")}
@@ -53,26 +52,24 @@ export default function User() {
             avatarUrl={myAvatarUrl()}
             editable={true}
           />
-        </Match>
-        <Match when={userInfo.loading}>{t("loading")}</Match>
-        <Match when={userInfo.error}>
-          {t("loadFailed", {
-            message: getErrorMessage(userInfo.error),
-          })}
-        </Match>
-        <Match when={userInfo()}>
-          {(user) => (
+        }
+      >
+        <Errored
+          fallback={(error) =>
+            t("loadFailed", { message: getErrorMessage(error()) })
+          }
+        >
+          <Loading on={params.id} fallback={t("loading")}>
             <UserInfo
               type="user"
-              idText={`ID: ${user().id}`}
-              name={user().name}
-              avatarUrl={getGithubAvatarUrl(user().id)}
-              editable={user().id === mine()?.id}
-              onSubmit={refetch}
+              idText={`ID: ${userInfo().id}`}
+              name={userInfo().name}
+              avatarUrl={getGithubAvatarUrl(userInfo().id)}
+              editable={userInfo().id === mine()?.id}
             />
-          )}
-        </Match>
-      </Switch>
+          </Loading>
+        </Errored>
+      </Show>
     </Layout>
   );
 }

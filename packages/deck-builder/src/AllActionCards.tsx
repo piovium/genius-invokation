@@ -13,12 +13,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { createEffect, createMemo, createSignal } from "solid-js";
+import { createEffect, createMemo, createSignal, For } from "solid-js";
 import { PoolCard } from "./Card";
 import type { AllCardsProps } from "./AllCards";
-import { Key } from "@solid-primitives/keyed";
 import type { DeckDataActionCardInfo } from "@gi-tcg/assets-manager";
-import { CARD_TAG_IMG_NAME_MAP, CARD_TYPE_TEXT_KEYS, CARD_COST_TEXT_KEYS } from "./TagIcon";
+import {
+  CARD_TAG_IMG_NAME_MAP,
+  CARD_TYPE_TEXT_KEYS,
+  CARD_COST_TEXT_KEYS,
+} from "./TagIcon";
 import { FilterBar } from "./FilterBar";
 import { useDeckBuilderContext } from "./DeckBuilder";
 
@@ -38,16 +41,22 @@ export function AllActionCards(props: AllCardsProps) {
   };
 
   // Remove invalid action cards
-  createEffect(() => {
-    const currentCards = props.deck.cards;
-    const result = currentCards.filter((c) => valid(props.actionCards.get(c)!));
-    if (result.length < currentCards.length) {
-      props.onChangeDeck?.({
-        ...props.deck,
-        cards: result,
-      });
-    }
-  });
+  createEffect(
+    () => {
+      const currentCards = props.deck.cards;
+      const result = currentCards.filter((c) =>
+        valid(props.actionCards.get(c)!),
+      );
+      return result.length < currentCards.length
+        ? { ...props.deck, cards: result }
+        : null;
+    },
+    (deck) => {
+      if (deck) {
+        props.onChangeDeck?.(deck);
+      }
+    },
+  );
   const maxCount = (id: number) => {
     return props.actionCards
       .get(id)
@@ -176,12 +185,12 @@ export function AllActionCards(props: AllCardsProps) {
         ]}
       />
       <ul class="flex-grow overflow-auto grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-2 pb-2 @3xl:pb-0 [scrollbar-width:thin]">
-        <Key each={sortedActionCards()} by="id">
+        <For each={sortedActionCards()} keyed={(item) => item.id}>
           {(ac) => (
             <li
               class="hidden data-[shown]-block relative cursor-pointer data-[disabled]:cursor-not-allowed data-[disabled]:opacity-60 data-[disabled]:filter-none hover:brightness-110"
-              bool:data-shown={shown(ac())}
-              bool:data-disabled={fullCards() && !count(ac().id)}
+              data-shown={shown(ac())}
+              data-disabled={fullCards() && !count(ac().id)}
               onClick={() => {
                 if (valid(ac())) {
                   toggleCard(ac().id);
@@ -198,7 +207,7 @@ export function AllActionCards(props: AllCardsProps) {
               />
             </li>
           )}
-        </Key>
+        </For>
       </ul>
     </div>
   );

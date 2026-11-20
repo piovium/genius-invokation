@@ -23,6 +23,7 @@
     "@vercel/analytics": "^1.2.0",
     "core-js": "3.38.1",
     "merge-error-cause": "^5.0.2",
+    "@solidjs/web": "catalog:",
     "solid-js": "catalog:"
   },
   "devDependencies": {
@@ -32,7 +33,7 @@
     "@rollup/plugin-babel": "^6.0.4",
     "@types/core-js": "^2.5.8",
     "vite": "catalog:",
-    "vite-plugin-solid": "catalog:",
+    "@solidjs/vite-plugin": "catalog:",
     "vite-plugin-static-copy": "^3.1.1"
   }
 }

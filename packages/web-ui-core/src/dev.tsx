@@ -16,8 +16,8 @@
 /* @refresh reload */
 
 import "./index";
-import { createSignal, onMount, Show } from "solid-js";
-import { render } from "solid-js/web";
+import { createSignal, onSettled, Show } from "solid-js";
+import { render } from "@solidjs/web";
 
 import getData from "@gi-tcg/data";
 import {
@@ -73,7 +73,7 @@ function App() {
   // Toggle me to debug oppChessboard
   const createOpp = true;
 
-  onMount(() => {
+  onSettled(() => {
     const state = Game.createInitialState({
       data: getData(),
       decks: [deck0, deck1],

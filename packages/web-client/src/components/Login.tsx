@@ -73,7 +73,7 @@ export function Login() {
             type="text"
             class="input input-solid rounded-r-0 b-r-0 h-9 text-4"
             name="guestName"
-            maxLength={64}
+            maxlength={64}
             placeholder={t("guestNamePlaceholder")}
             pattern=".*[^\s].*"
             onInput={(e) => setGuestNameValid(e.target.checkValidity())}

@@ -48,20 +48,25 @@ export function RoundAndPhaseNotification(
   }));
   const opp = createMemo(() => props.who !== props.info.who);
   const [isFirst, setIsFirst] = createSignal(true);
-  createEffect(() => {
-    // 宣布回合结束总是先手方先宣布，随后后手方宣布，周而复始
-    if (props.info.value === "declareEnd") {
-      setIsFirst((prev) => !prev);
-    }
-  });
+  createEffect(
+    () => props.info,
+    (info) => {
+      // 宣布回合结束总是先手方先宣布，随后后手方宣布，周而复始
+      if (info.value === "declareEnd") {
+        setIsFirst((prev) => !prev);
+      }
+    },
+  );
   return (
     <>
       <Switch>
         <Match when={typeof props.info.value === "number"}>
           <div
-            class={`w-210 h-6 text-center line-height-4.5 text-#f5ebd2 font-bold text-3.5
-              pointer-events-none select-none action-hint phase-notification ${props.class ?? ""}`}
-            bool:data-delay={props.info.showRound}
+            class={[
+              "w-210 h-6 text-center line-height-4.5 text-#f5ebd2 font-bold text-3.5 pointer-events-none select-none action-hint phase-notification",
+              props.class,
+            ]}
+            data-delay={props.info.showRound}
           >
             {phaseText()[props.info.value as PbPhaseType]}
           </div>
@@ -72,9 +77,11 @@ export function RoundAndPhaseNotification(
           }
         >
           <div
-            class={`w-210 h-6 text-center line-height-6 font-bold text-3.5 pointer-events-none
-              select-none action-hint-who action-notification ${props.class ?? ""}`}
-            bool:data-opp={opp()}
+            class={[
+              "w-210 h-6 text-center line-height-6 font-bold text-3.5 pointer-events-none select-none action-hint-who action-notification",
+              props.class,
+            ]}
+            data-opp={opp()}
           >
             {t(
               `phase.${opp() ? "opp" : "my"}${props.info.value === "action" ? "ActionTurn" : "DeclareEndTurn"}`,
@@ -87,9 +94,11 @@ export function RoundAndPhaseNotification(
       </Switch>
       <Show when={props.info.showRound}>
         <div
-          class={`w-210 h-6 text-center line-height-6 font-bold text-3.5 pointer-events-none
-            select-none action-hint-who round-notification ${props.class ?? ""}`}
-          bool:data-opp={props.currentTurn !== props.who}
+          class={[
+            "w-210 h-6 text-center line-height-6 font-bold text-3.5 pointer-events-none select-none action-hint-who round-notification",
+            props.class,
+          ]}
+          data-opp={props.currentTurn !== props.who}
         >
           <div class="h-18 w-36 rounded-t-full font-bold text-3 line-height-none pt-14 mt--18 mx-auto round-hint-who">
             {t("phase.round", { round: props.roundNumber })}

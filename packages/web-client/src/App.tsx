@@ -13,25 +13,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Route, Router } from "@solidjs/router";
+import { Router } from "./router";
 import {
   createContext,
   createSignal,
-  onMount,
-  onCleanup,
+  onSettled,
   useContext,
   type Accessor,
-  lazy,
 } from "solid-js";
 import { useAuth } from "./auth";
 import { GITHUB_AUTH_REDIRECT_URL } from "./config";
-
-const Home = lazy(() => import("./pages/Home"));
-const User = lazy(() => import("./pages/User"));
-const Decks = lazy(() => import("./pages/Decks"));
-const EditDeck = lazy(() => import("./pages/EditDeck"));
-const Room = lazy(() => import("./pages/Room"));
-const NotFound = lazy(() => import("./pages/NotFound"));
 
 const MobileContext = createContext<Accessor<boolean>>();
 export const useMobile = () => useContext(MobileContext)!;
@@ -58,26 +49,19 @@ function App() {
     }
   };
 
-  onMount(() => {
+  onSettled(() => {
     mobileMediaQuery.addEventListener("change", handleMobileChange);
     window.addEventListener("message", onReceiveToken);
-  });
-  onCleanup(() => {
-    mobileMediaQuery.removeEventListener("change", handleMobileChange);
-    window.removeEventListener("message", onReceiveToken);
+    return () => {
+      mobileMediaQuery.removeEventListener("change", handleMobileChange);
+      window.removeEventListener("message", onReceiveToken);
+    };
   });
 
   return (
-    <MobileContext.Provider value={mobile}>
-      <Router base={import.meta.env.BASE_URL.replace(/(.+)\/$/, "$1")}>
-        <Route path="/" component={Home} />
-        <Route path="/user/:id" component={User} />
-        <Route path="/decks/:id" component={EditDeck} />
-        <Route path="/decks" component={Decks} />
-        <Route path="/rooms/:code" component={Room} />
-        <Route path="*" component={NotFound} />
-      </Router>
-    </MobileContext.Provider>
+    <MobileContext value={mobile}>
+      <Router />
+    </MobileContext>
   );
 }
 

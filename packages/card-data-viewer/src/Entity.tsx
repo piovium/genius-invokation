@@ -13,23 +13,22 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { AssetFallback } from "./AssetFallback";
 import {
-  createEffect,
   createMemo,
-  createResource,
-  createSignal,
+  Errored,
   For,
-  Match,
+  Loading,
+  type ParentProps,
   Show,
-  Switch,
 } from "solid-js";
 import type { PbCharacterState, PbEntityState } from "@gi-tcg/typings";
 import type { ViewerInput } from "./CardDataViewer";
 import type {
+  AnyData,
   EntityRawData,
   CharacterRawData,
   KeywordRawData,
-  PlayCost,
   SkillRawData,
 } from "@gi-tcg/assets-manager";
 import { PlayCostList } from "./PlayCost";
@@ -45,6 +44,24 @@ export interface CardDataProps {
   onRequestExplain?: (id: number | null) => void;
 }
 
+function createDefinition<T extends AnyData>(id: () => number) {
+  const { assetsManager } = useAssetsManager();
+  return createMemo(() => assetsManager().getData(id()) as Promise<T>);
+}
+
+function DefinitionBoundary(props: ParentProps<{ nameFor?: number }>) {
+  const { assetsManager, t } = useAssetsManager();
+  const name = () =>
+    typeof props.nameFor === "number"
+      ? (assetsManager().getNameSync(props.nameFor) ?? props.nameFor)
+      : undefined;
+  return (
+    <Errored fallback={name() ?? t("loadFailed")}>
+      <Loading fallback={name() ?? t("loading")}>{props.children}</Loading>
+    </Errored>
+  );
+}
+
 export function Character(props: CardDataProps) {
   const state = createMemo(() => {
     if (props.input.from === "definitionId") {
@@ -53,10 +70,9 @@ export function Character(props: CardDataProps) {
       return props.input.state as PbCharacterState;
     }
   });
-  const { assetsManager, t } = useAssetsManager();
-  const [data] = createResource(
-    () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<CharacterRawData>,
+  const { assetsManager } = useAssetsManager();
+  const data = createDefinition<CharacterRawData>(
+    () => props.input.definitionId,
   );
   const equipmentDefinitionIds = createMemo(
     () =>
@@ -64,29 +80,29 @@ export function Character(props: CardDataProps) {
         ?.entity.filter((entity) => typeof entity.equipment === "number")
         .map((entity) => entity.definitionId) ?? [],
   );
-  const [techniqueData] = createResource(
-    () => [equipmentDefinitionIds(), assetsManager()] as const,
-    ([definitionIds, manager]) =>
+  const techniqueData = createMemo(
+    () =>
       Promise.all(
-        definitionIds.map((definitionId) =>
-          (manager.getData(definitionId) as Promise<EntityRawData>)
+        equipmentDefinitionIds().map((definitionId) =>
+          (assetsManager().getData(definitionId) as Promise<EntityRawData>)
             .then((data) =>
               data.skills.filter((sk) => sk.type === "GCG_SKILL_TAG_VEHICLE"),
             )
             .catch(() => []),
         ),
       ),
+    { loadingValue: [] },
   );
   const skills = createMemo(() => [
-    ...(data()?.skills ?? []),
-    ...(techniqueData()?.flat() ?? []),
+    ...data().skills,
+    ...techniqueData().flat(),
   ]);
   const hpText = createMemo(() => {
     const st = state();
     if (st) {
       return `${st.health}/${st.maxHealth}`;
     } else {
-      return data()?.hp ?? 0;
+      return data().hp;
     }
   });
   const mpText = createMemo(() => {
@@ -94,46 +110,38 @@ export function Character(props: CardDataProps) {
     if (st) {
       return `${st.energy}/${st.maxEnergy}`;
     } else {
-      return data()?.maxEnergy ?? 0;
+      return data().maxEnergy;
     }
   });
   return (
     <div class={props.class}>
-      <Switch>
-        <Match when={data.error}>{t("loadFailed")}</Match>
-        <Match when={data.state === "pending"}>{t("loading")}</Match>
-        <Match when={data()}>
-          {(data) => (
-            <>
-              <h3 class="card-name">{data().name}</h3>
-              <dl class="flex flex-row gap-[0.25em] mb-[0.25em] card-info">
-                <dt>HP</dt>
-                <dd class="font-bold">{hpText()}</dd>
-                <dt>&nbsp;&nbsp;&nbsp;MP</dt>
-                <dd class="font-bold">{mpText()}</dd>
-              </dl>
-              <Tags tags={data().tags} />
-              <ul class="flex flex-col gap-[0.5em]">
-                <For each={skills()}>
-                  {(skill) => (
-                    <Show when={!skill.hidden}>
-                      <Skill
-                        {...props}
-                        input={{
-                          from: "definitionId",
-                          type: "skill",
-                          definitionId: skill.id,
-                        }}
-                        asChild
-                      />
-                    </Show>
-                  )}
-                </For>
-              </ul>
-            </>
-          )}
-        </Match>
-      </Switch>
+      <DefinitionBoundary>
+        <h3 class="card-name">{data().name}</h3>
+        <dl class="flex flex-row gap-[0.25em] mb-[0.25em] card-info">
+          <dt>HP</dt>
+          <dd class="font-bold">{hpText()}</dd>
+          <dt>&nbsp;&nbsp;&nbsp;MP</dt>
+          <dd class="font-bold">{mpText()}</dd>
+        </dl>
+        <Tags tags={data().tags} />
+        <ul class="flex flex-col gap-[0.5em]">
+          <For each={skills()}>
+            {(skill) => (
+              <Show when={!skill.hidden}>
+                <Skill
+                  {...props}
+                  input={{
+                    from: "definitionId",
+                    type: "skill",
+                    definitionId: skill.id,
+                  }}
+                  asChild
+                />
+              </Show>
+            )}
+          </For>
+        </ul>
+      </DefinitionBoundary>
       <IdBox defId={props.input.definitionId} id={state()?.id} />
     </div>
   );
@@ -147,54 +155,43 @@ export function ActionCard(props: CardDataProps) {
       return props.input.state as PbEntityState;
     }
   });
-  const { assetsManager, t } = useAssetsManager();
-  const [data] = createResource(
-    () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<EntityRawData>,
-  );
+  const { t } = useAssetsManager();
+  const data = createDefinition<EntityRawData>(() => props.input.definitionId);
   const rawDescription = createMemo(() => {
     const st = state();
-    const d = data() as EntityRawData | undefined;
+    const d = data();
     if (st) {
-      if (props.input.type === "card" && d?.rawDynamicDescription) {
+      if (props.input.type === "card" && d.rawDynamicDescription) {
         return d.rawDynamicDescription;
-      } else if (props.input.type === "entity" && d?.rawPlayingDescription) {
+      } else if (props.input.type === "entity" && d.rawPlayingDescription) {
         return d.rawPlayingDescription;
       }
     }
-    return d?.rawDescription;
+    return d.rawDescription;
   });
   return (
     <div class={props.class}>
-      <Switch>
-        <Match when={data.error}>{t("loadFailed")}</Match>
-        <Match when={data.state === "pending"}>{t("loading")}</Match>
-        <Match when={data()}>
-          {(data) => (
-            <>
-              <h3 class="card-name">{data().name}</h3>
-              <div class="flex flex-row items-center mb-[0.25em]">
-                <span class="skill-type mr-[0.5em]">
-                  {typeTagText(data().type, t)}
-                </span>
-                <Show when={props.input.type === "card"}>
-                  <PlayCostList playCost={(data() as EntityRawData).playCost} />
-                </Show>
-              </div>
-              <Tags tags={data().tags} />
-              <div class="px-[0.5em]">
-                <Description
-                  {...props}
-                  keyMap={state()?.descriptionDictionary ?? {}}
-                  definitionId={props.input.definitionId}
-                  description={rawDescription() ?? ""}
-                  onRequestExplain={props.onRequestExplain}
-                />
-              </div>
-            </>
-          )}
-        </Match>
-      </Switch>
+      <DefinitionBoundary>
+        <h3 class="card-name">{data().name}</h3>
+        <div class="flex flex-row items-center mb-[0.25em]">
+          <span class="skill-type mr-[0.5em]">
+            {typeTagText(data().type, t)}
+          </span>
+          <Show when={props.input.type === "card"}>
+            <PlayCostList playCost={data().playCost} />
+          </Show>
+        </div>
+        <Tags tags={data().tags} />
+        <div class="px-[0.5em]">
+          <Description
+            {...props}
+            keyMap={state()?.descriptionDictionary ?? {}}
+            definitionId={props.input.definitionId}
+            description={rawDescription()}
+            onRequestExplain={props.onRequestExplain}
+          />
+        </div>
+      </DefinitionBoundary>
       <IdBox defId={props.input.definitionId} id={state()?.id} />
     </div>
   );
@@ -207,68 +204,49 @@ interface ExpandableCardDataProps extends CardDataProps {
 
 export function Skill(props: ExpandableCardDataProps) {
   const { assetsManager, t } = useAssetsManager();
-  const [data] = createResource(
-    () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<SkillRawData>,
-  );
+  const data = createDefinition<SkillRawData>(() => props.input.definitionId);
 
-  const [icon] = createResource(
-    () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getImageUrl(defId),
+  const icon = createMemo(() =>
+    assetsManager().getImageUrl(props.input.definitionId),
   );
-  const [skillTypeText, setSkillTypeText] = createSignal("");
-  const [playCost, setPlayCost] = createSignal<PlayCost[]>([]);
-
-  createEffect(() => {
-    if (data.state === "ready") {
-      setPlayCost(data().playCost);
-      setSkillTypeText(typeTagText(data().type, t) ?? "");
-    }
-  });
+  const skillTypeText = () => typeTagText(data().type, t) ?? "";
   return (
     <details
-      class={`flex flex-col min-h-0 skill-wrap ${props.class ?? ""}`}
+      class={["flex flex-col min-h-0 skill-wrap", props.class]}
       open={!props.asChild}
     >
       <summary class="flex flex-row items-center p-[0.25em] gap-[0.25em] cursor-pointer skill-header">
-        <Show when={icon()} fallback={<div class="w-[3em] h-[3em] shrink-0" />}>
-          {(icon) => (
-            <div
-              class="skill-icon shrink-0"
-              style={{ "--mask-image": `url(${icon()})` }}
-            />
-          )}
-        </Show>
+        <AssetFallback
+          on={props.input.definitionId}
+          fallback={<div class="w-[3em] h-[3em] shrink-0" />}
+        >
+          <div
+            class="skill-icon shrink-0"
+            style={{ "--mask-image": `url(${icon()})` }}
+          />
+        </AssetFallback>
         <div class="flex flex-col">
-          <h3 class="skill-name">
-            {data()?.name ??
-              assetsManager().getNameSync(props.input.definitionId) ??
-              props.input.definitionId}
-          </h3>
-          <div class="flex flex-row items-center">
-            <span class="skill-type mr-[0.5em]">{skillTypeText()}</span>
-            <Show when={data()?.type !== "GCG_SKILL_TAG_PASSIVE"}>
-              <PlayCostList playCost={playCost()} />
-            </Show>
-          </div>
+          <DefinitionBoundary nameFor={props.input.definitionId}>
+            <h3 class="skill-name">{data().name}</h3>
+            <div class="flex flex-row items-center">
+              <span class="skill-type mr-[0.5em]">{skillTypeText()}</span>
+              <Show when={data().type !== "GCG_SKILL_TAG_PASSIVE"}>
+                <PlayCostList playCost={data().playCost} />
+              </Show>
+            </div>
+          </DefinitionBoundary>
         </div>
       </summary>
       <div class="p-[0.5em]">
-        <Switch>
-          <Match when={data.error}>{t("loadFailed")}</Match>
-          <Match when={data.state === "pending"}>{t("loading")}</Match>
-          <Match when={data()}>
-            {(data) => (
-              <Description
-                {...props}
-                definitionId={props.input.definitionId}
-                description={data().rawDescription}
-                keyMap={data().keyMap ?? {}}
-                onRequestExplain={props.onRequestExplain}
-              />
-            )}
-          </Match>
-        </Switch>
+        <DefinitionBoundary>
+          <Description
+            {...props}
+            definitionId={props.input.definitionId}
+            description={data().rawDescription}
+            keyMap={data().keyMap ?? {}}
+            onRequestExplain={props.onRequestExplain}
+          />
+        </DefinitionBoundary>
         <IdBox defId={props.input.definitionId} />
       </div>
     </details>
@@ -284,31 +262,21 @@ export function Entity(props: ExpandableCardDataProps) {
     }
   });
   const { assetsManager, t } = useAssetsManager();
-  const [data] = createResource(
-    () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<EntityRawData>,
+  const data = createDefinition<EntityRawData>(() => props.input.definitionId);
+  const icon = createMemo(() =>
+    assetsManager().getImageUrl(props.input.definitionId, { type: "icon" }),
   );
-  const [icon] = createResource(
-    () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getImageUrl(defId, { type: "icon" }),
-  );
-  const [entityTypeText, setEntityTypeText] = createSignal("");
-
-  createEffect(() => {
-    if (data.state === "ready") {
-      setEntityTypeText(typeTagText(data().type, t) ?? "");
-    }
-  });
+  const entityTypeText = () => typeTagText(data().type, t) ?? "";
   return (
     <details
-      class={`flex flex-col min-h-0 skill-wrap ${props.class ?? ""}`}
+      class={["flex flex-col min-h-0 skill-wrap", props.class]}
       open={!props.asChild}
     >
       <summary class="flex flex-row items-center p-[0.25em] gap-[0.25em] cursor-pointer skill-header">
         <div class="w-[3em] h-[3em] grid children:grid-area-[1/1] shrink-0">
-          <Show when={icon()}>
-            {(icon) => <img src={icon()} class="w-[3em] h-[3em]" />}
-          </Show>
+          <AssetFallback on={props.input.definitionId}>
+            <img src={icon()} class="w-[3em] h-[3em]" />
+          </AssetFallback>
           <Show when={typeof state()?.variableValue === "number"}>
             <div class="place-self-end rounded-full entity-variable">
               {state()!.variableValue}
@@ -316,32 +284,22 @@ export function Entity(props: ExpandableCardDataProps) {
           </Show>
         </div>
         <div class="flex flex-col">
-          <h3 class="skill-name">
-            {data()?.name ??
-              assetsManager().getNameSync(props.input.definitionId) ??
-              props.input.definitionId}
-          </h3>
-          <span class="skill-type">{entityTypeText()}</span>
+          <DefinitionBoundary nameFor={props.input.definitionId}>
+            <h3 class="skill-name">{data().name}</h3>
+            <span class="skill-type">{entityTypeText()}</span>
+          </DefinitionBoundary>
         </div>
       </summary>
       <div class="p-[0.5em]">
-        <Switch>
-          <Match when={data.error}>{t("loadFailed")}</Match>
-          <Match when={data.state === "pending"}>{t("loading")}</Match>
-          <Match when={data()}>
-            {(data) => (
-              <Description
-                {...props}
-                keyMap={state()?.descriptionDictionary ?? {}}
-                definitionId={props.input.definitionId}
-                description={
-                  data().rawPlayingDescription ?? data().rawDescription
-                }
-                onRequestExplain={props.onRequestExplain}
-              />
-            )}
-          </Match>
-        </Switch>
+        <DefinitionBoundary>
+          <Description
+            {...props}
+            keyMap={state()?.descriptionDictionary ?? {}}
+            definitionId={props.input.definitionId}
+            description={data().rawPlayingDescription ?? data().rawDescription}
+            onRequestExplain={props.onRequestExplain}
+          />
+        </DefinitionBoundary>
         <IdBox defId={props.input.definitionId} id={state()?.id} />
       </div>
     </details>
@@ -354,31 +312,21 @@ export interface CardDefinitionProps {
 }
 
 export function Keyword(props: CardDefinitionProps) {
-  const { assetsManager, t } = useAssetsManager();
-  const [data] = createResource(
-    () => [props.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<KeywordRawData>,
-  );
+  const data = createDefinition<KeywordRawData>(() => props.definitionId);
   return (
-    <div class={`px-[0.5em] ${props.class ?? ""}`}>
+    <div class={["px-[0.5em]", props.class]}>
       <h3 class="keyword-name">
-        {data()?.name ??
-          assetsManager().getNameSync(props.definitionId) ??
-          props.definitionId}
+        <DefinitionBoundary nameFor={props.definitionId}>
+          {data().name}
+        </DefinitionBoundary>
       </h3>
-      <Switch>
-        <Match when={data.error}>{t("loadFailed")}</Match>
-        <Match when={data.state === "pending"}>{t("loading")}</Match>
-        <Match when={data()}>
-          {(data) => (
-            <Description
-              {...props}
-              definitionId={props.definitionId}
-              description={data().rawDescription}
-            />
-          )}
-        </Match>
-      </Switch>
+      <DefinitionBoundary>
+        <Description
+          {...props}
+          definitionId={props.definitionId}
+          description={data().rawDescription}
+        />
+      </DefinitionBoundary>
       <IdBox defId={-props.definitionId} />
     </div>
   );
@@ -389,41 +337,26 @@ export interface ReferenceProps extends CardDefinitionProps {
 }
 
 export function Reference(props: ReferenceProps) {
-  const { assetsManager, t } = useAssetsManager();
-  const [data] = createResource(
-    () => [props.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<SkillRawData>,
-  );
+  const { t } = useAssetsManager();
+  const data = createDefinition<SkillRawData>(() => props.definitionId);
   return (
     <>
       <h4 class="flex flex-row items-center justify-between mb-[0.25em]">
-        <span class="reference-name">
-          {data()?.name ??
-            assetsManager().getNameSync(props.definitionId) ??
-            props.definitionId}
-        </span>
-        <Show when={data.state === "ready" && data()}>
-          {(data) => (
-            <span class="reference-type">{typeTagText(data().type, t)}</span>
-          )}
-        </Show>
+        <DefinitionBoundary nameFor={props.definitionId}>
+          <span class="reference-name">{data().name}</span>
+          <span class="reference-type">{typeTagText(data().type, t)}</span>
+        </DefinitionBoundary>
       </h4>
       <div class="reference-description">
-        <Switch>
-          <Match when={data.error}>{t("loadFailed")}</Match>
-          <Match when={data.state === "pending"}>{t("loading")}</Match>
-          <Match when={data()}>
-            {(data) => (
-              <Description
-                {...props}
-                keyMap={"keyMap" in data() ? (data().keyMap ?? {}) : {}}
-                definitionId={props.definitionId}
-                description={data().rawDescription}
-                onAddReference={props.onAddReference}
-              />
-            )}
-          </Match>
-        </Switch>
+        <DefinitionBoundary>
+          <Description
+            {...props}
+            keyMap={data().keyMap ?? {}}
+            definitionId={props.definitionId}
+            description={data().rawDescription}
+            onAddReference={props.onAddReference}
+          />
+        </DefinitionBoundary>
       </div>
       <IdBox defId={props.definitionId} />
     </>

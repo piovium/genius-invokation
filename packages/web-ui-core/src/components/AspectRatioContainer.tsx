@@ -14,19 +14,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { children, splitProps, type ComponentProps } from "solid-js";
+import { children, omit } from "solid-js";
+import type { ComponentProps } from "@solidjs/web";
 
 export function AspectRatioContainer(props: ComponentProps<"div">) {
-  const [local, restProps] = splitProps(props, [
-    "class",
-    "children",
-  ]);
-  const child = children(() => local.children);
+  const restProps = omit(props, "class", "children");
+  const child = children(() => props.children);
   return (
     <div
-      class={`aspect-ratio-[16/9] h-full max-w-full min-h-0 min-w-0 relative pointer-events-none children-pointer-events-auto ${
-        local.class ?? ""
-      }`}
+      class={[
+        "aspect-ratio-[16/9] h-full max-w-full min-h-0 min-w-0 relative pointer-events-none children-pointer-events-auto",
+        props.class,
+      ]}
       {...restProps}
     >
       {child()}

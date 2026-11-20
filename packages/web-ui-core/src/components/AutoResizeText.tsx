@@ -16,11 +16,10 @@
 import {
   children as solidChildren,
   createSignal,
-  onCleanup,
-  onMount,
-  splitProps,
-  type ComponentProps,
+  onSettled,
+  omit,
 } from "solid-js";
+import type { ComponentProps } from "@solidjs/web";
 
 export interface AutoResizeTextProps extends ComponentProps<"p"> {
   /**
@@ -31,11 +30,7 @@ export interface AutoResizeTextProps extends ComponentProps<"p"> {
 }
 
 export function AutoResizeText(props: AutoResizeTextProps) {
-  const [local, restProps] = splitProps(props, [
-    "class",
-    "minFontSize",
-    "children",
-  ]);
+  const restProps = omit(props, "class", "minFontSize", "children");
   let container!: HTMLParagraphElement;
   let textSpan!: HTMLSpanElement;
   let lastObservedWidth: number | null = null;
@@ -69,7 +64,7 @@ export function AutoResizeText(props: AutoResizeTextProps) {
       "--auto-resize-min-font-size",
     );
     const minSize =
-      (cssMinFontSize ? parseFloat(cssMinFontSize) : local.minFontSize) ?? 12;
+      (cssMinFontSize ? parseFloat(cssMinFontSize) : props.minFontSize) ?? 12;
 
     const containerWidth = Math.ceil(container.getBoundingClientRect().width);
     const baseFontSize = parseFloat(getComputedStyle(container).fontSize);
@@ -97,7 +92,7 @@ export function AutoResizeText(props: AutoResizeTextProps) {
     setShouldWrap(targetFontSize <= minSize && overflowAtTarget);
   };
 
-  onMount(() => {
+  onSettled(() => {
     // Initial measurement
     measure();
     // Re-measure on resize
@@ -114,10 +109,9 @@ export function AutoResizeText(props: AutoResizeTextProps) {
       measure();
     });
     resizeObserver.observe(container);
-  });
-
-  onCleanup(() => {
-    resizeObserver?.disconnect();
+    return () => {
+      resizeObserver?.disconnect();
+    };
   });
 
   const children = solidChildren(() => props.children);
@@ -125,7 +119,7 @@ export function AutoResizeText(props: AutoResizeTextProps) {
   return (
     <p
       ref={container}
-      class={`grid overflow-hidden ${props.class ?? ""}`}
+      class={["grid overflow-hidden", props.class]}
       {...restProps}
     >
       <span
