@@ -15,9 +15,9 @@
 
 import { createMemo, createSignal, For, Show, omit } from "solid-js";
 import type { ComponentProps } from "@solidjs/web";
-import type { SelectOptionRequest } from "@gi-tcg/typings";
+import { DiceType, type SelectOptionRequest } from "@gi-tcg/typings";
 import { Button } from "./Button";
-import { Image } from "./Image";
+import { ImageFallback } from "./Image";
 import { useUiContext } from "../hooks/context";
 import SelectOptionCard from "../svg/SelectOption.svg?fb";
 
@@ -107,34 +107,39 @@ export function SelectOption(props: SelectOptionProps) {
 
 export function SelectOptionImage(props: { image?: string; class?: string }) {
   const { assetsManager } = useUiContext();
-  const imageId = () => props.image?.match(/^id:\/\/(\d+)$/)?.[1];
-  const url = createMemo(() =>
-    props.image?.startsWith("name://")
-      ? assetsManager().getRawImageUrlSync(props.image.slice("name://".length))
-      : props.image,
+  const url = createMemo(
+    () =>
+      props.image &&
+      assetsManager().resolveCustomImageUrl(props.image, {
+        type: "icon",
+        thumbnail: true,
+      }),
   );
   return (
-    <Show when={props.image}>
-      <Show
-        when={imageId()}
-        fallback={
-          <img
-            src={url()}
-            alt=""
-            draggable="false"
-            class={`object-cover ${props.class ?? ""}`}
-          />
-        }
-      >
-        {(id) => (
-          <Image
-            imageId={Number(id())}
-            type="icon"
-            fallback="state"
-            class={props.class}
-          />
-        )}
-      </Show>
+    <Show when={url()} keyed>
+      {(src) => {
+        const [failed, setFailed] = createSignal(false);
+        return (
+          <Show
+            when={!failed()}
+            fallback={
+              <ImageFallback
+                type="state"
+                imageId={DiceType.Omni}
+                class={props.class}
+              />
+            }
+          >
+            <img
+              src={src}
+              alt=""
+              draggable="false"
+              class={`object-cover ${props.class ?? ""}`}
+              onError={() => setFailed(true)}
+            />
+          </Show>
+        );
+      }}
     </Show>
   );
 }

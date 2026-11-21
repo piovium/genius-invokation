@@ -16,6 +16,57 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+describe("custom image URLs", () => {
+  test("resolves image references and preserves ordinary URLs", () => {
+    const manager = new AssetsManager({ apiBaseUrl: API_ENDPOINT });
+    const url = "https://example.test/image.png";
+
+    expect(manager.resolveCustomImageUrl(url)).toBe(url);
+    expect(manager.resolveCustomImageUrl("name://TestIcon")).toBe(
+      manager.getRawImageUrlSync("TestIcon"),
+    );
+    expect(
+      manager.resolveCustomImageUrl("id://1101", {
+        type: "icon",
+        thumbnail: true,
+      }),
+    ).toBe(`${API_ENDPOINT}/api/v5/image/1101?thumbnail=true&type=icon`);
+  });
+
+  test("resolves custom images without following custom ID redirects", async () => {
+    const manager = new AssetsManager({
+      apiBaseUrl: API_ENDPOINT,
+      customData: [
+        {
+          characters: [],
+          entities: [],
+          attachments: [],
+          skills: ["id://2", "id://1", "name://TestIcon"].map(
+            (skillIconUrl, index) => ({
+              id: index + 1,
+              name: "Test Skill",
+              rawDescription: "",
+              skillIconUrl,
+              type: "normal",
+              playCost: [],
+            }),
+          ),
+        },
+      ],
+    });
+
+    expect(manager.getImageUrlSync(1, { type: "icon" })).toBe(
+      `${API_ENDPOINT}/api/v5/image/2?thumbnail=false&type=icon`,
+    );
+    expect(manager.resolveCustomImageUrl("id://1")).toBe(
+      `${API_ENDPOINT}/api/v5/image/1?thumbnail=false&type=unspecified`,
+    );
+    await expect(manager.getImageUrl(3)).resolves.toBe(
+      manager.getRawImageUrlSync("TestIcon"),
+    );
+  });
+});
+
 describe("version selection", () => {
   test("keeps string version behavior", async () => {
     const fetchMock = stubFetch();
