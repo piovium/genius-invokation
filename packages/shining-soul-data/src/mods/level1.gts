@@ -26,7 +26,7 @@ import { $, DiceType, customEvent } from "#custom-data-loader";
  */
 define card {
   id 321006;
-  description "结束阶段：治疗我方出战角色2点。满血时可选择是否触发并消耗次数。可用次数：2";
+  description "<color=#FFFFFFFF>结束阶段：</color>治疗我方出战角色2点。满血时可选择是否触发并消耗次数。<color=#FFFFFFFF>$[K3]：2</color>";
   cost DiceType.Aligned, 2;
   support place {
     usage 2;
@@ -67,7 +67,7 @@ const PhysicalTimaeusShouldDraw = customEvent(
  */
 define card {
   id 322003;
-  description "初始具有2个合成材料，结束阶段增加1个。打出圣遗物时，如可能，支付其总费用数量的材料免费装备（每回合1次）。成功触发后抓1张牌（每张蒂玛乌斯整局1次）。";
+  description "初始具有2个<color=#FFFFFFFF>合成材料</color>，<color=#FFFFFFFF>结束阶段</color>增加1个。<color=#FFFFFFFF>打出{SPRITE_PRESET#3004}圣遗物时，</color>如可能，支付其总费用数量的材料免费装备（每回合1次）。成功触发后抓1张牌（每张$[C322003]整局1次）。";
   cost DiceType.Aligned, 2;
   support ally {
     variable material, 2;
@@ -105,7 +105,7 @@ const PhysicalWagnerShouldDraw = customEvent("mod/physical/wagner/shouldDraw");
  */
 define card {
   id 322004;
-  description "初始具有2个锻造原胚，结束阶段增加1个。打出武器时，如可能，支付其总费用数量的原胚免费装备（每回合1次）。成功触发后抓1张牌（每张瓦格纳整局1次）。";
+  description "初始具有2个<color=#FFFFFFFF>锻造原胚</color>，<color=#FFFFFFFF>结束阶段</color>增加1个。<color=#FFFFFFFF>打出{SPRITE_PRESET#3003}武器时，</color>如可能，支付其总费用数量的原胚免费装备（每回合1次）。成功触发后抓1张牌（每张$[C322004]整局1次）。";
   cost DiceType.Aligned, 2;
   support ally {
     variable material, 2;
@@ -237,7 +237,7 @@ const PhysicalLibenCollect = customEvent("mod/physical/liben/collect");
  */
 define card {
   id 322008;
-  description "结束阶段：选择收集未使用的元素骰，本次每种最多1个，累计最多3个（万能为独立骰种）。行动阶段开始时：收集满3个则抓2张牌、生成2个万能元素骰，然后弃置此牌。";
+  description "<color=#FFFFFFFF>结束阶段：</color>选择收集未使用的元素骰，本次每种最多1个，累计最多3个（万能为独立骰种）。<color=#FFFFFFFF>行动阶段开始时：</color>收集满3个则抓2张牌、生成2个$[K411]骰，然后弃置此牌。";
   support ally {
     variable collected, 0;
     variable collectedKinds, 0 { visible false; };

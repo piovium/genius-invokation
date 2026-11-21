@@ -22,6 +22,7 @@ const modsPath = [
   "../mods/level2.gts",
   "../mods/level3.gts",
   "../mods/level4.gts",
+  "../mods/level5.gts",
 ];
 
 export default async function physicalPreset() {
