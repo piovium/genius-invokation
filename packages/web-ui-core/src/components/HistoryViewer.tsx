@@ -1342,6 +1342,10 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
     }
     case "selectOption": {
       const isOpp = opp(block.who);
+      const description =
+        typeof block.selectedTitle === "undefined"
+          ? block.selectedKey
+          : block.prompt;
       result = {
         type: block.type,
         opp: isOpp,
@@ -1350,13 +1354,13 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
         ),
         indent: block.indent,
         imageSize: "option",
-        optionImage: block.image,
+        optionImage: block.selectedImage,
         content: {
           opp: isOpp,
-          name: selectOptionText(block.title ?? ""),
+          name: selectOptionText(block.selectedTitle ?? block.prompt ?? ""),
           content: (
-            <p class="whitespace-pre-wrap">
-              {selectOptionText(block.text)}
+            <p class="whitespace-pre-wrap break-words">
+              {selectOptionText(description ?? "")}
             </p>
           ),
         },

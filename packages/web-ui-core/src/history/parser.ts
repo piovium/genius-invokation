@@ -870,9 +870,10 @@ export function updateHistory(
           mainBlock = {
             type: "selectOption",
             who: m.who as 0 | 1,
-            text: m.text,
-            image: m.image,
-            title: m.title,
+            prompt: m.prompt,
+            selectedKey: m.selectedKey,
+            selectedTitle: m.selectedTitle,
+            selectedImage: m.selectedImage,
             children: [],
             indent: history.currentIndent,
           };

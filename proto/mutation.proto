@@ -316,9 +316,11 @@ message SelectCardDoneEM {
 
 message SelectOptionDoneEM {
   int32 who = 1;
-  string text = 2;
-  optional string image = 3;
-  optional string title = 4;
+  optional string prompt = 2;
+  optional int32 selected_index = 3;
+  optional string selected_key = 4;
+  optional string selected_title = 5;
+  optional string selected_image = 6;
 }
 
 message HandleEventEM {

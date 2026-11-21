@@ -43,9 +43,17 @@ test("preserves option presentation through RPC encoding", () => {
 });
 
 test.each([
-  { who: 1, text: "Text only" },
-  { who: 0, text: "Chosen", image: "id://1101", title: "Title" },
-  { who: 0, text: "", image: "", title: "" },
+  { who: 1, prompt: "Choose", selectedIndex: 0, selectedKey: "legacy" },
+  { who: 1, selectedTitle: "Text only" },
+  {
+    who: 0,
+    prompt: "Choose",
+    selectedIndex: 1,
+    selectedKey: "character",
+    selectedTitle: "Character",
+    selectedImage: "id://1101",
+  },
+  { who: 0, selectedTitle: "", selectedImage: "" },
 ])("preserves selected option notification fields %j", (notification) => {
   expect(
     SelectOptionDoneEM.decode(SelectOptionDoneEM.encode(notification).finish()),

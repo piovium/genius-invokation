@@ -1230,15 +1230,20 @@ export class Game {
     if (selectedIndex < 0 || selectedIndex >= options.length) {
       throw new GiTcgIoError(who, "Selected option not in candidates");
     }
-    for (const recipient of [0, 1] as const) {
-      this.notifyOne(recipient, {
-        $case: "selectOptionDone",
-        who,
-        text: options[selectedIndex].text,
-        image: options[selectedIndex].image,
-        title: options[selectedIndex].title,
-      });
-    }
+    const option = options[selectedIndex];
+    const notification = {
+      $case: "selectOptionDone" as const,
+      who,
+      selectedTitle: option.title ?? option.text,
+      selectedImage: option.image,
+    };
+    this.notifyOne(who, {
+      ...notification,
+      prompt,
+      selectedIndex,
+      selectedKey: option.key,
+    });
+    this.notifyOne(flip(who), notification);
     return selectedIndex;
   }
 
