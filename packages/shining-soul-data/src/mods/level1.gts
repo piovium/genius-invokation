@@ -35,10 +35,23 @@ define card {
         :heal(2, $.my.active);
         :consumeUsage();
       } else {
-        :selectOption("西风大教堂：出战角色满血，是否触发治疗并消耗次数？", [
-          { key: "skip", text: "不触发，保留次数" },
-          { key: "heal", text: "触发治疗，消耗1次" },
-        ]);
+        :selectOption(
+          "西风大教堂：出战角色生命值已满，是否触发治疗并消耗可用次数？",
+          [
+            {
+              key: "heal",
+              text: "触发治疗，消耗1次可用次数",
+              image: "name://UI_Gcg_Buff_Common_Heal",
+              title: "治疗",
+            },
+            {
+              key: "skip",
+              text: "不触发治疗，保留可用次数",
+              image: "name://UI_Gcg_Buff_Common_More",
+              title: "跳过",
+            },
+          ],
+        );
       }
     };
     on selectOption {
@@ -153,10 +166,12 @@ define card {
         :consumeUsage();
       } else if (candidates.length > 0) {
         :selectOption(
-          "田铁嘴：选择获得1点充能的角色",
+          "田铁嘴：选择1名角色获得1点充能",
           candidates.map((ch) => ({
             key: String(ch.id),
-            text: `$[A${ch.definition.id}]`,
+            text: `$[A${ch.definition.id}]获得1点充能`,
+            image: `id://${ch.definition.id}`,
+            title: `$[A${ch.definition.id}]`,
           })),
         );
       }
@@ -170,12 +185,59 @@ define card {
 };
 
 define combatStatus {
+  name "强能之雷·充能选择" as HighVoltageQuestion;
+  image "name://UI_Gcg_Buff_Common_Special";
+  on selfEnter {
+    const candidates = :queryAll(
+      $.my.standby.var("energy", "<", "maxEnergy"),
+    );
+    :selectOption(
+      "元素共鸣：强能之雷：选择1名角色获得1点充能",
+      candidates.map((ch) => ({
+        key: String(ch.id),
+        text: `$[A${ch.definition.id}]获得1点充能`,
+        image: `id://${ch.definition.id}`,
+        title: `$[A${ch.definition.id}]`,
+      })),
+    );
+  };
+  on selectOption {
+    listenTo myself;
+    :gainEnergy(1, $.my.character.id(Number(:e.selectedKey)));
+    :dispose();
+  };
+};
+
+/**
+ * @id 331402
+ * @name 元素共鸣：强能之雷
+ * @cost 1*Electro
+ * @description
+ * 我方一名充能未满的角色获得1点充能。（出战角色优先）
+ * （牌组包含至少2个雷元素角色，才能加入牌组）
+ */
+define card {
+  id 331402;
+  cost DiceType.Electro, 1;
+  tags resonance;
+  filter :( :query($.my.character.var("energy", "<", "maxEnergy")) );
+  const active = :query($.my.active.var("energy", "<", "maxEnergy"));
+  if (active) {
+    active.gainEnergy(1);
+  } else {
+    :combatStatus(HighVoltageQuestion);
+  }
+};
+
+define combatStatus {
   name "白垩之术·充能转移" as CalxsArtsTransfer;
+  image "name://UI_Gcg_Buff_Common_Special";
   usage 2;
 };
 
 define status {
   name "白垩之术·询问" as CalxsArtsQuestion;
+  image "name://UI_Gcg_Buff_Common_Special";
   on selfEnter {
     if (!:query($.my.combatStatus.def(CalxsArtsTransfer))) {
       :dispose();
@@ -184,8 +246,18 @@ define status {
     :selectOption(
       `白垩之术：是否转移$[A${:self.master.definition.id}]的1点充能到出战角色？`,
       [
-        { key: "yes", text: "是" },
-        { key: "no", text: "否" },
+        {
+          key: "yes",
+          text: `转移$[A${:self.master.definition.id}]的1点充能到出战角色`,
+          image: "name://UI_Gcg_Buff_Common_Special",
+          title: "转移充能",
+        },
+        {
+          key: "no",
+          text: `不转移$[A${:self.master.definition.id}]的充能`,
+          image: "name://UI_Gcg_Buff_Common_More",
+          title: "跳过",
+        },
       ],
     );
   };
@@ -225,6 +297,17 @@ define card {
 };
 
 const diceNames = ["无色", "冰", "水", "火", "雷", "风", "岩", "草", "万能"];
+const diceImages = [
+  "DiceVoid",
+  "DiceCryoS",
+  "DiceHydroS",
+  "DicePyroS",
+  "DiceElectroS",
+  "DiceAnemoS",
+  "DiceGeoS",
+  "DiceDendroS",
+  "DiceOmniS",
+];
 const PhysicalLibenCollect = customEvent("mod/physical/liben/collect");
 
 /**
@@ -256,9 +339,19 @@ define card {
         )
         .sort((a, b) => a - b);
       if (kinds.length > 0) {
-        :selectOption("立本：选择放入1个元素骰，或停止放入", [
-          { key: "none", text: "停止放入" },
-          ...kinds.map((die) => ({ key: String(die), text: diceNames[die] })),
+        :selectOption("立本：选择收集1枚未使用元素骰，或停止收集", [
+          ...kinds.map((die) => ({
+            key: String(die),
+            text: `收集1枚${diceNames[die]}元素骰`,
+            image: `https://ui-assets.piovium.org/${diceImages[die]}.svg.webp`,
+            title: `${diceNames[die]}元素`,
+          })),
+          {
+            key: "none",
+            text: "停止继续收集元素骰",
+            image: "name://UI_Gcg_Buff_Common_More",
+            title: "停止收集",
+          },
         ]);
       }
     };

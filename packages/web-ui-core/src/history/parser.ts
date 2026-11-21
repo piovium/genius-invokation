@@ -871,8 +871,9 @@ export function updateHistory(
             type: "selectOption",
             who: m.who as 0 | 1,
             prompt: m.prompt,
-            selectedIndex: m.selectedIndex,
             selectedKey: m.selectedKey,
+            selectedTitle: m.selectedTitle,
+            selectedImage: m.selectedImage,
             children: [],
             indent: history.currentIndent,
           };

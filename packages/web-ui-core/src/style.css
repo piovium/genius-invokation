@@ -758,6 +758,23 @@
     }
   }
 
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .select-option-text {
+    mask-image: linear-gradient(
+      to bottom,
+      black calc(100% - 12px),
+      transparent
+    );
+  }
+
   /* Merge Chessboard */
   &[data-has-opp-chessboard] {
     .dice-bar-my {
