@@ -1350,7 +1350,9 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
         type: block.type,
         opp: isOpp,
         title: t(
-          isOpp ? "history.oppSelectOptionTitle" : "history.mySelectOptionTitle",
+          isOpp
+            ? "history.oppSelectOptionTitle"
+            : "history.mySelectOptionTitle",
         ),
         indent: block.indent,
         imageSize: "option",
@@ -1483,9 +1485,7 @@ export function HistorySummon(props: HistoryCardProps) {
   return (
     <Show
       when={!!props.definitionId}
-      fallback={
-        <div class={["bg-gray-700 b-2 b-white/50", props.class]} />
-      }
+      fallback={<div class={["bg-gray-700 b-2 b-white/50", props.class]} />}
     >
       <>
         <Image
@@ -1502,7 +1502,7 @@ export function HistorySummon(props: HistoryCardProps) {
 function HistoryOption(props: { image?: string; class?: string }) {
   return (
     <div
-      class={`pointer-events-none grid children:grid-area-[1/1] ${props.class ?? ""}`}
+      class={["pointer-events-none grid children:grid-area-[1/1]", props.class]}
     >
       <SelectOptionCard class="w-full h-full" />
       <SelectOptionImage

@@ -134,7 +134,7 @@ export function SelectOptionImage(props: { image?: string; class?: string }) {
               src={src}
               alt=""
               draggable="false"
-              class={`object-cover ${props.class ?? ""}`}
+              class={["object-cover", props.class]}
               onError={() => setFailed(true)}
             />
           </Show>

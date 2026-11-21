@@ -102,6 +102,7 @@ define combatStatus {
         .map((element, i) => ({
           key: String(i),
           text: `召唤$[S${303211 + i}]。\n结束阶段：造成1点${element}元素伤害。\n可用次数：2`,
+          // 借用愚人众阴谋四色图标
           image: `id://${303216 + i}`,
           title: `${element}元素`,
         }))
