@@ -20,7 +20,6 @@ import {
   DiceType,
   Reaction,
   type SelectOption,
-  SelectOptionUiType,
 } from "@gi-tcg/typings";
 import { clampVariable } from "../data/utils";
 
@@ -152,7 +151,6 @@ interface MaxCostHandsOpt {
 
 interface SelectOptionOpt {
   who?: "my" | "opp";
-  uiType?: "cardFace" | "icon" | "none";
 }
 
 interface DrawCardsOpt {
@@ -2288,11 +2286,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
       opt.who === "opp" ? flip(this.self.who) : this.self.who,
       prompt,
       options,
-      {
-        cardFace: SelectOptionUiType.CARD_FACE,
-        icon: SelectOptionUiType.ICON,
-        none: SelectOptionUiType.NONE,
-      }[opt.uiType ?? "none"],
     );
   }
 
