@@ -197,16 +197,12 @@ export default function Room() {
   }));
   return (
     <Show keyed when={session()}>
-      {renderRoomSession}
+      {(session) => <RoomSession {...session} />}
     </Show>
   );
 }
 
-function renderRoomSession({
-  code,
-  playerId,
-  action,
-}: {
+function RoomSession(props: {
   code: string;
   playerId?: string;
   action: boolean;
@@ -215,7 +211,7 @@ function renderRoomSession({
   const { t, assetsManager, locale } = useI18n();
   const checkboxId = createUniqueId();
   const navigate = useNavigate();
-  const id = roomCodeToId(code);
+  const id = () => roomCodeToId(props.code);
   const { status } = useAuth();
   const [playerIo, setPlayerIo] = createSignal<WebUiPlayerIO>();
   const [initialized, setInitialized] = createSignal<InitializedPayload>();
@@ -257,7 +253,7 @@ function renderRoomSession({
     const onGiveUp = async () => {
       try {
         const { data } = await axios.post(
-          `rooms/${id}/players/${playerId}/giveUp`,
+          `rooms/${id()}/players/${props.playerId}/giveUp`,
         );
       } catch (e) {
         if (e instanceof AxiosError) {
@@ -272,7 +268,7 @@ function renderRoomSession({
           assetsManager: () => assetsManager(profile),
           locale,
           onGiveUp,
-          disableAction: !action,
+          disableAction: !props.action,
         }),
       );
       setChessboard(() => Ui);
@@ -295,7 +291,7 @@ function renderRoomSession({
     setCurrentMyTimer(null);
     try {
       const reply = axios.post(
-        `rooms/${id}/players/${playerId}/actionResponse`,
+        `rooms/${id()}/players/${props.playerId}/actionResponse`,
         {
           id: payload.id,
           response: base64Encode(RpcResponse.encode(response).finish()),
@@ -315,7 +311,7 @@ function renderRoomSession({
       return;
     }
     try {
-      const { data } = await axios.delete(`rooms/${id}`);
+      const { data } = await axios.delete(`rooms/${id()}`);
       history.back();
     } catch (e) {
       if (e instanceof AxiosError) {
@@ -363,14 +359,14 @@ function renderRoomSession({
   };
 
   const roomInfo = createMemo(() =>
-    axios.get<{ status: string }>(`rooms/${id}`).then(({ data }) => data),
+    axios.get<{ status: string }>(`rooms/${id()}`).then(({ data }) => data),
   );
   const loadingNotice = () => (
     <div class="mb-3 alert alert-outline-info">{t("roomLoading")}</div>
   );
 
   const [fetchMyNotification, abortMyNotification] = createReconnectSse(
-    `rooms/${id}/players/${playerId}/notification`,
+    () => `rooms/${id()}/players/${props.playerId}/notification`,
     async (payload: any) => {
       setLoading(false);
       switch (payload.type) {
@@ -398,7 +394,7 @@ function renderRoomSession({
             onActionRequested(rpc);
           } else {
             // 观战方收到 RPC 状态变化时取消 RPC（玩家已完成 RPC 无需取消）
-            if (!action) {
+            if (!props.action) {
               playerIo()?.cancelRpc();
             }
             setCurrentMyTimer(null);
@@ -419,10 +415,10 @@ function renderRoomSession({
   );
 
   const getOppPlayerId = () => initialized()?.oppPlayerInfo.id;
-  const allowWatchOpp = () => !action;
+  const allowWatchOpp = () => !props.action;
 
   const [fetchOppNotification, abortOppNotification] = createReconnectSse(
-    () => `rooms/${id}/players/${getOppPlayerId()}/notification`,
+    () => `rooms/${id()}/players/${getOppPlayerId()}/notification`,
     (payload: any) => {
       switch (payload.type) {
         case "initialized": {
@@ -475,7 +471,7 @@ function renderRoomSession({
 
   const downloadGameLog = async () => {
     try {
-      const { data } = await axios.get(`rooms/${id}/gameLog`);
+      const { data } = await axios.get(`rooms/${id()}/gameLog`);
       const blob = new Blob([JSON.stringify(data)], {
         type: "application/json",
       });
@@ -539,7 +535,7 @@ function renderRoomSession({
           <div class="flex-grow group-data-[mobile]:hidden group-data-[mobile]:peer-checked:flex flex flex-row group-data-[mobile]:flex-col flex-wrap items-center justify-between mb-3">
             <div class="flex flex-row flex-wrap gap-3 items-center">
               <h2 class="text-2xl font-bold flex-shrink-0">
-                {t("roomNumber", { code })}
+                {t("roomNumber", { code: props.code })}
               </h2>
               <Show when={!loading() && !failed() && !initialized()}>
                 <button class="btn btn-outline-red" onClick={deleteRoom}>
@@ -569,7 +565,7 @@ function renderRoomSession({
                     <div>
                       <span>
                         {payload().myPlayerInfo.name}
-                        {action ? t("meLabel") : t("spectatingLabel")}
+                        {props.action ? t("meLabel") : t("spectatingLabel")}
                       </span>
                       <span class="font-bold"> VS </span>
                       <span>{payload().oppPlayerInfo.name}</span>
