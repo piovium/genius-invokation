@@ -852,7 +852,7 @@ function Equipment(props: EquipmentProps) {
   const data = createMemo(() => props.data);
   const EquipmentIcon = dynamic(() => props.icon);
   return (
-    <div class="w-7 h-7 mb--0.5 grid children:grid-area-[1/1]">
+    <div class="w-7 h-7 mb--0.4 grid children:grid-area-[1/1]">
       <EquipmentIcon
         class="w-7 h-7 equipment-icon"
         data-entering={data().animation === "entering"}

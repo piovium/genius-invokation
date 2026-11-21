@@ -86,6 +86,7 @@ function requireConfig(input: unknown) {
 
 ## Checks
 
+- Before finishing a Solid.js change, verify that the code has no reactivity warnings or errors by running a configured ESLint check inside the affected package.
 - During focused iteration, run `pnpm check` from the affected package directory if it defines a `check` script (for example, `packages/core`). Never run `tsc` directly.
 - Run `pnpm -r check` from the repository root to run a repository-wide check. A full `pnpm build` might be required: missing or stale package builds can cause mismatched types. Packages without a `check` script are skipped, so this is not full lint and type-check coverage.
 

@@ -135,6 +135,7 @@ define card {
  */
 define combatStatus {
   name "叛逆的守护" as BellShield0;
+  image "name://UI_Gcg_Buff_Common_Shield";
   description "为我方出战角色提供$[K6]。（可叠加，最多叠加到2点）\n<color=#FFFFFFFF>生成此出战状态的「$[C311305]」移除时：</color>弃置自身。";
   shield 1, 2;
   variable weaponId, 0;
@@ -153,6 +154,7 @@ define combatStatus {
  */
 define combatStatus {
   name "叛逆的守护" as BellShield1;
+  image "name://UI_Gcg_Buff_Common_Shield";
   description "为我方出战角色提供$[K6]。（可叠加，最多叠加到2点）\n<color=#FFFFFFFF>生成此出战状态的「$[C311305]」移除时：</color>弃置自身。";
   shield 1, 2;
   variable weaponId, 0;
@@ -171,6 +173,7 @@ define combatStatus {
  */
 define combatStatus {
   name "叛逆的守护" as BellShield2;
+  image "name://UI_Gcg_Buff_Common_Shield";
   description "为我方出战角色提供$[K6]。（可叠加，最多叠加到2点）\n<color=#FFFFFFFF>生成此出战状态的「$[C311305]」移除时：</color>弃置自身。";
   shield 1, 2;
   variable weaponId, 0;
