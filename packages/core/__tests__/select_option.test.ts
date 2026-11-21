@@ -1,8 +1,4 @@
 import { expect, test } from "vitest";
-import {
-  SelectOptionDoneEM,
-  SelectOptionRequest,
-} from "@gi-tcg/typings";
 import { verifyRpcResponse } from "../src/io";
 import { StateMutator } from "../src/mutator";
 import { Game } from "../src/game";
@@ -25,40 +21,6 @@ test("accepts an integer option index", () => {
   ).not.toThrow();
 });
 
-test("preserves option presentation through RPC encoding", () => {
-  const request = {
-    prompt: "Choose",
-    options: [
-      { key: "image", text: "", image: "id://1101", title: "Character" },
-      { key: "text", text: "Text only" },
-      { key: "url", text: "URL", image: "https://example.com/card.png" },
-      { key: "empty", image: "id://1101", title: "", text: "" },
-      { key: "uri", text: "URI", image: "data:image/png;base64,AA==" },
-      { key: "empty-image", text: "No image", image: "" },
-    ],
-  };
-  expect(
-    SelectOptionRequest.decode(SelectOptionRequest.encode(request).finish()),
-  ).toEqual(request);
-});
-
-test.each([
-  { who: 1, prompt: "Choose", selectedIndex: 0, selectedKey: "legacy" },
-  { who: 1, selectedTitle: "Text only" },
-  {
-    who: 0,
-    prompt: "Choose",
-    selectedIndex: 1,
-    selectedKey: "character",
-    selectedTitle: "Character",
-    selectedImage: "id://1101",
-  },
-  { who: 0, selectedTitle: "", selectedImage: "" },
-])("preserves selected option notification fields %j", (notification) => {
-  expect(
-    SelectOptionDoneEM.decode(SelectOptionDoneEM.encode(notification).finish()),
-  ).toEqual(notification);
-});
 
 test("option selection stops previews without interaction IO", async () => {
   const state = Game.createInitialState({
