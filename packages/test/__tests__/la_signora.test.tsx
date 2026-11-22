@@ -23,6 +23,11 @@ import {
   Chevreuse,
   RingOfBurstingGrenades,
 } from "@gi-tcg/data/internal/characters/pyro/chevreuse.gts";
+import {
+  BlazingHeat,
+  CrimsonWitchOfEmbers,
+  DecimatingLash,
+} from "@gi-tcg/data/internal/characters/pyro/crimson_witch_of_embers.gts";
 import { Aura } from "@gi-tcg/typings";
 import { expect } from "vitest";
 import { test } from "vitest";
@@ -66,4 +71,22 @@ test("la signora: death in cryo state", async () => {
   c.expect(laSignora).toHaveVariable({ alive: 1, health: 1 });
   // 复活后带着复活甲
   c.expect($.opp.typeStatus.def(IcesealedCrimsonWitchOfEmbers)).toBeExist();
+});
+
+test("la signora: decimating lash attaches blazing heat to the character hit by overloaded", async () => {
+  const target = ref();
+  const next = ref();
+  const c = setup(
+    <State>
+      <Character my active def={CrimsonWitchOfEmbers} />
+      <Character opp active aura={Aura.Electro} ref={target} />
+      <Character opp ref={next} />
+    </State>,
+  );
+
+  await c.me.skill(DecimatingLash);
+
+  c.expect($.opp.active).toBe(next);
+  c.expect($.typeStatus.def(BlazingHeat).at($.id(target.id))).toBeExist();
+  c.expect($.typeStatus.def(BlazingHeat).at($.id(next.id))).toNotExist();
 });
