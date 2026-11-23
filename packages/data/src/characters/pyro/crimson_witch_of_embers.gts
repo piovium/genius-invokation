@@ -83,8 +83,8 @@ define skill {
   id 63012 as DecimatingLash;
   skillType elemental;
   cost DiceType.Pyro, 3;
-  :damage(DamageType.Pyro, 2);
   :characterStatus(BlazingHeat, $.opp.active);
+  :damage(DamageType.Pyro, 2);
 };
 
 /**

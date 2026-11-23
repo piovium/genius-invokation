@@ -530,14 +530,31 @@ export class AssetsManager {
   }
 
   getImageUrlSync(id: number, options: GetImageOptions = {}): string {
+    const customUrl = this.customDataImageUrls.get(id);
+    return typeof customUrl === "undefined"
+      ? this.getOfficialImageUrlSync(id, options)
+      : this.resolveCustomImageUrl(customUrl, options);
+  }
+
+  resolveCustomImageUrl(url: string, options: GetImageOptions = {}): string {
+    const imageId = url.match(/^id:\/\/(\d+)$/)?.[1];
+    if (typeof imageId !== "undefined") {
+      return this.getOfficialImageUrlSync(Number(imageId), options);
+    }
+    return url.startsWith("name://")
+      ? this.getRawImageUrlSync(url.slice("name://".length))
+      : url;
+  }
+
+  private getOfficialImageUrlSync(
+    id: number,
+    options: GetImageOptions,
+  ): string {
     const searchParams = new URLSearchParams({
       thumbnail: String(options.thumbnail ?? false),
       type: options.type ?? "unspecified",
     });
-    const url =
-      this.customDataImageUrls.get(id) ??
-      `${this.apiUrl}/image/${id}?${searchParams}`;
-    return url;
+    return `${this.apiUrl}/image/${id}?${searchParams}`;
   }
 
   getRawImageUrlSync(imageName: string): string {
@@ -549,7 +566,7 @@ export class AssetsManager {
     options: GetImageOptions = {},
   ): Promise<string> {
     if (this.customDataImageUrls.has(id)) {
-      return this.customDataImageUrls.get(id)!;
+      return this.getImageUrlSync(id, options);
     }
     const blob = await this.getImage(id, options);
     return blobToDataUrl(blob);

@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { IS_BETA } from "@gi-tcg/config";
 import { CURRENT_VERSION, VERSIONS } from "@gi-tcg/core";
 import { loadPresets, officialProfile } from "./compiler";
 import type { CompiledProfile } from "./types";
@@ -26,6 +27,10 @@ export class ProfilesService {
     for (const version of VERSIONS) {
       const compiled = officialProfile(version);
       this.profiles.set(compiled.profile.id, compiled);
+    }
+    if (IS_BETA) {
+      // beta 服不维护 old_versions，加载 presets 会 mismatch
+      return;
     }
     for (const compiled of await loadPresets(
       new URL("../../presets/", import.meta.url),
