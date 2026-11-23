@@ -195,7 +195,9 @@ define card {
     };
     on dealReaction {
       when :(
-        ([Reaction.Bloom, Reaction.LunarBloom] as Reaction[]).includes(:e.type)
+        ([Reaction.Bloom, Reaction.LunarBloom] as Reaction[]).includes(
+          :e.type,
+        ) && :query($.my.character.var("health", "<", "maxHealth"))
       );
       listenTo samePlayer;
       usage perRound, 1;
