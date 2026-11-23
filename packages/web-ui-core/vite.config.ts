@@ -35,7 +35,9 @@ export default defineConfig({
     },
     gts(),
     unoCss(),
-    solid(),
+    solid({
+      performanceTracks: false,
+    }),
     svgWithFallback(),
     !process.env.NO_TYPING && dts({ bundleTypes: true }),
   ],

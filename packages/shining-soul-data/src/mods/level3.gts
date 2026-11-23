@@ -14,7 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   DiceType,
+  customEvent,
   type CombatStatusHandle,
   type SummonHandle,
 } from "#custom-data-loader";
@@ -76,42 +78,97 @@ define card {
 };
 
 const elements = ["冰", "水", "火", "雷"];
-const pairs = elements.flatMap((a, i) =>
-  elements.slice(i + 1).map((b, offset) => ({
-    key: `${i},${i + offset + 1}`,
-    text: `${a}、${b}`,
-  })),
+const PhysicalElementDeclaration = customEvent(
+  "mod/physical/elementDeclaration/choose",
 );
 
-/**
- * @name 元素声明
- * @description
- * 我方声明冰、水、火、雷中的两种不同元素，再由对方选择其中一种。
- */
 define combatStatus {
-  name "元素声明" as ElementDeclaration;
-  variable fatui, 0;
-  variable stage, 0;
+  name "深渊的呼唤·元素声明" as AbyssalSummonsDeclaration;
+  description "从冰、水、火、雷中声明两种不同元素，由对方选择其中一种，召唤对应的「丘丘人」召唤物。";
+  image "name://UI_Gcg_Buff_Common_Special";
+  variable declared, 0 { visible false; };
+  variable elements, 0 { visible false; };
   on selfEnter {
-    :selectOption("声明两种元素由对方选择其一：", pairs);
+    :emitCustomEvent(PhysicalElementDeclaration);
+  };
+  on PhysicalElementDeclaration {
+    listenTo myself;
+    const declaring = :variables.declared < 2;
+    :selectOption(
+      declaring
+        ? `深渊的呼唤：声明2种元素由对方选择，当前声明第${:variables.declared + 1}种元素`
+        : "对方使用深渊的呼唤：选择1种对方声明的元素，在对方场上召唤对应丘丘人",
+      elements
+        .map((element, i) => ({
+          key: String(i),
+          text: `召唤$[S${303211 + i}]。\n结束阶段：造成1点${element}元素伤害。\n可用次数：2`,
+          // 借用愚人众阴谋四色图标
+          image: `id://${303216 + i}`,
+          title: `${element}元素`,
+        }))
+        .filter((_, i) =>
+          declaring
+            ? !(:variables.elements & (1 << i))
+            : !!(:variables.elements & (1 << i)),
+        ),
+      { who: declaring ? "my" : "opp" },
+    );
   };
   on selectOption {
     listenTo myself;
-    if (:variables.stage === 0) {
-      :variables.stage = 1;
-      const chosen = :e.selectedKey.split(",").map(Number);
-      :selectOption(
-        `对方已声明${chosen.map((i) => elements[i]).join("、")}，请选择一种`,
-        chosen.map((i) => ({ key: String(i), text: elements[i] })),
-        { who: "opp" },
-      );
+    if (:variables.declared < 2) {
+      :variables.elements |= 1 << Number(:e.selectedKey);
+      :variables.declared++;
+      :emitCustomEvent(PhysicalElementDeclaration);
     } else {
-      const element = Number(:e.selectedKey);
-      if (:variables.fatui) {
-        :combatStatus((303216 + element) as CombatStatusHandle, "opp");
-      } else {
-        :summon((303211 + element) as SummonHandle);
-      }
+      :summon((303211 + Number(:e.selectedKey)) as SummonHandle);
+      :dispose();
+    }
+  };
+};
+
+define combatStatus {
+  name "愚人众的阴谋·元素声明" as FatuiConspiracyDeclaration;
+  image "name://UI_Gcg_Buff_Common_Special";
+  description "从冰、水、火、雷中声明两种不同元素，由对方选择其中一种，在对方场上生成对应的「愚人众伏兵」。";
+  variable declared, 0 { visible false; };
+  variable elements, 0 { visible false; };
+  on selfEnter {
+    :emitCustomEvent(PhysicalElementDeclaration);
+  };
+  on PhysicalElementDeclaration {
+    listenTo myself;
+    const declaring = :variables.declared < 2;
+    :selectOption(
+      declaring
+        ? `愚人众的阴谋：声明2种元素由对方选择，当前声明第${:variables.declared + 1}种元素`
+        : "对方使用愚人众的阴谋：选择1种对方声明的元素，在我方场上生成对应愚人众伏兵",
+      elements
+        .map((element, i) => ({
+          key: String(i),
+          text: `生成$[C${303216 + i}]。\n所在阵营的角色使用技能后：对所在阵营的出战角色造成1点${element}元素伤害。（每回合1次）\n可用次数：2`,
+          image: `id://${303216 + i}`,
+          title: `${element}元素`,
+        }))
+        .filter((_, i) =>
+          declaring
+            ? !(:variables.elements & (1 << i))
+            : !!(:variables.elements & (1 << i)),
+        ),
+      { who: declaring ? "my" : "opp" },
+    );
+  };
+  on selectOption {
+    listenTo myself;
+    if (:variables.declared < 2) {
+      :variables.elements |= 1 << Number(:e.selectedKey);
+      :variables.declared++;
+      :emitCustomEvent(PhysicalElementDeclaration);
+    } else {
+      :combatStatus(
+        (303216 + Number(:e.selectedKey)) as CombatStatusHandle,
+        "opp",
+      );
       :dispose();
     }
   };
@@ -130,7 +187,9 @@ define card {
   id 332015;
   description "声明冰、水、火、雷中的两种元素，由对方选择其中一种，召唤对应的丘丘人（2次可用次数）。牌组包含至少2个魔物角色才能加入。";
   cost DiceType.Aligned, 2;
-  :combatStatus(ElementDeclaration);
+  if (:queryAll($.my.summon).length < :state.config.maxSummonsCount) {
+    :combatStatus(AbyssalSummonsDeclaration);
+  }
 };
 
 /**
@@ -147,7 +206,5 @@ define card {
   id 332016;
   description "声明冰、水、火、雷中的两种元素，由对方选择其中一种，在对方场上生成对应的愚人众伏兵（2次可用次数，每回合1次）。牌组包含至少2个愚人众角色才能加入。";
   cost DiceType.Aligned, 2;
-  :combatStatus(ElementDeclaration, "my", {
-    overrideVariables: { fatui: 1 },
-  });
+  :combatStatus(FatuiConspiracyDeclaration);
 };

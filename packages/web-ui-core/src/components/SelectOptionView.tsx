@@ -13,11 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { createSignal, For, Show, omit } from "solid-js";
+import { createMemo, createSignal, For, Show, omit } from "solid-js";
 import type { ComponentProps } from "@solidjs/web";
-import { type SelectOptionRequest, SelectOptionUiType } from "@gi-tcg/typings";
+import { DiceType, type SelectOptionRequest } from "@gi-tcg/typings";
 import { Button } from "./Button";
-import { Image } from "./Image";
+import { ImageFallback } from "./Image";
 import { useUiContext } from "../hooks/context";
 import SelectOptionCard from "../svg/SelectOption.svg?fb";
 
@@ -30,6 +30,7 @@ export interface SelectOptionViewProps {
 export function SelectOptionView(props: SelectOptionViewProps) {
   const { t } = useUiContext();
   const [selectedIndex, setSelectedIndex] = createSignal<number | null>(null);
+  const selectOptionText = textWithReference();
   return (
     <div
       class="w-full h-full hidden data-[shown]:flex flex-col items-center justify-center select-none z-3 min-w-0 min-h-0"
@@ -39,13 +40,12 @@ export function SelectOptionView(props: SelectOptionViewProps) {
         {t("view.selectOption")}
       </h3>
       <p class="h-6 text-white/60 text-4">
-        <SelectOptionText text={props.request.prompt} />
+        {selectOptionText(props.request.prompt)}
       </p>
       <div class={`flex flex-row h-36 mt-9 mb-15 justify-evenly w-180`}>
         <For each={props.request.options}>
           {(option, index) => (
             <SelectOption
-              uiType={props.request.uiType}
               image={option.image}
               title={option.title}
               text={option.text}
@@ -72,25 +72,14 @@ export function SelectOptionView(props: SelectOptionViewProps) {
 }
 
 export interface SelectOptionProps extends ComponentProps<"div"> {
-  uiType: SelectOptionUiType;
   image?: string;
   title?: string;
   text: string;
 }
 
 export function SelectOption(props: SelectOptionProps) {
-  const rest = omit(props, "uiType", "image", "title", "text", "class");
-  const imageId = () => props.image?.match(/^id:\/\/(\d+)$/)?.[1];
-  const imageType = () => {
-    switch (props.uiType) {
-      case SelectOptionUiType.CARD_FACE:
-        return "cardFace" as const;
-      case SelectOptionUiType.ICON:
-        return "icon" as const;
-      default:
-        return void 0;
-    }
-  };
+  const rest = omit(props, "image", "title", "text", "class");
+  const selectOptionText = textWithReference();
   return (
     <div
       class={[
@@ -101,48 +90,66 @@ export function SelectOption(props: SelectOptionProps) {
     >
       <SelectOptionCard class="w-full h-full select-option-card" />
       <div class="grid grid-rows-[3.2rem_1.6rem_4.2rem] grid-cols-1 w-full h-full justify-items-center z-1">
-        <Show when={props.image && imageType()}>
-          <Show
-            when={imageId()}
-            fallback={
-              <img
-                src={props.image}
-                alt=""
-                draggable="false"
-                class="rounded-full w-9 h-9 object-cover grid-area-[1/1] self-end"
-              />
-            }
-          >
-            {(id) => (
-              <Image
-                imageId={Number(id())}
-                type={imageType()}
-                fallback={imageType() === "cardFace" ? "card" : "state"}
-                class="rounded-full w-9 h-9 grid-area-[1/1] self-end"
-              />
-            )}
-          </Show>
-        </Show>
+        <SelectOptionImage
+          image={props.image}
+          class="rounded-full w-9 h-9 grid-area-[1/1] self-end"
+        />
         <span class="grid-area-[2/1] text-#ebccba font-bold text-2.5 self-center">
-          <SelectOptionText text={props.title ?? ""} />
+          {selectOptionText(props.title ?? "")}
         </span>
-        <div class="grid-area-[3/1] w-full h-full overflow-y-auto px-1 text-2 text-#ebd6c0 whitespace-pre-wrap break-words">
-          <SelectOptionText text={props.text} />
+        <div class="grid-area-[3/1] w-full h-full overflow-y-auto px-1 pb-1 text-2 text-#ebd6c0 whitespace-pre-wrap break-words touch-pan scrollbar-hidden select-option-text">
+          {selectOptionText(props.text)}
         </div>
       </div>
     </div>
   );
 }
 
-function SelectOptionText(props: { text: string }) {
+export function SelectOptionImage(props: { image?: string; class?: string }) {
   const { assetsManager } = useUiContext();
+  const url = createMemo(
+    () =>
+      props.image &&
+      assetsManager().resolveCustomImageUrl(props.image, {
+        type: "icon",
+        thumbnail: true,
+      }),
+  );
   return (
-    <>
-      {props.text.replace(
-        /\$\[[ACS](\d+)\]/g,
-        (reference, id: string) =>
-          assetsManager().getNameSync(Number(id)) ?? reference,
-      )}
-    </>
+    <Show when={url()} keyed>
+      {(src) => {
+        const [failed, setFailed] = createSignal(false);
+        return (
+          <Show
+            when={!failed()}
+            fallback={
+              <ImageFallback
+                type="state"
+                imageId={DiceType.Omni}
+                class={props.class}
+              />
+            }
+          >
+            <img
+              src={src}
+              alt=""
+              draggable="false"
+              class={["object-cover", props.class]}
+              onError={() => setFailed(true)}
+            />
+          </Show>
+        );
+      }}
+    </Show>
   );
 }
+
+export const textWithReference = () => {
+  const { assetsManager } = useUiContext();
+  return (text: string) =>
+    text.replace(
+      /\$\[[ACS](\d+)\]/g,
+      (reference, id: string) =>
+        assetsManager().getNameSync(Number(id)) ?? reference,
+    );
+};
