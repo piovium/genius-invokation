@@ -1534,7 +1534,6 @@ export function Chessboard(props: ChessboardProps) {
       const initialPointerX = e.clientX;
       const initialPointerY = e.clientY;
       const zRatio = (PERSPECTIVE - DRAGGING_Z) / PERSPECTIVE;
-      // Only the dragged card and tuning area track pointer coordinates.
       const [position, setPosition] = createSignal<Pos>([originalX, originalY]);
       setDraggingHand({
         id: cardInfo.id,
@@ -1589,6 +1588,7 @@ export function Chessboard(props: ChessboardProps) {
     }
     shouldMoveWhenHandBlurring?.resolve(true);
     const size = [height(), width()] as Size;
+    // update internal signal
     const [, y] = dragging.updatePos(e);
     if (canToggleHandFocus()) {
       const shouldFocusingHand = shouldFocusHandWhenDragging(size, y);
