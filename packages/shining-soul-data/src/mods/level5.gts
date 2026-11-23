@@ -253,6 +253,7 @@ define card {
     on discardOrTuneCard {
       when :( :e.isTuning() );
       usage 2 {
+        visible false;
         autoDispose false;
       };
       :variables.count += 1;
