@@ -39,6 +39,7 @@ import {
   untrack,
   createStore,
   For,
+  type Accessor,
 } from "solid-js";
 import type { ComponentProps, JSX } from "@solidjs/web";
 import { funnel } from "remeda";
@@ -150,8 +151,7 @@ export interface CardInfo {
 export interface DraggingCardInfo {
   id: number;
   data: PbEntityState;
-  x: number;
-  y: number;
+  position: Accessor<Pos>;
   status: "start" | "moving" | "end";
   tuneStep: ElementalTuningActionStep | null;
   updatePos: (e: PointerEvent) => Pos;
@@ -467,7 +467,7 @@ function calcCardsInfo(
 
   // Dragging
   if (ctx.draggingHand) {
-    const { x, y, status, id, data } = ctx.draggingHand;
+    const { position, status, id, data } = ctx.draggingHand;
     const playStep =
       availableSteps.find(
         (step): step is PlayCardActionStep =>
@@ -487,12 +487,9 @@ function calcCardsInfo(
         type: "cardStatic",
         isAnimating: false,
         triggered: triggeringEntities.includes(id),
-        transform: {
-          x,
-          y,
-          z: DRAGGING_Z,
-          ry: 0,
-          rz: 0,
+        get transform() {
+          const [x, y] = position();
+          return { x, y, z: DRAGGING_Z, ry: 0, rz: 0 };
         },
         draggingEndAnimation: status === "end",
       },
@@ -978,9 +975,11 @@ function rerenderChildren(opt: {
   const [tuningAreaX, tuningAreaY] = getTuningAreaPos(size, draggingHand);
   const tuningArea: TuningAreaInfo = {
     draggingHand,
-    cardHovering: draggingHand
-      ? draggingHand.x + CARD_WIDTH > tuningAreaX
-      : false,
+    get cardHovering() {
+      const [draggingX = Number.NEGATIVE_INFINITY] =
+        draggingHand?.position() ?? [];
+      return draggingX + CARD_WIDTH > tuningAreaX;
+    },
     transform: {
       x: tuningAreaX,
       y: tuningAreaY,
@@ -1145,9 +1144,7 @@ export function Chessboard(props: ChessboardProps) {
     minQuietPeriodMs: 200,
   });
   const resizeObserver = new ResizeObserver(onResizeDebouncer.call);
-  const [children, setChildren] = createSignal<
-    ChessboardChildrenUpdate
-  >({
+  const [children, setChildren] = createSignal<ChessboardChildrenUpdate>({
     forceUpdate: true,
     characters: [],
     cards: [],
@@ -1537,11 +1534,11 @@ export function Chessboard(props: ChessboardProps) {
       const initialPointerX = e.clientX;
       const initialPointerY = e.clientY;
       const zRatio = (PERSPECTIVE - DRAGGING_Z) / PERSPECTIVE;
+      const [position, setPosition] = createSignal<Pos>([originalX, originalY]);
       setDraggingHand({
         id: cardInfo.id,
         data: cardInfo.data,
-        x: originalX,
-        y: originalY,
+        position,
         status: "start",
         tuneStep: cardInfo.tuneStep ?? null,
         updatePos: (e2) => {
@@ -1553,7 +1550,7 @@ export function Chessboard(props: ChessboardProps) {
           const dy = e2.clientY - initialPointerY;
           const x = originalX + ((cos * dx - sin * dy) / scale / unit) * zRatio;
           const y = originalY + ((sin * dx + cos * dy) / scale / unit) * zRatio;
-          return [x, y];
+          return setPosition([x, y]);
         },
       });
     } else if (untrack(() => props.opp) && cardInfo.kind === "oppHand") {
@@ -1591,7 +1588,8 @@ export function Chessboard(props: ChessboardProps) {
     }
     shouldMoveWhenHandBlurring?.resolve(true);
     const size = [height(), width()] as Size;
-    const [x, y] = dragging.updatePos(e);
+    // update internal signal
+    const [, y] = dragging.updatePos(e);
     if (canToggleHandFocus()) {
       const shouldFocusingHand = shouldFocusHandWhenDragging(size, y);
       setFocusingHands(shouldFocusingHand);
@@ -1605,12 +1603,9 @@ export function Chessboard(props: ChessboardProps) {
         });
       }
     }
-    setDraggingHand({
-      ...dragging,
-      status: "moving",
-      x,
-      y,
-    });
+    if (dragging.status === "start") {
+      setDraggingHand({ ...dragging, status: "moving" });
+    }
   };
   const onCardPointerUp = (
     e: PointerEvent,
@@ -1625,8 +1620,9 @@ export function Chessboard(props: ChessboardProps) {
       return;
     }
     const [tuningAreaX] = getTuningAreaPos(size, dragging);
-    const shouldFocusingHand = shouldFocusHandWhenDragging(size, dragging.y);
-    if (cardInfo.tuneStep && dragging.x + CARD_WIDTH > tuningAreaX) {
+    const [x, y] = dragging.position();
+    const shouldFocusingHand = shouldFocusHandWhenDragging(size, y);
+    if (cardInfo.tuneStep && x + CARD_WIDTH > tuningAreaX) {
       const accepted =
         props.onStepActionState?.(cardInfo.tuneStep, selectedDiceValue()) ??
         false;
@@ -1839,10 +1835,7 @@ export function Chessboard(props: ChessboardProps) {
             perspective: `${PERSPECTIVE / 4}rem`,
           }}
         >
-          <ChildrenCluster
-            input={children()}
-            path="characters"
-          >
+          <ChildrenCluster input={children()} path="characters">
             {(character) => (
               <CharacterArea
                 {...character()}
