@@ -976,9 +976,9 @@ function rerenderChildren(opt: {
   const tuningArea: TuningAreaInfo = {
     draggingHand,
     get cardHovering() {
-      return (
-        !!draggingHand && draggingHand.position()[0] + CARD_WIDTH > tuningAreaX
-      );
+      const [draggingX = Number.NEGATIVE_INFINITY] =
+        draggingHand?.position() ?? [];
+      return draggingX + CARD_WIDTH > tuningAreaX;
     },
     transform: {
       x: tuningAreaX,
@@ -1144,9 +1144,7 @@ export function Chessboard(props: ChessboardProps) {
     minQuietPeriodMs: 200,
   });
   const resizeObserver = new ResizeObserver(onResizeDebouncer.call);
-  const [children, setChildren] = createSignal<
-    ChessboardChildrenUpdate
-  >({
+  const [children, setChildren] = createSignal<ChessboardChildrenUpdate>({
     forceUpdate: true,
     characters: [],
     cards: [],
@@ -1837,10 +1835,7 @@ export function Chessboard(props: ChessboardProps) {
             perspective: `${PERSPECTIVE / 4}rem`,
           }}
         >
-          <ChildrenCluster
-            input={children()}
-            path="characters"
-          >
+          <ChildrenCluster input={children()} path="characters">
             {(character) => (
               <CharacterArea
                 {...character()}
