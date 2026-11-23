@@ -209,7 +209,6 @@ define card {
   since "v3.3.0";
   cost DiceType.Hydro, 1;
   tags resonance;
-  filter :( :query($.my.character.var("health", "<", "maxHealth")) );
   :heal(2, $.my.active);
   :heal(1, $.my.standby);
 };

@@ -244,6 +244,19 @@ export class StateRecorder {
         ];
       }
       case PbResetDiceReason.GENERATE: {
+        if (new_.includes(DiceType.Void)) {
+          const count = new_.length - old.length;
+          return count > 0
+            ? [
+                {
+                  type: "generateDice",
+                  who: mut.who as 0 | 1,
+                  diceType: DiceType.Void,
+                  count,
+                },
+              ]
+            : [];
+        }
         const generated: DiceType[] = [];
         for (const d of new_) {
           const idx = old.indexOf(d);
