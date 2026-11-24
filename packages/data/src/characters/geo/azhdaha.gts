@@ -44,6 +44,7 @@ define extension {
 define status {
   id 126021 as StoneFacetsElementalAbsorption;
   associateExtension AbsorbedCountExtension;
+  variable absorbedCount, 0;
   on transformDefinition {
     when :( :e.oldDefinition.id !== :e.newDefinition.id );
     let diceType: DiceType = DiceType.Geo;
@@ -66,6 +67,9 @@ define status {
         st.absorbed[:self.who].push(diceType);
       }
     });
+    :self.variables.absorbedCount = :getExtensionState().absorbed[
+      :self.who
+    ].length;
     :generateDice(diceType, 1);
   };
 };
@@ -256,7 +260,7 @@ define skill {
  * @hp 10
  * @energy 2
  * @description
- * 
+ *
  */
 define character {
   id 6601 as AzhdahaCryo;
@@ -292,7 +296,7 @@ define skill {
  * @hp 10
  * @energy 2
  * @description
- * 
+ *
  */
 define character {
   id 6602 as AzhdahaHydro;
@@ -328,7 +332,7 @@ define skill {
  * @hp 10
  * @energy 2
  * @description
- * 
+ *
  */
 define character {
   id 6603 as AzhdahaPyro;
@@ -364,7 +368,7 @@ define skill {
  * @hp 10
  * @energy 2
  * @description
- * 
+ *
  */
 define character {
   id 6604 as AzhdahaElectro;
