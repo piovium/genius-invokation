@@ -56,6 +56,7 @@ import {
 } from "../base/skill";
 import {
   type CharacterState as CharacterStateO,
+  type CharacterVariables,
   type EntityState as EntityStateO,
   type AttachmentState as AttachmentStateO,
   type GameData,
@@ -64,6 +65,7 @@ import {
   type PlayerState,
   stringifyState,
   PlungingStatus,
+  StateSymbol,
 } from "../base/state";
 import {
   getEntityArea,
@@ -1228,6 +1230,37 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return (this as any)[CALLED_FROM_REACTION] ?? null;
   }
 
+  createCharacter(id: CharacterHandle, where: "my" | "opp" = "my") {
+    // The preview protocol cannot represent a newly added character.
+    this.abortPreview();
+    const definition = this.rawState.data.characters.get(id);
+    if (typeof definition === "undefined") {
+      throw new GiTcgDataError(`Unknown character definition id ${id}`);
+    }
+    const value = {
+      [StateSymbol]: "character" as const,
+      id: 0,
+      definition,
+      variables: Object.fromEntries(
+        Object.entries(definition.varConfigs).map(([name, config]) => [
+          name,
+          config.initialValue,
+        ]),
+      ) as CharacterVariables,
+      entities: [],
+    };
+    this.mutate({
+      type: "createCharacter",
+      who: where === "my" ? this.self.who : flip(this.self.who),
+      value,
+    });
+    this.emitEvent("onCreateCharacter", this.rawState, {
+      newState: this.get<"character">(value.id).latest(),
+      overridden: null,
+    });
+    return this.get<"character">(value.id);
+  }
+
   createEntity<Ty extends EntityType, const Id extends HandleT<Ty>>(
     type: Ty,
     id: Id,
@@ -1613,6 +1646,12 @@ export class SkillContext<Meta extends ContextMetaBase> {
         state: target,
         newDefinition: def,
       });
+      if (def.type === "character") {
+        this.emitEvent("onCreateCharacter", this.rawState, {
+          newState: t.latest(),
+          overridden: null,
+        });
+      }
     }
   }
 
@@ -2375,6 +2414,7 @@ type SkillContextMutativeProps =
   | "apply"
   | "cleanAura"
   | "createEntity"
+  | "createCharacter"
   | "moveEntity"
   | "summon"
   | "combatStatus"

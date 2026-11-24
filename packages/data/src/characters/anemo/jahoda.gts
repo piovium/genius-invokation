@@ -237,7 +237,8 @@ define skill {
 define skill {
   id 15164 as MoonsignBenedictionRooftopDash;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1;
       :createHandCard(PurrloinedTreasureFlask);
     };
     on dealReaction {

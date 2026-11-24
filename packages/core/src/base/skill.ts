@@ -1326,7 +1326,7 @@ export class CustomEventEventArg<T = unknown> extends EntityEventArg {
 }
 
 export const EVENT_MAP = {
-  onBattleBegin: EventArg,
+  onCreateCharacter: EnterEventArg,
   onRoundBegin: EventArg,
   onRoundEnd: EventArg,
 
@@ -1375,7 +1375,6 @@ export const EVENT_MAP = {
   onDispose: DisposeEventArg,
 
   modifyZeroHealth: ZeroHealthEventArg,
-  onRevive: CharacterEventArg,
 
   onCustomEvent: CustomEventEventArg,
 } satisfies Record<string, new (...args: any[]) => EventArg>;

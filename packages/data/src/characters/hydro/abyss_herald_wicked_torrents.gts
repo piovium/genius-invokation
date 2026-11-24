@@ -175,7 +175,8 @@ define skill {
 define skill {
   id 22034 as WateryRebirth;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1;
       :characterStatus(WateryRebirthStatus);
     };
   };
@@ -186,7 +187,7 @@ define skill {
  * @name 护罩碎裂
  * @cost
  * @description
- * 
+ *
  */
 define skill {
   id 22037 as BrokenShield;
@@ -200,7 +201,7 @@ define skill {
  * @name 水之新生
  * @cost
  * @description
- * 
+ *
  */
 define skill {
   id 22038 as WateryRebirth01;

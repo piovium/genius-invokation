@@ -113,10 +113,7 @@ define skill {
 define skill {
   id 12094 as Breakthrough;
   skillType passive {
-    on battleBegin {
-      :characterStatus(BreakthroughStatus);
-    };
-    on revive {
+    on selfEnter {
       :characterStatus(BreakthroughStatus);
     };
   };

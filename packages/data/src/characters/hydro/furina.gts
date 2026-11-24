@@ -240,7 +240,8 @@ define skill {
 define skill {
   id 12115 as ArkheSeatsSacredAndSecular;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1;
       :createHandCard(SeatsSacredAndSecular);
     };
   };

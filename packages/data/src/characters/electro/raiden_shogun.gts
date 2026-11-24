@@ -118,10 +118,7 @@ define skill {
 define skill {
   id 14074 as ChakraDesiderata;
   skillType passive {
-    on battleBegin {
-      :characterStatus(ChakraDesiderataStatus);
-    };
-    on revive {
+    on selfEnter {
       :characterStatus(ChakraDesiderataStatus);
     };
   };

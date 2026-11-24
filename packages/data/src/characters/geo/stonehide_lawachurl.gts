@@ -54,9 +54,9 @@ define status {
     :e.decreaseDamage(1);
   };
   on damaged {
-    when :( :e.type === DamageType.Geo);
+    when :( :e.type === DamageType.Geo );
     :consumeUsage(1);
-  }
+  };
 };
 
 /**
@@ -113,7 +113,8 @@ define skill {
 define skill {
   id 26014 as InfusedStonehide;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1;
       :characterStatus(Stonehide);
       :characterStatus(StoneForce);
     };

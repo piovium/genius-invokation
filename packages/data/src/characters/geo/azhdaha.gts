@@ -165,7 +165,6 @@ define skill {
     default:
       break;
   }
-
   // 实际行为：
   // - 若汲取到不同元素：更新计数器，生成骰子，转换定义；
   // - 否则：生成“元素凝晶”，更新计数器
@@ -218,14 +217,7 @@ define skill {
   id 26025 as StoneFacets;
   skillType passive {
     associateExtension AbsorbedCountExtension;
-    on battleBegin {
-      :characterStatus(StoneFacetsElementalAbsorption, :self, {
-        overrideVariables: {
-          absorbedCount: :getExtensionState().absorbed[:self.who].length,
-        },
-      });
-    };
-    on revive {
+    on selfEnter {
       :characterStatus(StoneFacetsElementalAbsorption, :self, {
         overrideVariables: {
           absorbedCount: :getExtensionState().absorbed[:self.who].length,

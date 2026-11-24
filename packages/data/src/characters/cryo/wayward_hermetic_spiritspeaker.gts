@@ -67,10 +67,7 @@ define card {
     $.my.combatStatus.def(RadiantHuesIcicleInEffect),
   );
   if (radiantHuesIcicleInEffect) {
-    :damage(
-      DamageType.Cryo,
-      radiantHuesIcicleInEffect.variables.damageValue,
-    );
+    :damage(DamageType.Cryo, radiantHuesIcicleInEffect.variables.damageValue);
   }
   // [浮彩·多重] 打出浮彩时：召唤浮彩分身。（浮彩分身造成的伤害等于此状态层数）
   const radiantHuesEchoesInEffect = :query(
@@ -362,7 +359,8 @@ define skill {
 define skill {
   id 21054 as IridescentSilhouette;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1;
       :createPileCards(RadiantHues, 3, "spaceAround");
     };
   };

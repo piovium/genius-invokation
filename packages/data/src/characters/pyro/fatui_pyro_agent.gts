@@ -123,7 +123,8 @@ define skill {
 define skill {
   id 23014 as StealthMaster;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1;
       :characterStatus(Stealth);
     };
   };

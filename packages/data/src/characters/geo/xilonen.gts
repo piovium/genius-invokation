@@ -299,7 +299,8 @@ type SampleType = keyof typeof sampleMap;
 define skill {
   id 16114 as SourceSample;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1;
       const sampleCount = Object.fromEntries(
         Object.keys(sampleMap).map((k) => [k, 0]),
       ) as Record<SampleType, number>;

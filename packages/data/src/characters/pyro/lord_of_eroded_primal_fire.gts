@@ -120,10 +120,7 @@ define skill {
 define skill {
   id 23054 as ResentmentPassive;
   skillType passive {
-    on battleBegin {
-      :characterStatus(CardsDiscarded);
-    };
-    on revive {
+    on selfEnter {
       :characterStatus(CardsDiscarded);
     };
   };

@@ -184,7 +184,8 @@ define skill {
 define skill {
   id 24014 as ElectroCrystalCoreSkill;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1;
       :characterStatus(ElectroCrystalCore);
     };
   };

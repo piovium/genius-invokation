@@ -105,10 +105,7 @@ define skill {
 define skill {
   id 14044 as LawfulEnforcer;
   skillType passive {
-    on battleBegin {
-      :characterStatus(PactswornPathclearer);
-    };
-    on revive {
+    on selfEnter {
       :characterStatus(PactswornPathclearer);
     };
   };

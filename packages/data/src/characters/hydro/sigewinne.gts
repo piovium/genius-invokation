@@ -185,13 +185,7 @@ define skill {
 define skill {
   id 12134 as DetailedDiagnosisThoroughTreatment01;
   skillType passive {
-    on battleBegin {
-      :characterStatus(
-        DetailedDiagnosisThoroughTreatmentStatus,
-        $.my.character,
-      );
-    };
-    on revive {
+    on selfEnter {
       :characterStatus(
         DetailedDiagnosisThoroughTreatmentStatus,
         $.my.character,

@@ -159,7 +159,8 @@ define skill {
 define skill {
   id 24024 as LightningProbe;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1;
       :combatStatus(LightningStrikeProbe, "opp");
     };
   };
