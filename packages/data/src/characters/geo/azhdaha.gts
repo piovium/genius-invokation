@@ -165,6 +165,11 @@ define skill {
     default:
       break;
   }
+
+  // 实际行为：
+  // - 若汲取到不同元素：更新计数器，生成骰子，转换定义；
+  // - 否则：生成“元素凝晶”，更新计数器
+  // 此处为了简洁编写将更新计数器统一放在最前面
   if (diceType) {
     :setExtensionState((st) => {
       if (!st.absorbed[:self.who].includes(diceType)) {
@@ -177,7 +182,6 @@ define skill {
       :getExtensionState().absorbed[:self.who].length,
     );
   }
-  // 实际行为：未汲取或者汲取到相同元素时也会生成“元素凝晶”
   if (diceType && targetDef && :self.definition.id !== targetDef) {
     :generateDice(diceType, 1);
     :transformDefinition(:self, targetDef);
