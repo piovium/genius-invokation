@@ -55,7 +55,7 @@ define combatStatus {
 | `reaction`、`dealReaction`、`modifyReaction`                                                                     | `onReaction`、`modifyReaction` | 元素反应                   |
 | `selfEnter`、`entityEnter`                                                                                       | `onEnter`                      | 自身或相关实体入场         |
 | `adventure`                                                                                                      | `onAdventure`                  | 自身进行冒险               |
-| `revive`、`generateDice`、`selectCard`                                                    | 对应同名核心事件               | 复苏、变身、生成骰子、选牌 |
+| `revive`、`generateDice`、`selectCard`                                                    | 对应同名核心事件               | 复苏、生成骰子、选牌 |
 | `cancelConsumeNightsoul`、`consumeNightsoul`、`gainNightsoul`、`gainUsage`                                       | 变量修改事件                   | 夜魂值或可用次数           |
 
 ## 内联事件
