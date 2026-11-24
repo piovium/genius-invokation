@@ -56,7 +56,8 @@ export default (props = {}) => {
 }
 
 async function optimizeSvg(content: string, path: string) {
-  const result = optimize(content, { path });
+  // Do NOT use <div /> as part of <foreignObject>; innerHTML doesn't recognize that
+  const result = optimize(content, { path, js2svg: { useShortTags: false } });
   return result.data;
 }
 
