@@ -43,35 +43,7 @@ define extension {
  */
 define status {
   id 126021 as StoneFacetsElementalAbsorption;
-  associateExtension AbsorbedCountExtension;
   variable absorbedCount, 0;
-  on transformDefinition {
-    when :( :e.oldDefinition.id !== :e.newDefinition.id );
-    let diceType: DiceType = DiceType.Geo;
-    switch (:self.master.definition.id) {
-      case AzhdahaCryo:
-        diceType = DiceType.Cryo;
-        break;
-      case AzhdahaHydro:
-        diceType = DiceType.Hydro;
-        break;
-      case AzhdahaPyro:
-        diceType = DiceType.Pyro;
-        break;
-      case AzhdahaElectro:
-        diceType = DiceType.Electro;
-        break;
-    }
-    :setExtensionState((st) => {
-      if (!st.absorbed[:self.who].includes(diceType)) {
-        st.absorbed[:self.who].push(diceType);
-      }
-    });
-    :self.variables.absorbedCount = :getExtensionState().absorbed[
-      :self.who
-    ].length;
-    :generateDice(diceType, 1);
-  };
 };
 
 /**
@@ -82,25 +54,42 @@ define status {
  */
 define status {
   id 126022 as StoneFacetsElementalCrystallization;
+  associateExtension AbsorbedCountExtension;
   on damaged {
-    let targetDef: CharacterHandle;
+    let targetDef: CharacterHandle | null = null;
+    let diceType: DiceType | null = null;
     switch (:e.type) {
       case DamageType.Cryo:
         targetDef = AzhdahaCryo;
+        diceType = DiceType.Cryo;
         break;
       case DamageType.Hydro:
         targetDef = AzhdahaHydro;
+        diceType = DiceType.Hydro;
         break;
       case DamageType.Pyro:
         targetDef = AzhdahaPyro;
+        diceType = DiceType.Pyro;
         break;
       case DamageType.Electro:
         targetDef = AzhdahaElectro;
+        diceType = DiceType.Electro;
         break;
       default:
-        return;
+        break;
     }
-    if (:self.master.definition.id !== targetDef) {
+    if (diceType && targetDef && :self.master.definition.id !== targetDef) {
+      :setExtensionState((st) => {
+        if (!st.absorbed[:self.who].includes(diceType)) {
+          st.absorbed[:self.who].push(diceType);
+        }
+      });
+      const counter = :query($.my.def(StoneFacetsElementalAbsorption));
+      counter?.setVariable(
+        "absorbedCount",
+        :getExtensionState().absorbed[:self.who].length,
+      );
+      :generateDice(diceType, 1);
       :transformDefinition(:self.master, targetDef);
       :dispose();
     }
@@ -164,25 +153,49 @@ define skill {
   id 26022 as AuraOfMajesty;
   skillType elemental;
   cost DiceType.Geo, 3;
+  associateExtension AbsorbedCountExtension;
   const targetAura = :query($.opp.active)?.aura;
+  let targetDef: CharacterHandle | null = null;
+  let diceType: DiceType | null = null;
   :damage(DamageType.Geo, 3);
   switch (targetAura) {
     case Aura.CryoDendro:
     case Aura.Cryo:
-      :transformDefinition(:self, AzhdahaCryo);
+      targetDef = AzhdahaCryo;
+      diceType = DiceType.Cryo;
       break;
     case Aura.Hydro:
-      :transformDefinition(:self, AzhdahaHydro);
+      targetDef = AzhdahaHydro;
+      diceType = DiceType.Hydro;
       break;
     case Aura.Pyro:
-      :transformDefinition(:self, AzhdahaPyro);
+      targetDef = AzhdahaPyro;
+      diceType = DiceType.Pyro;
       break;
     case Aura.Electro:
-      :transformDefinition(:self, AzhdahaElectro);
+      targetDef = AzhdahaElectro;
+      diceType = DiceType.Electro;
       break;
     default:
-      :characterStatus(StoneFacetsElementalCrystallization);
       break;
+  }
+  if (diceType) {
+    :setExtensionState((st) => {
+      if (!st.absorbed[:self.who].includes(diceType)) {
+        st.absorbed[:self.who].push(diceType);
+      }
+    });
+    const counter = :query($.my.def(StoneFacetsElementalAbsorption));
+    counter?.setVariable(
+      "absorbedCount",
+      :getExtensionState().absorbed[:self.who].length,
+    );
+  }
+  if (diceType && targetDef && :self.definition.id !== targetDef) {
+    :generateDice(diceType, 1);
+    :transformDefinition(:self, targetDef);
+  } else {
+    :characterStatus(StoneFacetsElementalCrystallization);
   }
 };
 
@@ -213,11 +226,20 @@ define skill {
 define skill {
   id 26025 as StoneFacets;
   skillType passive {
+    associateExtension AbsorbedCountExtension;
     on battleBegin {
-      :characterStatus(StoneFacetsElementalAbsorption);
+      :characterStatus(StoneFacetsElementalAbsorption, :self, {
+        overrideVariables: {
+          absorbedCount: :getExtensionState().absorbed[:self.who].length,
+        },
+      });
     };
     on revive {
-      :characterStatus(StoneFacetsElementalAbsorption);
+      :characterStatus(StoneFacetsElementalAbsorption, :self, {
+        overrideVariables: {
+          absorbedCount: :getExtensionState().absorbed[:self.who].length,
+        },
+      });
     };
   };
 };
