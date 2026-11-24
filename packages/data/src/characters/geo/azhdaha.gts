@@ -176,10 +176,10 @@ define skill {
       "absorbedCount",
       :getExtensionState().absorbed[:self.who].length,
     );
-  }
-  if (diceType && targetDef && :self.definition.id !== targetDef) {
-    :generateDice(diceType, 1);
-    :transformDefinition(:self, targetDef);
+    if (targetDef && :self.definition.id !== targetDef) {
+      :generateDice(diceType, 1);
+      :transformDefinition(:self, targetDef);
+    }
   } else {
     :characterStatus(StoneFacetsElementalCrystallization);
   }
