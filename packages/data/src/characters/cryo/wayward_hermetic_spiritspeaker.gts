@@ -360,7 +360,7 @@ define skill {
   id 21054 as IridescentSilhouette;
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       :createPileCards(RadiantHues, 3, "spaceAround");
     };
   };

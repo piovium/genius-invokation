@@ -232,7 +232,7 @@ define skill {
   until "v5.8.0";
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       // 战斗开始时也附属附魔
       if (:self.isActive()) {
         :characterStatus(CryoElementalInfusion);

@@ -114,7 +114,7 @@ define skill {
   id 26014 as InfusedStonehide;
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       :characterStatus(Stonehide);
       :characterStatus(StoneForce);
     };

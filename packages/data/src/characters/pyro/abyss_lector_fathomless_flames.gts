@@ -162,7 +162,7 @@ define skill {
   id 23024 as FieryRebirth;
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       :characterStatus(FieryRebirthStatus);
     };
   };

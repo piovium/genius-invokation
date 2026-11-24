@@ -235,7 +235,7 @@ define skill {
   id 11154 as ConstantOffthecuffCookery;
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       :createEntity("support", AllspectrumMultiuseCookingMek);
     };
   };

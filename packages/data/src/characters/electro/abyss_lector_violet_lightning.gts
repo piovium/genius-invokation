@@ -144,7 +144,7 @@ define skill {
   id 24064 as ElectricRebirthPassive;
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       :characterStatus(ElectricRebirth);
     };
   };

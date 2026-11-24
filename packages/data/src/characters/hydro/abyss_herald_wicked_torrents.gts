@@ -176,7 +176,7 @@ define skill {
   id 22034 as WateryRebirth;
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       :characterStatus(WateryRebirthStatus);
     };
   };

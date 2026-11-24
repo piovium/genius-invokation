@@ -124,7 +124,7 @@ define skill {
   id 23014 as StealthMaster;
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       :characterStatus(Stealth);
     };
   };

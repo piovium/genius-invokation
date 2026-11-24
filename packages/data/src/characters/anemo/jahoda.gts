@@ -238,7 +238,7 @@ define skill {
   id 15164 as MoonsignBenedictionRooftopDash;
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       :createHandCard(PurrloinedTreasureFlask);
     };
     on dealReaction {

@@ -296,7 +296,7 @@ define skill {
   skillType passive {
     variable organismCount, 0;
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       :createPileCards(AwakenMyKindred, 6, "random");
       :combatStatus(HeartOfOasis);
     };

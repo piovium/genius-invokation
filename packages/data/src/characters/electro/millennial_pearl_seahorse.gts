@@ -138,7 +138,7 @@ define skill {
   id 24034 as PearlArmor;
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       :characterStatus(FontemerPearl);
     };
   };

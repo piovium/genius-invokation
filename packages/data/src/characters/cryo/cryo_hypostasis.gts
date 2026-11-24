@@ -123,7 +123,7 @@ define skill {
   id 21034 as CryoCrystalCoreSkill;
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       :characterStatus(CryoCrystalCore);
     };
   };

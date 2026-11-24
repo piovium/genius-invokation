@@ -241,7 +241,7 @@ define skill {
   id 12115 as ArkheSeatsSacredAndSecular;
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       :createHandCard(SeatsSacredAndSecular);
     };
   };

@@ -300,7 +300,7 @@ define skill {
   id 16114 as SourceSample;
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       const sampleCount = Object.fromEntries(
         Object.keys(sampleMap).map((k) => [k, 0]),
       ) as Record<SampleType, number>;

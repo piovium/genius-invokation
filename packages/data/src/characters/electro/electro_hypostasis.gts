@@ -185,7 +185,7 @@ define skill {
   id 24014 as ElectroCrystalCoreSkill;
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       :characterStatus(ElectroCrystalCore);
     };
   };

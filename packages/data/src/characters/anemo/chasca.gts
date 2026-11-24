@@ -250,7 +250,7 @@ define skill {
   id 15114 as ShadowhuntShellPassive;
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       :createPileCards(ShadowhuntShell, 6, "random");
     };
   };

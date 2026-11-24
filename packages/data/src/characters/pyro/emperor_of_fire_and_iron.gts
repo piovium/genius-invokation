@@ -136,7 +136,7 @@ define skill {
   id 23044 as ImperialPanoply;
   skillType passive {
     on selfEnter {
-      usage 1;
+      usage 1 { name "selfEnterUsage"; };
       :characterStatus(ArmoredCrabCarapace, :self, {
         overrideVariables: {
           shield: 5,
