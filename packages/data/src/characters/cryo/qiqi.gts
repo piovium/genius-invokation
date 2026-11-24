@@ -111,7 +111,11 @@ define extension {
   mutateWhen onDamageOrHeal,
     ((st, e) => {
       // 七七倒下时重置
-      if (e.target.definition.id === Qiqi && e.damageInfo.causeDefeated) {
+      if (
+        e.type !== DamageType.Heal &&
+        e.target.definition.id === Qiqi &&
+        e.damageInfo.causeDefeated
+      ) {
         st.count[e.targetWho] = 0;
       }
     });

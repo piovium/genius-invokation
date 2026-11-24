@@ -86,7 +86,11 @@ define extension {
   mutateWhen onDamageOrHeal,
     ((st, e) => {
       // 甘雨倒下时重置
-      if (e.target.definition.id === Ganyu && e.damageInfo.causeDefeated) {
+      if (
+        e.type !== DamageType.Heal &&
+        e.target.definition.id === Ganyu &&
+        e.damageInfo.causeDefeated
+      ) {
         st.used[e.targetWho] = false;
       }
     });
