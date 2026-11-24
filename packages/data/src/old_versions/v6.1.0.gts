@@ -205,3 +205,21 @@ define summon {
     :variables.effect += addDmg;
   };
 };
+
+/**
+ * @id 331202
+ * @name 元素共鸣：愈疗之水
+ * @cost 1*Hydro
+ * @description
+ * 治疗我方出战角色2点。然后，治疗所有我方后台角色1点。
+ * （牌组包含至少2个水元素角色，才能加入牌组）
+ */
+define card {
+  id 331202 as private ElementalResonanceSoothingWater;
+  until "v6.1.0";
+  cost DiceType.Hydro, 1;
+  tags resonance;
+  filter :( :query($.my.character.var("health", "<", "maxHealth")) );
+  :heal(2, $.my.active);
+  :heal(1, $.my.standby);
+};
