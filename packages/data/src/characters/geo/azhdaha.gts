@@ -43,31 +43,8 @@ define extension {
  */
 define status {
   id 126021 as StoneFacetsElementalAbsorption;
-  associateExtension AbsorbedCountExtension;
-  on transformDefinition {
-    when :( :e.oldDefinition.id !== :e.newDefinition.id );
-    let diceType: DiceType = DiceType.Geo;
-    switch (:self.master.definition.id) {
-      case AzhdahaCryo:
-        diceType = DiceType.Cryo;
-        break;
-      case AzhdahaHydro:
-        diceType = DiceType.Hydro;
-        break;
-      case AzhdahaPyro:
-        diceType = DiceType.Pyro;
-        break;
-      case AzhdahaElectro:
-        diceType = DiceType.Electro;
-        break;
-    }
-    :setExtensionState((st) => {
-      if (!st.absorbed[:self.who].includes(diceType)) {
-        st.absorbed[:self.who].push(diceType);
-      }
-    });
-    :generateDice(diceType, 1);
-  };
+  variable absorbedCount, 0;
+  // 官方实际行为：调用 :transformDefinition 同时计数&生骰
 };
 
 /**
@@ -78,25 +55,42 @@ define status {
  */
 define status {
   id 126022 as StoneFacetsElementalCrystallization;
+  associateExtension AbsorbedCountExtension;
   on damaged {
-    let targetDef: CharacterHandle;
+    let targetDef: CharacterHandle | null = null;
+    let diceType: DiceType | null = null;
     switch (:e.type) {
       case DamageType.Cryo:
         targetDef = AzhdahaCryo;
+        diceType = DiceType.Cryo;
         break;
       case DamageType.Hydro:
         targetDef = AzhdahaHydro;
+        diceType = DiceType.Hydro;
         break;
       case DamageType.Pyro:
         targetDef = AzhdahaPyro;
+        diceType = DiceType.Pyro;
         break;
       case DamageType.Electro:
         targetDef = AzhdahaElectro;
+        diceType = DiceType.Electro;
         break;
       default:
-        return;
+        break;
     }
-    if (:self.master.definition.id !== targetDef) {
+    if (diceType && targetDef && :self.master.definition.id !== targetDef) {
+      :setExtensionState((st) => {
+        if (!st.absorbed[:self.who].includes(diceType)) {
+          st.absorbed[:self.who].push(diceType);
+        }
+      });
+      const counter = :query($.my.def(StoneFacetsElementalAbsorption));
+      counter?.setVariable(
+        "absorbedCount",
+        :getExtensionState().absorbed[:self.who].length,
+      );
+      :generateDice(diceType, 1);
       :transformDefinition(:self.master, targetDef);
       :dispose();
     }
@@ -115,22 +109,7 @@ define status {
  */
 define status {
   id 126023 as StoneFacetsElementalSummoning;
-  on endPhase {
-    switch (:self.master.definition.id) {
-      default:
-        :transformDefinition(:self.master, AzhdahaHydro);
-        break;
-      case AzhdahaHydro:
-        :transformDefinition(:self.master, AzhdahaCryo);
-        break;
-      case AzhdahaCryo:
-        :transformDefinition(:self.master, AzhdahaPyro);
-        break;
-      case AzhdahaPyro:
-        :transformDefinition(:self.master, AzhdahaElectro);
-        break;
-    }
-  };
+  reserved;
 };
 
 /**
@@ -160,25 +139,54 @@ define skill {
   id 26022 as AuraOfMajesty;
   skillType elemental;
   cost DiceType.Geo, 3;
+  associateExtension AbsorbedCountExtension;
   const targetAura = :query($.opp.active)?.aura;
+  let targetDef: CharacterHandle | null = null;
+  let diceType: DiceType | null = null;
   :damage(DamageType.Geo, 3);
   switch (targetAura) {
     case Aura.CryoDendro:
     case Aura.Cryo:
-      :transformDefinition(:self, AzhdahaCryo);
+      targetDef = AzhdahaCryo;
+      diceType = DiceType.Cryo;
       break;
     case Aura.Hydro:
-      :transformDefinition(:self, AzhdahaHydro);
+      targetDef = AzhdahaHydro;
+      diceType = DiceType.Hydro;
       break;
     case Aura.Pyro:
-      :transformDefinition(:self, AzhdahaPyro);
+      targetDef = AzhdahaPyro;
+      diceType = DiceType.Pyro;
       break;
     case Aura.Electro:
-      :transformDefinition(:self, AzhdahaElectro);
+      targetDef = AzhdahaElectro;
+      diceType = DiceType.Electro;
       break;
     default:
-      :characterStatus(StoneFacetsElementalCrystallization);
       break;
+  }
+
+  // 实际行为：
+  // - 若汲取到不同元素：更新计数器，生成骰子，转换定义；
+  // - 否则：生成“元素凝晶”，更新计数器
+  // 此处为了简洁编写将更新计数器统一放在最前面
+  if (diceType) {
+    :setExtensionState((st) => {
+      if (!st.absorbed[:self.who].includes(diceType)) {
+        st.absorbed[:self.who].push(diceType);
+      }
+    });
+    const counter = :query($.my.def(StoneFacetsElementalAbsorption));
+    counter?.setVariable(
+      "absorbedCount",
+      :getExtensionState().absorbed[:self.who].length,
+    );
+  }
+  if (diceType && targetDef && :self.definition.id !== targetDef) {
+    :generateDice(diceType, 1);
+    :transformDefinition(:self, targetDef);
+  } else {
+    :characterStatus(StoneFacetsElementalCrystallization);
   }
 };
 
@@ -209,11 +217,20 @@ define skill {
 define skill {
   id 26025 as StoneFacets;
   skillType passive {
+    associateExtension AbsorbedCountExtension;
     on battleBegin {
-      :characterStatus(StoneFacetsElementalAbsorption);
+      :characterStatus(StoneFacetsElementalAbsorption, :self, {
+        overrideVariables: {
+          absorbedCount: :getExtensionState().absorbed[:self.who].length,
+        },
+      });
     };
     on revive {
-      :characterStatus(StoneFacetsElementalAbsorption);
+      :characterStatus(StoneFacetsElementalAbsorption, :self, {
+        overrideVariables: {
+          absorbedCount: :getExtensionState().absorbed[:self.who].length,
+        },
+      });
     };
   };
 };
@@ -256,7 +273,7 @@ define skill {
  * @hp 10
  * @energy 2
  * @description
- * 
+ *
  */
 define character {
   id 6601 as AzhdahaCryo;
@@ -292,7 +309,7 @@ define skill {
  * @hp 10
  * @energy 2
  * @description
- * 
+ *
  */
 define character {
   id 6602 as AzhdahaHydro;
@@ -328,7 +345,7 @@ define skill {
  * @hp 10
  * @energy 2
  * @description
- * 
+ *
  */
 define character {
   id 6603 as AzhdahaPyro;
@@ -364,7 +381,7 @@ define skill {
  * @hp 10
  * @energy 2
  * @description
- * 
+ *
  */
 define character {
   id 6604 as AzhdahaElectro;
