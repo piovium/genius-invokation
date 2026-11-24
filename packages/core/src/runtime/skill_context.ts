@@ -1618,7 +1618,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
         state: target,
         newDefinition: def,
       });
-      this.emitEvent("onTransformDefinition", this.rawState, target, def);
     }
   }
 

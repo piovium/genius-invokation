@@ -554,9 +554,6 @@ export const detailedEventDictionary = {
   revive: defineDescriptor("onRevive", (e, r) => {
     return checkRelative(e.onTimeState, e.character.id, r);
   }),
-  transformDefinition: defineDescriptor("onTransformDefinition", (e, r) => {
-    return checkRelative(e.onTimeState, e.entity.id, r);
-  }),
   generateDice: defineDescriptor("onGenerateDice", (e, r) => {
     return checkRelative(e.onTimeState, { who: e.who }, r);
   }),
