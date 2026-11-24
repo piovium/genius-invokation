@@ -176,10 +176,11 @@ define skill {
       "absorbedCount",
       :getExtensionState().absorbed[:self.who].length,
     );
-    if (targetDef && :self.definition.id !== targetDef) {
-      :generateDice(diceType, 1);
-      :transformDefinition(:self, targetDef);
-    }
+  }
+  // 实际行为：未汲取或者汲取到相同元素时也会生成“元素凝晶”
+  if (diceType && targetDef && :self.definition.id !== targetDef) {
+    :generateDice(diceType, 1);
+    :transformDefinition(:self, targetDef);
   } else {
     :characterStatus(StoneFacetsElementalCrystallization);
   }
