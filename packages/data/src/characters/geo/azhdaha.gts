@@ -44,6 +44,7 @@ define extension {
 define status {
   id 126021 as StoneFacetsElementalAbsorption;
   variable absorbedCount, 0;
+  // 官方实际行为：调用 :transformDefinition 同时计数&生骰
 };
 
 /**
@@ -108,22 +109,7 @@ define status {
  */
 define status {
   id 126023 as StoneFacetsElementalSummoning;
-  on endPhase {
-    switch (:self.master.definition.id) {
-      default:
-        :transformDefinition(:self.master, AzhdahaHydro);
-        break;
-      case AzhdahaHydro:
-        :transformDefinition(:self.master, AzhdahaCryo);
-        break;
-      case AzhdahaCryo:
-        :transformDefinition(:self.master, AzhdahaPyro);
-        break;
-      case AzhdahaPyro:
-        :transformDefinition(:self.master, AzhdahaElectro);
-        break;
-    }
-  };
+  reserved;
 };
 
 /**
