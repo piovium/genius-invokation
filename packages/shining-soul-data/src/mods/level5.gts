@@ -22,6 +22,7 @@ import {
   type CardHandle,
   type CharacterHandle,
   type CombatStatusHandle,
+  type ExtensionHandle,
   type SkillHandle,
   type StatusHandle,
 } from "#custom-data-loader";
@@ -623,6 +624,9 @@ define summon {
 // 若陀龙王相关状态
 const StoneFacetsElementalAbsorption = 126021 as StatusHandle;
 const StoneFacetsElementalCrystallization = 126022 as StatusHandle;
+const AbsorbedCountExtension = (50_000_000 + 2602) as ExtensionHandle<{
+  absorbed: [[], []];
+}>;
 
 /**
  * @id 26025
@@ -635,12 +639,21 @@ define skill {
   id 26025 as StoneFacets;
   description "【被动】战斗开始时，初始附属<color=#FFFFFFFF>$[C126022]</color>。";
   skillType passive {
+    associateExtension AbsorbedCountExtension;
     on battleBegin {
-      :characterStatus(StoneFacetsElementalAbsorption);
+      :characterStatus(StoneFacetsElementalAbsorption, :self, {
+        overrideVariables: {
+          absorbedCount: :getExtensionState().absorbed[:self.who].length,
+        },
+      });
       :characterStatus(StoneFacetsElementalCrystallization);
     };
     on revive {
-      :characterStatus(StoneFacetsElementalAbsorption);
+      :characterStatus(StoneFacetsElementalAbsorption, :self, {
+        overrideVariables: {
+          absorbedCount: :getExtensionState().absorbed[:self.who].length,
+        },
+      });
       :characterStatus(StoneFacetsElementalCrystallization);
     };
   };
