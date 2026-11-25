@@ -49,6 +49,7 @@ define combatStatus {
           text: `$[K56]这张$[C${card.definition.id}]`,
           image: `id://${card.definition.id}`,
           title: `$[C${card.definition.id}]`,
+          uiType: "cardFace",
         })),
       );
     } else {
@@ -520,6 +521,7 @@ define status {
         text: `将这张$[C${card.definition.id}]置于牌库底`,
         image: `id://${card.definition.id}`,
         title: `$[C${card.definition.id}]`,
+        uiType: "cardFace",
       })),
     );
   };
