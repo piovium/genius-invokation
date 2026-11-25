@@ -19,6 +19,7 @@ import {
   DamageType,
   DiceType,
   Reaction,
+  customEvent,
   type CardHandle,
   type CharacterHandle,
   type CombatStatusHandle,
@@ -26,6 +27,44 @@ import {
   type SkillHandle,
   type StatusHandle,
 } from "#custom-data-loader";
+
+const PhysicalDiscardNext = customEvent("mod/physical/discard/next");
+
+define combatStatus {
+  name "舍弃手牌" as PhysicalDiscard;
+  image "name://UI_Gcg_Buff_Common_Special";
+  description "选择1张手牌$[K56]。\n<color=#FFFFFFFF>$[K3]：1</color>（可叠加）";
+  usage 1 { append; };
+  on selfEnter {
+    :emitCustomEvent(PhysicalDiscardNext);
+  };
+  on PhysicalDiscardNext {
+    listenTo myself;
+    if (:player.hands.length > 0) {
+      :abortPreview();
+      :selectOption(
+        `选择舍弃1张手牌。当前效果还有${:variables.usage}张手牌需要舍弃。`,
+        :player.hands.map((card) => ({
+          key: String(card.id),
+          text: `$[K56]这张$[C${card.definition.id}]`,
+          image: `id://${card.definition.id}`,
+          title: `$[C${card.definition.id}]`,
+        })),
+      );
+    } else {
+      :dispose();
+    }
+  };
+  on selectOption {
+    listenTo myself;
+    const card = :player.hands.find((card) => card.id === Number(:e.selectedKey));
+    if (card) {
+      :discard(card);
+      :consumeUsage();
+    }
+    :emitCustomEvent(PhysicalDiscardNext);
+  };
+};
 
 /**
  * @id 313005
@@ -98,8 +137,20 @@ define card {
   };
 };
 
-// 「清洁工作」（生效中）
-const CalledInForCleanupActive = 302204 as CombatStatusHandle;
+// 「清洁工作」（生效中） 根据QA，实卡由出战状态改为角色状态
+// QA未提及增伤持续回合和叠加情况，除附属目标外其余均仿照线上出战状态实现
+define status {
+  name "「清洁工作」（生效中）" as CalledInForCleanupActive1;
+  image "name://UI_Gcg_Buff_Common_Atk_Up";
+  description "我方出战角色下次造成的伤害+1。（可叠加，最多叠加到+2）";
+  variable damage, 1 {
+    append;
+    range 2;
+  };
+  once increaseSkillDamage {
+    :e.increaseDamage(:variables.damage);
+  };
+};
 
 /**
  * @id 322025
@@ -115,8 +166,7 @@ define card {
   support ally {
     on actionPhase {
       usage 2;
-      // 未提及增伤持续回合和叠加情况，仿照线上通过出战状态实现
-      :combatStatus(CalledInForCleanupActive);
+      :characterStatus(CalledInForCleanupActive1, $.my.active);
     };
   };
 };
@@ -174,11 +224,12 @@ define card {
   artifact {
     on switchActive {
       when :(
-        :e.switchInfo.to.id === :self.master.id && :player.hands.length > 0
+        :e.switchInfo.to.id === :self.master.id &&
+          :player.hands.length >
+            (:query($.my.combatStatus.def(PhysicalDiscard))?.variables.usage ?? 0)
       );
       usage perRound, 1;
-      // 未提及舍弃方式，暂定随机
-      :discard(:random(:player.hands));
+      :combatStatus(PhysicalDiscard);
       :convertDice(DiceType.Omni, 2);
       :characterStatus(ConductorsTopHatInEffect, :self.master);
     };
@@ -374,11 +425,15 @@ define card {
       visible false;
     };
     on actionPhase {
-      const memory = :variables.memory;
-      if (memory < 2) {
-        const candidates = :randomSubset(:player.hands, 2 - memory);
-        :discard(...candidates);
-        const count = candidates.length;
+      const count = Math.min(
+        2 - :variables.memory,
+        :player.hands.length -
+          (:query($.my.combatStatus.def(PhysicalDiscard))?.variables.usage ?? 0),
+      );
+      if (count > 0) {
+        :combatStatus(PhysicalDiscard, "my", {
+          overrideVariables: { usage: count },
+        });
         :variables.memory += count;
       }
       :variables.cardPlayed = 0;
@@ -462,8 +517,12 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 2);
-  // 未提及舍弃方式，暂定随机
-  :discard(:random(:player.hands));
+  if (
+    :player.hands.length >
+    (:query($.my.combatStatus.def(PhysicalDiscard))?.variables.usage ?? 0)
+  ) {
+    :combatStatus(PhysicalDiscard);
+  }
   :combatStatus(ShieldOfPassion);
 };
 
@@ -546,9 +605,12 @@ define card {
     variable barrierUsage, 0; // no io hint for now
     variable stoic, 0;
     on decreaseDamaged {
-      when :( :player.hands.length > 0 );
+      when :(
+        :player.hands.length >
+          (:query($.my.combatStatus.def(PhysicalDiscard))?.variables.usage ?? 0)
+      );
       usage perRound, 1;
-      :discard(:random(:player.hands));
+      :combatStatus(PhysicalDiscard);
       :e.decreaseDamage(1);
       :variables.stoic += 1;
     };
@@ -584,10 +646,11 @@ define card {
       // 绒翼龙只在可以减费时生效
       when :(
         :e.action.to.id === :self.master.id && // 附属角色切换为出战角色
-          :player.hands.length > 0 // 有手牌（“如可能，舍弃”）
+          :player.hands.length >
+            (:query($.my.combatStatus.def(PhysicalDiscard))?.variables.usage ?? 0)
       );
       :variables.deductDiceTriggered = 1;
-      :discard(:random(:player.hands));
+      :combatStatus(PhysicalDiscard);
       :e.deductOmniCost(1);
     };
     on beforeFastSwitch {
