@@ -53,7 +53,7 @@ test("reviving Cryo Hypostasis does not restore its consumed initial crystal cor
         ref={revived}
         alive={0}
         health={0}
-        v={{ cryoCrystalCoreInitialUsage: 0 }}
+        v={{ selfEnterUsage: 0 }}
       />
       <Character opp active />
       <Card my def={TeyvatFriedEgg} />
@@ -64,7 +64,7 @@ test("reviving Cryo Hypostasis does not restore its consumed initial crystal cor
   c.expect(revived).toHaveVariable({
     alive: 1,
     health: 1,
-    cryoCrystalCoreInitialUsage: 0,
+    selfEnterUsage: 0,
   });
   c.expect($.typeStatus.def(CryoCrystalCore).at($.id(revived.id))).toNotExist();
 });
@@ -84,11 +84,11 @@ test("transforming Furina runs the destination selfEnter without entering the op
   await c.me.card(SeatsSacredAndSecular);
   c.expect(furina).toBeDefinition(FurinaOusia);
   c.expect(furina).toHaveVariable({
-    arkheSeatsSacredAndSecularInitialUsage: 0,
+    selfEnterUsage: 0,
   });
   c.expect($.my.hand.def(SeatsSacredAndSecular)).toBeUnique();
   c.expect(opponent).toHaveVariable({
-    arkheSeatsSacredAndSecularInitialUsage: 1,
+    selfEnterUsage: 1,
   });
   c.expect($.opp.hand.def(SeatsSacredAndSecular)).toNotExist();
 
@@ -120,7 +120,7 @@ test.each([
       health: 7,
       energy: 0,
       usagePerRound1: 1,
-      arkheSeatsSacredAndSecularInitialUsage: 0,
+      selfEnterUsage: 0,
     });
     c.expect($.my.hand.def(SeatsSacredAndSecular)).toNotExist();
 
@@ -134,7 +134,7 @@ test.each([
       health: 7,
       energy: 1,
       usagePerRound1: 0,
-      arkheSeatsSacredAndSecularInitialUsage: 0,
+      selfEnterUsage: 0,
     });
     c.expect($.my.hand.def(SeatsSacredAndSecular)).toNotExist();
 
