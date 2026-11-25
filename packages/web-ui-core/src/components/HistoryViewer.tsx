@@ -14,7 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DamageType, DiceType, Reaction, SelectOptionUiType } from "@gi-tcg/typings";
+import {
+  DamageType,
+  DiceType,
+  Reaction,
+  SelectOptionUiType,
+} from "@gi-tcg/typings";
 import {
   Errored,
   Loading,
@@ -1506,17 +1511,31 @@ function HistoryOption(props: {
   image?: string;
   class?: string;
 }) {
+  const cardId = () =>
+    props.uiType === SelectOptionUiType.CARD_FACE &&
+    props.image?.match(/^id:\/\/(\d+)$/)?.[1];
   return (
-    <div
-      class={["pointer-events-none grid children:grid-area-[1/1]", props.class]}
+    <Show
+      when={cardId()}
+      fallback={
+        <div
+          class={[
+            "pointer-events-none grid children:grid-area-[1/1]",
+            props.class,
+          ]}
+        >
+          <SelectOptionCard class="w-full h-full" />
+          <SelectOptionImage
+            image={
+              props.uiType === SelectOptionUiType.OPTION ? props.image : void 0
+            }
+            class="h-25% aspect-square mt-18% justify-self-center rounded-full"
+          />
+        </div>
+      }
     >
-      <SelectOptionCard class="w-full h-full" />
-      <SelectOptionImage
-        uiType={props.uiType ?? SelectOptionUiType.OPTION}
-        image={props.image}
-        class="h-25% aspect-square mt-18% justify-self-center rounded-full"
-      />
-    </div>
+      {(id) => <HistoryCard definitionId={Number(id())} class={props.class} />}
+    </Show>
   );
 }
 
