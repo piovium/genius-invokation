@@ -66,6 +66,7 @@ message SelectOption {
   string text = 2;
   optional string image = 3;
   optional string title = 4;
+  optional SelectOptionUiType ui_type = 5;
 }
 
 message SelectOptionRequest {

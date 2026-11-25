@@ -15,7 +15,11 @@
 
 import { createMemo, createSignal, For, Show, omit } from "solid-js";
 import type { ComponentProps } from "@solidjs/web";
-import { DiceType, type SelectOptionRequest } from "@gi-tcg/typings";
+import {
+  DiceType,
+  type SelectOptionRequest,
+  SelectOptionUiType,
+} from "@gi-tcg/typings";
 import { Button } from "./Button";
 import { ImageFallback } from "./Image";
 import { useUiContext } from "../hooks/context";
@@ -46,6 +50,7 @@ export function SelectOptionView(props: SelectOptionViewProps) {
         <For each={props.request.options}>
           {(option, index) => (
             <SelectOption
+              uiType={option.uiType}
               image={option.image}
               title={option.title}
               text={option.text}
@@ -72,13 +77,14 @@ export function SelectOptionView(props: SelectOptionViewProps) {
 }
 
 export interface SelectOptionProps extends ComponentProps<"div"> {
+  uiType?: SelectOptionUiType;
   image?: string;
   title?: string;
   text: string;
 }
 
 export function SelectOption(props: SelectOptionProps) {
-  const rest = omit(props, "image", "title", "text", "class");
+  const rest = omit(props, "uiType", "image", "title", "text", "class");
   const selectOptionText = textWithReference();
   return (
     <div
@@ -91,6 +97,7 @@ export function SelectOption(props: SelectOptionProps) {
       <SelectOptionCard class="w-full h-full select-option-card" />
       <div class="grid grid-rows-[3.2rem_1.6rem_4.2rem] grid-cols-1 w-full h-full justify-items-center z-1">
         <SelectOptionImage
+          uiType={props.uiType ?? SelectOptionUiType.OPTION}
           image={props.image}
           class="rounded-full w-9 h-9 grid-area-[1/1] self-end"
         />
@@ -105,7 +112,11 @@ export function SelectOption(props: SelectOptionProps) {
   );
 }
 
-export function SelectOptionImage(props: { image?: string; class?: string }) {
+export function SelectOptionImage(props: {
+  uiType?: SelectOptionUiType;
+  image?: string;
+  class?: string;
+}) {
   const { assetsManager } = useUiContext();
   const url = createMemo(
     () =>

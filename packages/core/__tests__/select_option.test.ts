@@ -1,4 +1,9 @@
 import { expect, test } from "vitest";
+import {
+  SelectOptionDoneEM,
+  SelectOptionRequest,
+  SelectOptionUiType,
+} from "@gi-tcg/typings";
 import { verifyRpcResponse } from "../src/io";
 import { StateMutator } from "../src/mutator";
 import { Game } from "../src/game";
@@ -21,6 +26,23 @@ test("accepts an integer option index", () => {
   ).not.toThrow();
 });
 
+
+test.each([undefined, SelectOptionUiType.OPTION, SelectOptionUiType.CARD_FACE])(
+  "preserves optional per-option UI type %s through the protocol",
+  (uiType) => {
+    const request = {
+      prompt: "Choose",
+      options: [{ key: "one", text: "One", uiType }],
+    };
+    expect(
+      SelectOptionRequest.decode(SelectOptionRequest.encode(request).finish()),
+    ).toEqual(request);
+    const notification = { who: 0, selectedUiType: uiType };
+    expect(
+      SelectOptionDoneEM.decode(SelectOptionDoneEM.encode(notification).finish()),
+    ).toEqual(notification);
+  },
+);
 
 test("option selection stops previews without interaction IO", async () => {
   const state = Game.createInitialState({

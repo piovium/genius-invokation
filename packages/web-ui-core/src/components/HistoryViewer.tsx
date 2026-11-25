@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DamageType, DiceType, Reaction } from "@gi-tcg/typings";
+import { DamageType, DiceType, Reaction, SelectOptionUiType } from "@gi-tcg/typings";
 import {
   Errored,
   Loading,
@@ -1120,6 +1120,7 @@ interface HistoryBlockData {
   imageId?: number;
   imageSize: "normal" | "summon" | "option";
   optionImage?: string;
+  optionUiType?: SelectOptionUiType;
   callerId?: number;
   energyChange?: blockEnergyProps;
   status?: number;
@@ -1357,6 +1358,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
         indent: block.indent,
         imageSize: "option",
         optionImage: block.selectedImage,
+        optionUiType: block.selectedUiType,
         content: {
           opp: isOpp,
           name: selectOptionText(block.selectedTitle ?? block.prompt ?? ""),
@@ -1499,13 +1501,18 @@ export function HistorySummon(props: HistoryCardProps) {
   );
 }
 
-function HistoryOption(props: { image?: string; class?: string }) {
+function HistoryOption(props: {
+  uiType?: SelectOptionUiType;
+  image?: string;
+  class?: string;
+}) {
   return (
     <div
       class={["pointer-events-none grid children:grid-area-[1/1]", props.class]}
     >
       <SelectOptionCard class="w-full h-full" />
       <SelectOptionImage
+        uiType={props.uiType ?? SelectOptionUiType.OPTION}
         image={props.image}
         class="h-25% aspect-square mt-18% justify-self-center rounded-full"
       />
@@ -1706,6 +1713,7 @@ function HistoryBlockBox(props: {
             <Match when={props.data.imageSize === "option"}>
               <HistoryOption
                 image={props.data.optionImage}
+                uiType={props.data.optionUiType}
                 class="grid-area-[2/1] w-10.5 h-18"
               />
             </Match>
@@ -1958,6 +1966,7 @@ function HistoryBlockDetailPanel(props: {
               <Match when={renderBlock().imageSize === "option"}>
                 <HistoryOption
                   image={renderBlock().optionImage}
+                  uiType={renderBlock().optionUiType}
                   class="grid-area-[1/1] w-10.5 h-18 m-2"
                 />
               </Match>
