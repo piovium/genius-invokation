@@ -87,7 +87,7 @@ define card {
  */
 define combatStatus {
   id 301102;
-  description "我方角色造成的伤害+1（仅在我方存在终末嗟叹之诗时生效）。持续回合：2";
+  description "<color=#FFFFFFFF>我方角色造成的伤害+1</color>（仅在我方存在$[C311205]时生效）。<color=#FFFFFFFF>$[K4]：2</color>";
   duration 2;
   on increaseSkillDamage {
     when :( :query($.my.equipped.def(ElegyForTheEnd)) );
@@ -107,7 +107,7 @@ define combatStatus {
  */
 define card {
   id 311306;
-  description "角色造成的伤害+1。角色使用元素战技或受到伤害后：本回合内，角色下次造成的伤害额外+1。（共用每回合2次）";
+  description "<color=#FFFFFFFF>角色造成的伤害+1</color>。<color=#FFFFFFFF>角色使用元素战技或受到伤害后：</color>本回合内，角色下次造成的伤害额外+1。（共用每回合2次）";
   cost DiceType.Aligned, 3;
   weapon claymore {
     on increaseSkillDamage {
@@ -136,7 +136,7 @@ define card {
 define combatStatus {
   name "叛逆的守护" as BellShield0;
   image "name://UI_Gcg_Buff_Common_Shield";
-  description "为我方出战角色提供护盾。（可叠加，最多叠加到2点）\n生成此出战状态的「钟剑」移除时：弃置自身。";
+  description "为我方出战角色提供$[K6]。（可叠加，最多叠加到2点）\n<color=#FFFFFFFF>生成此出战状态的「$[C311305]」移除时：</color>弃置自身。";
   shield 1, 2;
   variable weaponId, 0;
   on entityDispose {
@@ -155,7 +155,7 @@ define combatStatus {
 define combatStatus {
   name "叛逆的守护" as BellShield1;
   image "name://UI_Gcg_Buff_Common_Shield";
-  description "为我方出战角色提供护盾。（可叠加，最多叠加到2点）\n生成此出战状态的「钟剑」移除时：弃置自身。";
+  description "为我方出战角色提供$[K6]。（可叠加，最多叠加到2点）\n<color=#FFFFFFFF>生成此出战状态的「$[C311305]」移除时：</color>弃置自身。";
   shield 1, 2;
   variable weaponId, 0;
   on entityDispose {
@@ -174,7 +174,7 @@ define combatStatus {
 define combatStatus {
   name "叛逆的守护" as BellShield2;
   image "name://UI_Gcg_Buff_Common_Shield";
-  description "为我方出战角色提供护盾。（可叠加，最多叠加到2点）\n生成此出战状态的「钟剑」移除时：弃置自身。";
+  description "为我方出战角色提供$[K6]。（可叠加，最多叠加到2点）\n<color=#FFFFFFFF>生成此出战状态的「$[C311305]」移除时：</color>弃置自身。";
   shield 1, 2;
   variable weaponId, 0;
   on entityDispose {
@@ -197,7 +197,7 @@ const BELL_SHIELDS = [BellShield0, BellShield1, BellShield2];
  */
 define card {
   id 311305;
-  description "角色造成的伤害+1。角色使用技能后：生成1点绑定此武器的出战护盾。（每回合1次，自身最多叠加到2点）不同钟剑的护盾分别记录，装备者倒下或武器移除时对应护盾消失。";
+  description "<color=#FFFFFFFF>角色造成的伤害+1</color>。<color=#FFFFFFFF>角色使用技能后：</color>生成1点绑定此武器的出战$[K6]。（每回合1次，自身最多叠加到2点）不同$[C311305]的$[K6]分别记录，装备者倒下或武器移除时对应$[K6]消失。";
   cost DiceType.Aligned, 3;
   weapon claymore {
     on increaseSkillDamage {
