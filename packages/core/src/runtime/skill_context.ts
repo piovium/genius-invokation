@@ -158,13 +158,18 @@ export interface SelectOptionInput extends Omit<SelectOption, "uiType"> {
   uiType?: "option" | "cardFace";
 }
 
-interface DrawCardsOpt {
+/** All specified filters must match. */
+export interface DrawCardsOpt {
   who?: "my" | "opp";
+  /** Draw cards of the specified entity type. */
+  withType?: EntityType | null;
+  /** Match any listed tag; an empty list matches no cards. */
+  withOneOfTag?: readonly EntityTag[] | null;
   /** 抽取带有特定标签的牌 */
   withTag?: EntityTag | null;
   /** 抽取带有特定附着效果的牌 */
   withAttachment?: AttachmentHandle | null;
-  /** 抽取选定定义的牌。设置此选项会忽略 withTag */
+  /** 抽取选定定义的牌 */
   withDefinition?: CardHandle | null;
 }
 
@@ -1845,6 +1850,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
       return cardList.map((card) => this.get(card));
     }
     const {
+      withType = null,
+      withOneOfTag = null,
       withTag = null,
       withAttachment = null,
       withDefinition = null,
@@ -1854,9 +1861,11 @@ export class SkillContext<Meta extends ContextMetaBase> {
     const drawnCards: PlainEntityState[] = [];
     using l = this.mutator.subLog(
       DetailLogType.Primitive,
-      `Player ${who} draw ${countOrCard} cards, withTag=${withTag}, withAttachment=${withAttachment}, withDefinition=${withDefinition}`,
+      `Player ${who} draw ${countOrCard} cards, withType=${withType}, withOneOfTag=${withOneOfTag}, withTag=${withTag}, withAttachment=${withAttachment}, withDefinition=${withDefinition}`,
     );
     if (
+      withType === null &&
+      withOneOfTag === null &&
       withTag === null &&
       withAttachment === null &&
       withDefinition === null
@@ -1865,20 +1874,14 @@ export class SkillContext<Meta extends ContextMetaBase> {
       const { cards } = this.callAndEmit("drawCardsPlain", who, countOrCard);
       drawnCards.push(...cards);
     } else {
-      const check = (card: PlainEntityState) => {
-        if (withDefinition !== null) {
-          return card.definition.id === withDefinition;
-        }
-        if (withTag !== null) {
-          return card.definition.tags.includes(withTag);
-        }
-        if (withAttachment !== null) {
-          return card.attachments.some(
-            (a) => a.definition.id === withAttachment,
-          );
-        }
-        return false;
-      };
+      const check = (card: PlainEntityState) =>
+        (withType === null || card.definition.type === withType) &&
+        (withOneOfTag === null ||
+          withOneOfTag.some((tag) => card.definition.tags.includes(tag))) &&
+        (withDefinition === null || card.definition.id === withDefinition) &&
+        (withTag === null || card.definition.tags.includes(withTag)) &&
+        (withAttachment === null ||
+          card.attachments.some((a) => a.definition.id === withAttachment));
       // 否则，随机选中一张满足条件的牌
       const player = () => this.rawState.players[who];
       for (let i = 0; i < countOrCard; i++) {
