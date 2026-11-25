@@ -57,7 +57,9 @@ define combatStatus {
   };
   on selectOption {
     listenTo myself;
-    const card = :player.hands.find((card) => card.id === Number(:e.selectedKey));
+    const card = :player.hands.find(
+      (card) => card.id === Number(:e.selectedKey),
+    );
     if (card) {
       :discard(card);
       :consumeUsage();
@@ -108,6 +110,7 @@ define card {
     on damagedOrHealed {
       when :( :e.target.isActive() );
       :variables.forbidden += 1;
+      :abortPreview();
       if (:variables.forbidden >= 6 && :oppPlayer.hands.length > 0) {
         :variables.forbidden -= 6;
         :discard(:random(:oppPlayer.hands));
@@ -226,7 +229,8 @@ define card {
       when :(
         :e.switchInfo.to.id === :self.master.id &&
           :player.hands.length >
-            (:query($.my.combatStatus.def(PhysicalDiscard))?.variables.usage ?? 0)
+            (:query($.my.combatStatus.def(PhysicalDiscard))?.variables.usage ??
+              0)
       );
       usage perRound, 1;
       :combatStatus(PhysicalDiscard);
@@ -263,6 +267,7 @@ define card {
       cost DiceType.Aligned, 2;
       usage 2;
       :damage(DamageType.Physical, 1);
+      :abortPreview();
       :discard(:random(:oppPlayer.hands));
       :drawCards(1, { who: "opp" });
     };
@@ -428,7 +433,8 @@ define card {
       const count = Math.min(
         2 - :variables.memory,
         :player.hands.length -
-          (:query($.my.combatStatus.def(PhysicalDiscard))?.variables.usage ?? 0),
+          (:query($.my.combatStatus.def(PhysicalDiscard))?.variables.usage ??
+            0),
       );
       if (count > 0) {
         :combatStatus(PhysicalDiscard, "my", {
@@ -647,7 +653,8 @@ define card {
       when :(
         :e.action.to.id === :self.master.id && // 附属角色切换为出战角色
           :player.hands.length >
-            (:query($.my.combatStatus.def(PhysicalDiscard))?.variables.usage ?? 0)
+            (:query($.my.combatStatus.def(PhysicalDiscard))?.variables.usage ??
+              0)
       );
       :variables.deductDiceTriggered = 1;
       :combatStatus(PhysicalDiscard);
