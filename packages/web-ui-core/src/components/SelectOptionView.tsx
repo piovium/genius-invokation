@@ -24,6 +24,7 @@ import { Button } from "./Button";
 import { ImageFallback } from "./Image";
 import { useUiContext } from "../hooks/context";
 import SelectOptionCard from "../svg/SelectOption.svg?fb";
+import { StaticCard } from "./SelectCardView";
 
 export interface SelectOptionViewProps {
   shown: boolean;
@@ -54,8 +55,8 @@ export function SelectOptionView(props: SelectOptionViewProps) {
               image={option.image}
               title={option.title}
               text={option.text}
+              selected={selectedIndex() === index()}
               onClick={() => setSelectedIndex(index())}
-              data-selected={selectedIndex() === index()}
             />
           )}
         </For>
@@ -81,42 +82,63 @@ export interface SelectOptionProps extends ComponentProps<"div"> {
   image?: string;
   title?: string;
   text: string;
+  selected?: boolean;
 }
 
 export function SelectOption(props: SelectOptionProps) {
-  const rest = omit(props, "uiType", "image", "title", "text", "class");
+  const rest = omit(props, "uiType", "image", "title", "text", "selected", "class");
   const selectOptionText = textWithReference();
+  const cardId = () =>
+    props.uiType === SelectOptionUiType.CARD_FACE &&
+    props.image?.match(/^id:\/\/(\d+)$/)?.[1];
   return (
-    <div
-      class={[
-        "w-21 h-36 grid relative children:grid-area-[1/1] rounded isolate transition-all select-option",
-        props.class,
-      ]}
-      {...rest}
-    >
-      <SelectOptionCard class="w-full h-full select-option-card" />
-      <div class="grid grid-rows-[3.2rem_1.6rem_4.2rem] grid-cols-1 w-full h-full justify-items-center z-1">
-        <SelectOptionImage
-          uiType={props.uiType ?? SelectOptionUiType.OPTION}
-          image={props.image}
-          class="rounded-full w-9 h-9 grid-area-[1/1] self-end"
-        />
-        <span class="grid-area-[2/1] text-#ebccba font-bold text-2.5 self-center">
-          {selectOptionText(props.title ?? "")}
-        </span>
-        <div class="grid-area-[3/1] w-full h-full overflow-y-auto px-1 pb-1 text-2 text-#ebd6c0 whitespace-pre-wrap break-words touch-pan scrollbar-hidden select-option-text">
-          {selectOptionText(props.text)}
+    <Show
+      when={cardId()}
+      fallback={
+        <div
+          class={[
+            "w-21 h-36 grid relative children:grid-area-[1/1] rounded isolate transition-all select-option",
+            props.class,
+          ]}
+          data-selected={props.selected}
+          {...rest}
+        >
+          <SelectOptionCard class="w-full h-full select-option-card" />
+          <div class="grid grid-rows-[3.2rem_1.6rem_4.2rem] grid-cols-1 w-full h-full justify-items-center z-1">
+            <SelectOptionImage
+              image={
+                props.uiType === SelectOptionUiType.OPTION
+                  ? props.image
+                  : void 0
+              }
+              class="rounded-full w-9 h-9 grid-area-[1/1] self-end"
+            />
+            <span class="grid-area-[2/1] text-#ebccba font-bold text-2.5 self-center">
+              {selectOptionText(props.title ?? "")}
+            </span>
+            <div class="grid-area-[3/1] w-full h-full overflow-y-auto px-1 pb-1 text-2 text-#ebd6c0 whitespace-pre-wrap break-words touch-pan scrollbar-hidden select-option-text">
+              {selectOptionText(props.text)}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      }
+    >
+      {(id) => (
+        <StaticCard
+          cardDefinitionId={Number(id())}
+          selected={props.selected}
+          {...rest}
+        >
+          <div class="self-end w-35 mx--7 max-w-35 py-1 text-3 text-center text-white/80 line-height-tight translate-y-100%">
+            {selectOptionText(props.title ?? "")}
+          </div>
+        </StaticCard>
+      )}
+    </Show>
   );
 }
 
-export function SelectOptionImage(props: {
-  uiType?: SelectOptionUiType;
-  image?: string;
-  class?: string;
-}) {
+export function SelectOptionImage(props: { image?: string; class?: string }) {
   const { assetsManager } = useUiContext();
   const url = createMemo(
     () =>
