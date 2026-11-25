@@ -472,6 +472,7 @@ define card {
 
 // 潜猎护盾
 const SubnauticalShield = 111123 as StatusHandle;
+const PhysicalFreminetUndraw = customEvent("mod/physical/freminet/undraw");
 
 /**
  * @id 111122
@@ -484,8 +485,12 @@ const SubnauticalShield = 111123 as StatusHandle;
 define status {
   id 111122 as SubnauticalHunterMode;
   description "<color=#FFFFFFFF>我方抓3张牌后：</color>提供1点$[K6]保护所附属角色。（可叠加，最多叠加至2点）\n<color=#FFFFFFFF>所附属角色使用普通攻击或元素战技后：</color>将至多2张手牌置于牌库底，然后抓等量的牌。\n<color=#FFFFFFFF>$[K4]：2</color>";
+  playingDescription "<color=#FFFFFFFF>我方抓3张牌后：</color>提供1点$[K6]保护所附属角色。（可叠加，最多叠加至2点；<color=#D3BC8EFF>当前已抓${[GCG_TOKEN_COUNTER]}张牌</color>）。\n<color=#FFFFFFFF>所附属角色使用普通攻击或元素战技后：</color>将至多2张手牌置于牌库底，然后抓等量的牌。\n<color=#FFFFFFFF>$[K4]：2</color>";
   duration 2;
   variable drawnCard, 0 {
+    visible false;
+  };
+  variable undrawnCard, 0 {
     visible false;
   };
   replaceDescription "[GCG_TOKEN_COUNTER]",
@@ -500,10 +505,38 @@ define status {
   };
   on useSkill {
     when :( :e.isSkillType("normal") || :e.isSkillType("elemental") );
-    // 未提及undraw方式，暂定随机
-    const cards = :randomSubset(:player.hands, 2);
-    :undrawCards(cards, "bottom");
-    :drawCards(cards.length);
+    // 未提及undraw方式，暂定自选
+    :abortPreview();
+    :variables.undrawnCard = 0;
+    :emitCustomEvent(PhysicalFreminetUndraw);
+  };
+  on PhysicalFreminetUndraw {
+    when :( :player.hands.length > 0 );
+    listenTo myself;
+    :selectOption(
+      `选择将1张手牌置于牌库底。`,
+      :player.hands.map((card) => ({
+        key: String(card.id),
+        text: `将这张$[C${card.definition.id}]置于牌库底`,
+        image: `id://${card.definition.id}`,
+        title: `$[C${card.definition.id}]`,
+      })),
+    );
+  };
+  on selectOption {
+    listenTo myself;
+    const card = :player.hands.find(
+      (card) => card.id === Number(:e.selectedKey),
+    );
+    if (card) {
+      :undrawCards([card], "bottom");
+      :variables.undrawnCard += 1;
+    }
+    if (:player.hands.length > 0 && :variables.undrawnCard < 2) {
+      :emitCustomEvent(PhysicalFreminetUndraw);
+    } else {
+      :drawCards(:variables.undrawnCard);
+    }
   };
 };
 

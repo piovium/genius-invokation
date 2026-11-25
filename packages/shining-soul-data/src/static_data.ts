@@ -40,7 +40,7 @@ export default [
   // 嵌套特技技能不支持 description 声明，单独覆盖实卡文案。
   {
     id: 3130021,
-    playCost: [{ type: "GCG_COST_DICE_VOID", count: 2 }],
+    playCost: [{ type: "GCG_COST_DICE_SAME", count: 2 }],
     rawDescription:
       "造成1点$[K100]，随机$[K56]一张对方手牌，然后对手抓1张牌。如果我方手牌数不多于2，此特技少花费1个元素骰。",
   },
