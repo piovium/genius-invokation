@@ -757,7 +757,6 @@ define skill {
           absorbedCount: :getExtensionState().absorbed[:self.who].length,
         },
       });
-      :characterStatus(StoneFacetsElementalCrystallization);
     };
   };
 };
