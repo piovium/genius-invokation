@@ -3,7 +3,7 @@ import {
   type AssetsManagerOption,
 } from "@gi-tcg/assets-manager";
 import { Game, playSkillOfCard } from "@gi-tcg/core";
-import { DiceType, SelectOptionUiType } from "@gi-tcg/typings";
+import { DiceType } from "@gi-tcg/typings";
 import { describe, expect, test, vi } from "vitest";
 
 import { CustomDataLoader } from "../src";
@@ -130,8 +130,8 @@ describe("CustomDataLoader GTS", () => {
           id 20000010;
           name "Question";
           :selectOption("Choose", [
-            { key: "reference", text: "$[C1101]", image: "id://1101", uiType: "cardFace" },
-            { key: "empty", title: "", text: "", image: "id://1102", uiType: "option" },
+            { key: "reference", text: "$[C1101]", image: "id://1101" },
+            { key: "empty", title: "", text: "", image: "id://1102" },
             { key: "url", text: "URL", image: "https://example.com/card.png" },
             { key: "text", title: "Title", text: "Text" }
           ]${argument});
@@ -170,31 +170,14 @@ describe("CustomDataLoader GTS", () => {
             who,
             prompt: "Choose",
             options: [
-              {
-                key: "reference",
-                text: "$[C1101]",
-                image: "id://1101",
-                uiType: SelectOptionUiType.CARD_FACE,
-              },
-              {
-                key: "empty",
-                title: "",
-                text: "",
-                image: "id://1102",
-                uiType: SelectOptionUiType.OPTION,
-              },
+              { key: "reference", text: "$[C1101]", image: "id://1101" },
+              { key: "empty", title: "", text: "", image: "id://1102" },
               {
                 key: "url",
                 text: "URL",
                 image: "https://example.com/card.png",
-                uiType: SelectOptionUiType.OPTION,
               },
-              {
-                key: "text",
-                title: "Title",
-                text: "Text",
-                uiType: SelectOptionUiType.OPTION,
-              },
+              { key: "text", title: "Title", text: "Text" },
             ],
           }),
         ],

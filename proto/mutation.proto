@@ -321,7 +321,6 @@ message SelectOptionDoneEM {
   optional string selected_key = 4;
   optional string selected_title = 5;
   optional string selected_image = 6;
-  optional SelectOptionUiType selected_ui_type = 7;
 }
 
 message HandleEventEM {

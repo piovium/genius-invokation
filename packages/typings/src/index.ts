@@ -14,7 +14,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 export * from "./common_enums";
-export { SelectOptionUiType } from "./gen/enums";
 export { base64Decode, base64Encode } from "@bufbuild/protobuf/wire";
 
 export {
@@ -90,6 +89,7 @@ export {
   SelectCardRequest,
   SelectCardResponse,
   SelectOption,
+  SelectOptionUiType,
   SelectOptionRequest,
   SelectOptionResponse,
   SwitchHandsRequest,

@@ -155,7 +155,7 @@ interface SelectOptionOpt {
 }
 
 export interface SelectOptionInput extends Omit<SelectOption, "uiType"> {
-  uiType?: "option" | "cardFace";
+  uiType?: null | "cardFace";
 }
 
 /** All specified filters must match. */
@@ -2297,7 +2297,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         uiType:
           option.uiType === "cardFace"
             ? SelectOptionUiType.CARD_FACE
-            : SelectOptionUiType.OPTION,
+            : SelectOptionUiType.UNSPECIFIED,
       })),
     );
   }
