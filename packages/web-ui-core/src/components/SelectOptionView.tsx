@@ -88,6 +88,7 @@ export interface SelectOptionProps extends ComponentProps<"div"> {
 export function SelectOption(props: SelectOptionProps) {
   const rest = omit(props, "uiType", "image", "title", "text", "selected", "class");
   const selectOptionText = textWithReference();
+  // TODO no regex
   const cardId = () =>
     props.uiType === SelectOptionUiType.CARD_FACE &&
     props.image?.match(/^id:\/\/(\d+)$/)?.[1];

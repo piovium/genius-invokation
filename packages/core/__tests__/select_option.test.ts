@@ -21,6 +21,7 @@ test("accepts an integer option index", () => {
   ).not.toThrow();
 });
 
+
 test("option selection stops previews without interaction IO", async () => {
   const state = Game.createInitialState({
     decks: [

@@ -887,7 +887,6 @@ export function updateHistory(
             selectedKey: m.selectedKey,
             selectedTitle: m.selectedTitle,
             selectedImage: m.selectedImage,
-            selectedUiType: m.selectedUiType,
             children: [],
             indent: history.currentIndent,
           };

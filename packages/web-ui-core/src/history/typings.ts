@@ -13,13 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  Aura,
-  DamageType,
-  DiceType,
-  Reaction,
-  type SelectOptionUiType,
-} from "@gi-tcg/typings";
+import { Aura, DamageType, DiceType, Reaction } from "@gi-tcg/typings";
 import type { EntityType } from "./parser";
 
 export type HistoryDetailBlock =
@@ -197,7 +191,6 @@ export interface SelectOptionHistoryBlock {
   selectedKey?: string;
   selectedTitle?: string;
   selectedImage?: string;
-  selectedUiType?: SelectOptionUiType;
   children: HistoryChildren[];
 }
 

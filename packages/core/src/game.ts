@@ -29,7 +29,6 @@ import {
   ActionValidity,
   type Deck,
   type SelectOption,
-  SelectOptionUiType,
 } from "@gi-tcg/typings";
 import {
   getDefaultGameConfig,
@@ -1237,7 +1236,6 @@ export class Game {
       who,
       selectedTitle: option.title ?? option.text,
       selectedImage: option.image,
-      selectedUiType: option.uiType ?? SelectOptionUiType.OPTION,
     };
     this.notifyOne(who, {
       ...notification,
