@@ -26,7 +26,9 @@ define status {
   id 111121 as PersTimer;
   since "v5.0.0";
   variable level, 0;
-  variable triggerOnUseSkill, 0;
+  variable triggerOnUseSkill, 0 {
+    visible false;
+  };
   on drawCard {
     :variables.level += 1;
   };
