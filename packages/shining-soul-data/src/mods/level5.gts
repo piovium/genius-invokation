@@ -743,20 +743,16 @@ define skill {
   description "【被动】战斗开始时，初始附属<color=#FFFFFFFF>$[C126022]</color>。";
   skillType passive {
     associateExtension AbsorbedCountExtension;
-    on battleBegin {
+    on selfEnter {
       :characterStatus(StoneFacetsElementalAbsorption, :self, {
         overrideVariables: {
           absorbedCount: :getExtensionState().absorbed[:self.who].length,
         },
       });
-      :characterStatus(StoneFacetsElementalCrystallization);
     };
-    on revive {
-      :characterStatus(StoneFacetsElementalAbsorption, :self, {
-        overrideVariables: {
-          absorbedCount: :getExtensionState().absorbed[:self.who].length,
-        },
-      });
+    on selfEnter {
+      usage 1 { name "selfEnterUsage"; };
+      :characterStatus(StoneFacetsElementalCrystallization);
     };
   };
 };

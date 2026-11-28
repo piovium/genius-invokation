@@ -164,10 +164,7 @@ define skill {
 define skill {
   id 21024 as MightOfDelusion;
   skillType passive {
-    on battleBegin {
-      :characterStatus(IcesealedCrimsonWitchOfEmbers);
-    };
-    on revive {
+    on selfEnter {
       // 女士在转变形态前被击倒，复活后会重新附着复活甲
       :characterStatus(IcesealedCrimsonWitchOfEmbers);
     };
@@ -179,7 +176,7 @@ define skill {
  * @name 炽炎醒燃
  * @cost
  * @description
- * 
+ *
  */
 define skill {
   id 21025 as InfernosAwakening; // 定义为：当移除冰封的炽炎魔女时，转换角色形态

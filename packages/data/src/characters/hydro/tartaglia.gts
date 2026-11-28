@@ -153,10 +153,7 @@ define skill {
 define skill {
   id 12044 as TideWithholder;
   skillType passive {
-    on battleBegin {
-      :characterStatus(RangedStance);
-    };
-    on revive {
+    on selfEnter {
       :characterStatus(RangedStance);
     };
     on entityDispose {
@@ -171,7 +168,7 @@ define skill {
  * @name 远程状态
  * @cost
  * @description
- * 
+ *
  */
 define skill {
   id 12045 as private RangedStanceSkill;
@@ -185,7 +182,7 @@ define skill {
  * @name 遏浪
  * @cost
  * @description
- * 
+ *
  */
 define skill {
   id 12046 as private UnknownSkill;

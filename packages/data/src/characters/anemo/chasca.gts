@@ -249,7 +249,8 @@ define skill {
 define skill {
   id 15114 as ShadowhuntShellPassive;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1 { name "selfEnterUsage"; };
       :createPileCards(ShadowhuntShell, 6, "random");
     };
   };

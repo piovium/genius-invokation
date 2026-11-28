@@ -251,7 +251,8 @@ define skill {
   id 27024 as InvokationOfPropagation;
   skillType passive {
     variable organismCount, 0;
-    on battleBegin {
+    on selfEnter {
+      usage 1 { name "selfEnterUsage"; };
       :createPileCards(AwakenMyKindred, 5, "random");
       :combatStatus(HeartOfOasis);
     };

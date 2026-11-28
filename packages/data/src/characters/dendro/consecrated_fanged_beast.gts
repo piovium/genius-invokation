@@ -105,7 +105,8 @@ define skill {
 define skill {
   id 27054 as HungerFromTheRemains;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1 { name "selfEnterUsage"; };
       :createPileCards(BonecrunchersEnergyBlock, 2, "bottom");
     };
     on entityEnter {

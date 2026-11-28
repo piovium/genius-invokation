@@ -342,22 +342,19 @@ function getAllEntitiesImpl(
 }
 
 /**
- * Get all characters may be able to trigger on `onBattleBegin`.
+ * Get characters in creation order, left to right within each player.
  * Consider `config.hostRelatedExecution`.
  * @param state
  * @returns
  */
 export function getAllCharacters(state: GameState): CharacterState[] {
-  if (state.config.hostRelatedExecution) {
-    return [
-      ...state.players[state.config.hostWho].characters,
-      ...state.players[flip(state.config.hostWho)].characters,
-    ];
-  } else {
-    return getAllEntities(state).filter(
-      (st): st is CharacterState => st.definition.type === "character",
-    );
-  }
+  const first = state.config.hostRelatedExecution
+    ? state.config.hostWho
+    : state.currentTurn;
+  return [
+    ...state.players[first].characters,
+    ...state.players[flip(first)].characters,
+  ];
 }
 
 export interface CallerAndTriggeredSkill {
@@ -439,9 +436,7 @@ export function allSkills(
       }
     }
   }
-  const collectFn =
-    triggerOn === "onBattleBegin" ? getAllCharacters : getAllEntities;
-  for (const entity of collectFn(state)) {
+  for (const entity of getAllEntities(state)) {
     for (const skill of entity.definition.skills) {
       if (skill.triggerOn === triggerOn) {
         result.push({ caller: entity, skill });

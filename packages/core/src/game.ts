@@ -60,6 +60,8 @@ import {
 import {
   elementOfCharacter,
   getActiveCharacterIndex,
+  getAllCharacters,
+  getEntityById,
   findReplaceAction,
   shuffle,
   sortDice,
@@ -80,6 +82,7 @@ import {
   DisposeEventArg,
   type EventAndRequest,
   EventArg,
+  EnterEventArg,
   ModifyRollEventArg,
   PlayCardEventArg,
   PlayerEventArg,
@@ -621,7 +624,6 @@ export class Game {
     this.mutator.postChooseActive(a0, a1);
     await this.switchActive(0, a0, null);
     await this.switchActive(1, a1, null);
-    await this.handleEvent("onBattleBegin", new EventArg(this.state));
     this.mutate({
       type: "stepRound",
     });
@@ -672,6 +674,17 @@ export class Game {
   }
   private async actionPhase(): Promise<PhaseType> {
     if (this.state.prevPhase === "roll") {
+      if (this.state.roundNumber === 1) {
+        for (const character of getAllCharacters(this.state)) {
+          await this.handleEvent(
+            "onCreateCharacter",
+            new EnterEventArg(this.state, {
+              newState: getEntityById(this.state, character.id),
+              overridden: null,
+            }),
+          );
+        }
+      }
       await this.handleEvent("onActionPhase", new EventArg(this.state));
     }
     const who = this.state.currentTurn;

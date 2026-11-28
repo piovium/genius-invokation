@@ -107,7 +107,8 @@ define skill {
 define skill {
   id 25034 as ImmortalRemnantsAnemo;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1 { name "selfEnterUsage"; };
       :createPileCards(BonecrunchersEnergyBlock, 6, "spaceAround");
     };
   };

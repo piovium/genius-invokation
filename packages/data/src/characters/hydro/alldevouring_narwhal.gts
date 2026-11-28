@@ -249,7 +249,8 @@ define skill {
 define skill {
   id 22044 as InsatiableAppetite;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1 { name "selfEnterUsage"; };
       :combatStatus(DeepDevourersDomain);
     };
   };

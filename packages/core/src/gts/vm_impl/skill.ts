@@ -308,7 +308,11 @@ export class TriggeredSkillModel extends SkillModel {
       id: this.id,
       ownerType: this.caller.type,
       skillType: this.asSkillType,
-      triggerOn,
+      triggerOn:
+        this.caller.type === "character" &&
+        this.detailedEventName === "selfEnter"
+          ? "onCreateCharacter"
+          : triggerOn,
       initiativeSkillConfig: null,
       filter,
       action,

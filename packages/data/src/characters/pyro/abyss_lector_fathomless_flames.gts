@@ -161,7 +161,8 @@ define skill {
 define skill {
   id 23024 as FieryRebirth;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1 { name "selfEnterUsage"; };
       :characterStatus(FieryRebirthStatus);
     };
   };
@@ -172,7 +173,7 @@ define skill {
  * @name 火之新生
  * @cost
  * @description
- * 
+ *
  */
 define skill {
   id 23028 as FieryRebirthSkill;

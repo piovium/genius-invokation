@@ -119,10 +119,7 @@ define skill {
 define skill {
   id 27014 as RadicalVitality;
   skillType passive {
-    on battleBegin {
-      :characterStatus(RadicalVitalityStatus);
-    };
-    on revive {
+    on selfEnter {
       :characterStatus(RadicalVitalityStatus);
     };
   };

@@ -125,7 +125,8 @@ define skill {
 define skill {
   id 22084 as HydroCrystalCorePassive;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1 { name "selfEnterUsage"; };
       :characterStatus(HydroCrystalCore, :self);
     };
     on entityDispose {

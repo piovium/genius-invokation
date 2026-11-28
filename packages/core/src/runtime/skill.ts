@@ -392,7 +392,6 @@ export const detailedEventDictionary = {
     );
   }),
 
-  battleBegin: defineDescriptor("onBattleBegin"),
   roundBegin: defineDescriptor("onRoundBegin"),
   roundEnd: defineDescriptor("onRoundEnd"),
   actionPhase: defineDescriptor("onActionPhase"),
@@ -549,9 +548,6 @@ export const detailedEventDictionary = {
       e.damageInfo.causeDefeated &&
       checkRelative(e.onTimeState, e.target.id, r)
     );
-  }),
-  revive: defineDescriptor("onRevive", (e, r) => {
-    return checkRelative(e.onTimeState, e.character.id, r);
   }),
   generateDice: defineDescriptor("onGenerateDice", (e, r) => {
     return checkRelative(e.onTimeState, { who: e.who }, r);

@@ -52,7 +52,6 @@ import {
   GiTcgIoNotProvideError,
 } from "./error";
 import {
-  CharacterEventArg,
   BeforeVariableEventArg,
   DisposeEventArg,
   type VariableValueChangeInfo,
@@ -745,8 +744,11 @@ export class StateMutator {
           direction: "increase",
         });
         events.push([
-          "onRevive",
-          new CharacterEventArg(this.state, targetState),
+          "onCreateCharacter",
+          new EnterEventArg(this.state, {
+            newState: getEntityById(this.state, targetState.id),
+            overridden: null,
+          }),
         ]);
       } else {
         // Cannot apply non-revive heal on a dead character

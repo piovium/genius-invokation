@@ -455,7 +455,10 @@ function doMutation(state: GameState, m: Mutation): GameState {
     }
     case "modifyEntityVar": {
       // Not representable, skip.
-      if (m.value > DEFAULT_VARIABLE_UPPER_BOUND || m.value < DEFAULT_VARIABLE_LOWER_BOUND) {
+      if (
+        m.value > DEFAULT_VARIABLE_UPPER_BOUND ||
+        m.value < DEFAULT_VARIABLE_LOWER_BOUND
+      ) {
         return state;
       }
       const newState = produce(state, (draft) => {
@@ -480,6 +483,11 @@ function doMutation(state: GameState, m: Mutation): GameState {
         entity.definition = m.newDefinition as Draft<CharacterDefinition>;
         // 如果是转换角色形态，则移动 skillLog 到新的定义 id 下
         if (m.state.definition.type === "character") {
+          for (const [name, config] of Object.entries(
+            m.newDefinition.varConfigs,
+          )) {
+            entity.variables[name] ??= config.initialValue;
+          }
           const { who } = getEntityArea(draft, m.state.id);
           const player = draft.players[who];
           player.roundSkillLog.set(

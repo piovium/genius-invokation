@@ -137,7 +137,8 @@ define skill {
 define skill {
   id 24034 as PearlArmor;
   skillType passive {
-    on battleBegin {
+    on selfEnter {
+      usage 1 { name "selfEnterUsage"; };
       :characterStatus(FontemerPearl);
     };
   };
@@ -148,7 +149,7 @@ define skill {
  * @name 霰舞鱼群
  * @cost
  * @description
- * 
+ *
  */
 define skill {
   id 24037 as SwirlingSchoolOfFishPassive;
