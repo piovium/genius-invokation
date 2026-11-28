@@ -501,32 +501,24 @@ export const detailedEventDictionary = {
     return r.callerId === e.entity.id && e.isDiscard();
   }),
   dealDamage: defineDescriptor("onDamageOrHeal", (e, r) => {
-    return (
-      e instanceof DamageEventArg &&
-      checkRelative(e.onTimeState, e.source.id, r)
-    );
+    return e.isDamage() && checkRelative(e.onTimeState, e.source.id, r);
   }),
   skillDamage: defineDescriptor("onDamageOrHeal", (e, r) => {
     return (
-      e instanceof DamageEventArg &&
+      e.isDamage() &&
       checkRelative(e.onTimeState, e.source.id, r) &&
       e.source.definition.type === "character" &&
       e.damageInfo.fromReaction === null
     );
   }),
   damaged: defineDescriptor("onDamageOrHeal", (e, r) => {
-    return (
-      e instanceof DamageEventArg &&
-      checkRelative(e.onTimeState, e.target.id, r)
-    );
+    return e.isDamage() && checkRelative(e.onTimeState, e.target.id, r);
   }),
   healed: defineDescriptor("onDamageOrHeal", (e, r) => {
-    return (
-      e instanceof HealEventArg && checkRelative(e.onTimeState, e.target.id, r)
-    );
+    return e.isHeal() && checkRelative(e.onTimeState, e.target.id, r);
   }),
   damagedOrHealed: defineDescriptor("onDamageOrHeal", (e, r) => {
-    return checkRelative(e.onTimeState, e.target.id, r);
+    return checkRelative(e.onTimeState, e.character.id, r);
   }),
   modifyReaction: defineDescriptor("modifyReaction", (e, r) => {
     return checkRelative(e.onTimeState, e.reactionInfo.target.id, r);
@@ -553,7 +545,7 @@ export const detailedEventDictionary = {
   }),
   defeated: defineDescriptor("onDamageOrHeal", (e, r) => {
     return (
-      e instanceof DamageEventArg &&
+      e.isDamage() &&
       e.damageInfo.causeDefeated &&
       checkRelative(e.onTimeState, e.target.id, r)
     );

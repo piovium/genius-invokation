@@ -112,7 +112,7 @@ define extension {
     ((st, e) => {
       // 七七倒下时重置
       if (
-        e.type !== DamageType.Heal &&
+        e.isDamage() &&
         e.target.definition.id === Qiqi &&
         e.damageInfo.causeDefeated
       ) {

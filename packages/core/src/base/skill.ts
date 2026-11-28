@@ -776,6 +776,12 @@ export class DamageOrHealEventArg extends CharacterEventArg {
     }
     super(state, info.target);
   }
+  isDamage(): this is DamageEventArg {
+    return this instanceof DamageEventArg;
+  }
+  isHeal(): this is HealEventArg {
+    return this instanceof HealEventArg;
+  }
 }
 
 export class DamageEventArg extends DamageOrHealEventArg {
@@ -1449,9 +1455,7 @@ export const EVENT_MAP = {
   modifyHeal0: ModifyHeal0EventArg, // 取消（克洛琳德）
   modifyHeal1: ModifyHeal1EventArg, // 减（生命之契）
   modifyReaction: ModifyReactionEventArg,
-  onDamageOrHeal: DamageOrHealEventArg as new (
-    ...args: ConstructorParameters<typeof DamageOrHealEventArg>
-  ) => DamageEventArg | HealEventArg,
+  onDamageOrHeal: DamageOrHealEventArg,
 
   onEnter: EnterEventArg,
   onDispose: DisposeEventArg,

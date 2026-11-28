@@ -87,7 +87,7 @@ define extension {
     ((st, e) => {
       // 甘雨倒下时重置
       if (
-        e.type !== DamageType.Heal &&
+        e.isDamage() &&
         e.target.definition.id === Ganyu &&
         e.damageInfo.causeDefeated
       ) {

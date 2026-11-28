@@ -673,7 +673,7 @@ define extension {
   mutateWhen onDamageOrHeal,
     ((st, e) => {
       if (
-        e.type !== DamageType.Heal &&
+        e.isDamage() &&
         e.type !== DamageType.Physical &&
         e.type !== DamageType.Piercing
       ) {

@@ -428,7 +428,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     // - 其余类型归类为 otherEvents
     for (const event of this.currentEvents) {
       const [name, arg] = event;
-      if (name === "onDamageOrHeal" && arg instanceof DamageEventArg) {
+      if (name === "onDamageOrHeal" && arg.isDamage()) {
         if (arg.damageInfo.causeDefeated) {
           // Wrap original EventArg to ZeroHealthEventArg
           const zeroHealthEventArg = new ZeroHealthEventArg(
