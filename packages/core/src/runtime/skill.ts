@@ -31,7 +31,8 @@ import {
   ModifyHeal0EventArg,
   ModifyHeal1EventArg,
   UseSkillEventArg,
-  DamageOrHealEventArg,
+  DamageEventArg,
+  HealEventArg,
   ModifyAction4EventArg,
   SkillContextOptions,
 } from "../base/skill";
@@ -500,28 +501,24 @@ export const detailedEventDictionary = {
     return r.callerId === e.entity.id && e.isDiscard();
   }),
   dealDamage: defineDescriptor("onDamageOrHeal", (e, r) => {
-    return (
-      e.isDamageTypeDamage() && checkRelative(e.onTimeState, e.source.id, r)
-    );
+    return e.isDamage() && checkRelative(e.onTimeState, e.source.id, r);
   }),
   skillDamage: defineDescriptor("onDamageOrHeal", (e, r) => {
     return (
-      e.isDamageTypeDamage() &&
+      e.isDamage() &&
       checkRelative(e.onTimeState, e.source.id, r) &&
       e.source.definition.type === "character" &&
       e.damageInfo.fromReaction === null
     );
   }),
   damaged: defineDescriptor("onDamageOrHeal", (e, r) => {
-    return (
-      e.isDamageTypeDamage() && checkRelative(e.onTimeState, e.target.id, r)
-    );
+    return e.isDamage() && checkRelative(e.onTimeState, e.target.id, r);
   }),
   healed: defineDescriptor("onDamageOrHeal", (e, r) => {
-    return e.isDamageTypeHeal() && checkRelative(e.onTimeState, e.target.id, r);
+    return e.isHeal() && checkRelative(e.onTimeState, e.target.id, r);
   }),
   damagedOrHealed: defineDescriptor("onDamageOrHeal", (e, r) => {
-    return checkRelative(e.onTimeState, e.target.id, r);
+    return checkRelative(e.onTimeState, e.character.id, r);
   }),
   modifyReaction: defineDescriptor("modifyReaction", (e, r) => {
     return checkRelative(e.onTimeState, e.reactionInfo.target.id, r);
@@ -548,7 +545,9 @@ export const detailedEventDictionary = {
   }),
   defeated: defineDescriptor("onDamageOrHeal", (e, r) => {
     return (
-      checkRelative(e.onTimeState, e.target.id, r) && e.damageInfo.causeDefeated
+      e.isDamage() &&
+      e.damageInfo.causeDefeated &&
+      checkRelative(e.onTimeState, e.target.id, r)
     );
   }),
   revive: defineDescriptor("onRevive", (e, r) => {
@@ -622,9 +621,11 @@ export const detailedEventDictionary = {
 } satisfies Record<string, Descriptor<any>>;
 
 type OverrideEventArgType = {
-  damaged: DamageOrHealEventArg<DamageInfo>;
-  defeated: DamageOrHealEventArg<DamageInfo>;
-  dealDamage: DamageOrHealEventArg<DamageInfo>;
+  damaged: DamageEventArg;
+  defeated: DamageEventArg;
+  dealDamage: DamageEventArg;
+  skillDamage: DamageEventArg;
+  healed: HealEventArg;
   deductOmniDiceSwitch: ModifyAction2EventArg<SwitchActiveInfo>;
   deductOmniDiceCard: ModifyAction2EventArg<PlayCardInfo>;
   deductAllDiceCard: ModifyAction3EventArg<PlayCardInfo>;
@@ -633,8 +634,8 @@ type OverrideEventArgType = {
   deductOmniDiceSkill: ModifyAction2EventArg<UseSkillInfo>;
   deductOmniDiceTechnique: ModifyAction2EventArg<UseSkillInfo>;
   beforeFastSwitch: ModifyAction4EventArg<SwitchActiveInfo>;
-  cancelHealed: Omit<ModifyHeal0EventArg, "damageInfo" | "value">;
-  decreaseHealed: Omit<ModifyHeal1EventArg, "damageInfo" | "value">;
+  cancelHealed: Omit<ModifyHeal0EventArg, "value">;
+  decreaseHealed: Omit<ModifyHeal1EventArg, "value">;
 };
 
 type DetailedEventDictionary = Omit<

@@ -70,7 +70,6 @@ import type { CustomEvent } from "./custom_event";
 import { getRaw, NoReactiveSymbol } from "../runtime/reactive";
 import type { PlainCharacterState } from "../runtime/reactive/utils";
 import type { MoveEntityM, RemoveEntityM } from "./mutation";
-import type { LunarReaction } from "@gi-tcg/typings";
 import type { DamageOption, ReadonlyEventList } from "../mutator";
 import type { SkillContext } from "../runtime/skill_context";
 import { freeze, immerable, type Immutable } from "immer";
@@ -266,8 +265,6 @@ export interface HealInfo {
   readonly source: AnyState;
   readonly via: SkillInfo;
   readonly target: CharacterState;
-  readonly fromReaction: null;
-  readonly causeDefeated: false;
   readonly log?: string;
 }
 
@@ -752,40 +749,60 @@ export class PlayCardEventArg extends PlayerEventArg {
   }
 }
 
-export class DamageOrHealEventArg<
-  InfoT extends DamageInfo | HealInfo,
-> extends EventArg {
-  public readonly sourceWho: 0 | 1;
-  public readonly enabledLunarReactions: readonly LunarReaction[];
-  public readonly targetWho: 0 | 1;
+export class CharacterEventArg extends EventArg {
+  public readonly who: 0 | 1;
   constructor(
     state: GameState,
-    private readonly _damageInfo: InfoT,
-    public readonly option: DamageOption | "HEAL",
+    public readonly character: CharacterState,
   ) {
     super(state);
-    this.sourceWho =
-      typeof option === "object"
-        ? option.callerWho
-        : getEntityArea(state, _damageInfo.source.id).who;
-    this.targetWho = getEntityArea(state, _damageInfo.target.id).who;
-    this.enabledLunarReactions =
-      typeof option === "object" ? (option.enabledLunarReactions ?? []) : [];
+    this.who = getEntityArea(state, character.id).who;
   }
   toString() {
+    return stringifyState(this.character);
+  }
+}
+
+export class DamageOrHealEventArg extends CharacterEventArg {
+  constructor(
+    state: GameState,
+    ...[info, option]: [DamageInfo, DamageOption] | [HealInfo, "HEAL"]
+  ) {
+    // The event map constructs the base directly. Subclasses only initialize the target.
+    if (new.target === DamageOrHealEventArg) {
+      return option === "HEAL"
+        ? new HealEventArg(state, info)
+        : new DamageEventArg(state, info, option);
+    }
+    super(state, info.target);
+  }
+  isDamage(): this is DamageEventArg {
+    return this instanceof DamageEventArg;
+  }
+  isHeal(): this is HealEventArg {
+    return this instanceof HealEventArg;
+  }
+}
+
+export class DamageEventArg extends DamageOrHealEventArg {
+  public readonly sourceWho: 0 | 1;
+  constructor(
+    state: GameState,
+    public readonly damageInfo: DamageInfo,
+    public readonly option: DamageOption,
+  ) {
+    super(state, damageInfo, option);
+    this.sourceWho = getEntityArea(state, damageInfo.source.id).who;
+  }
+  get targetWho() {
+    return this.who;
+  }
+  get enabledLunarReactions() {
+    return this.option.enabledLunarReactions;
+  }
+  override toString() {
     return stringifyDamageInfo(this.damageInfo).split("\n")[0];
   }
-
-  get damageInfo() {
-    return this._damageInfo;
-  }
-  isDamageTypeDamage(): this is DamageOrHealEventArg<DamageInfo> {
-    return !this.isDamageTypeHeal();
-  }
-  isDamageTypeHeal(): this is DamageOrHealEventArg<HealInfo> {
-    return this._damageInfo.type === DamageType.Heal;
-  }
-
   get source() {
     return this.damageInfo.source;
   }
@@ -802,9 +819,6 @@ export class DamageOrHealEventArg<
     return this.damageInfo.via;
   }
   getReaction(): Reaction | null {
-    if (!this.isDamageTypeDamage()) {
-      return null;
-    }
     const { targetAura, type } = this.damageInfo;
     return getReaction({
       type,
@@ -813,15 +827,9 @@ export class DamageOrHealEventArg<
     }).reaction;
   }
   isReactionRelatedTo(target: DamageType): boolean {
-    if (!this.isDamageTypeDamage()) {
-      return false;
-    }
     return isReactionRelatedTo(this.damageInfo, target);
   }
   isSwirl(): SwirlableElement | null {
-    if (!this.isDamageTypeDamage()) {
-      return null;
-    }
     return isReactionSwirl(this.damageInfo);
   }
   viaSkillType(skillType: CommonSkillType): boolean {
@@ -832,11 +840,55 @@ export class DamageOrHealEventArg<
   }
 }
 
-class ModifyHealEventArgBase extends DamageOrHealEventArg<HealInfo> {
+export class HealEventArg extends DamageOrHealEventArg {
+  public readonly sourceWho: 0 | 1;
+  constructor(
+    state: GameState,
+    private readonly _healInfo: HealInfo,
+  ) {
+    super(state, _healInfo, "HEAL");
+    this.sourceWho = getEntityArea(state, _healInfo.source.id).who;
+  }
+  get healInfo() {
+    return this._healInfo;
+  }
+  get expectedValue() {
+    return this.healInfo.expectedValue;
+  }
+  get targetWho() {
+    return this.who;
+  }
+  override toString() {
+    return stringifyDamageInfo(this.healInfo).split("\n")[0];
+  }
+  get source() {
+    return this.healInfo.source;
+  }
+  get target() {
+    return this.healInfo.target;
+  }
+  get type() {
+    return this.healInfo.type;
+  }
+  get value() {
+    return this.healInfo.value;
+  }
+  get via() {
+    return this.healInfo.via;
+  }
+  viaSkillType(skillType: CommonSkillType): boolean {
+    return this.via.definition.skillType === skillType;
+  }
+  get log() {
+    return this.healInfo.log ?? "";
+  }
+}
+
+class ModifyHealEventArgBase extends HealEventArg {
   protected _increased = 0;
   protected _decreased = 0;
   protected _cancelled = false;
-  protected _log = super.damageInfo.log ?? "";
+  protected _log = super.healInfo.log ?? "";
 
   get cancelled() {
     return this._cancelled;
@@ -849,8 +901,8 @@ class ModifyHealEventArgBase extends DamageOrHealEventArg<HealInfo> {
     );
   }
 
-  override get damageInfo(): HealInfo {
-    const healInfo = super.damageInfo;
+  override get healInfo(): HealInfo {
+    const healInfo = super.healInfo;
     const expectedValue = Math.max(
       0,
       Math.ceil(healInfo.expectedValue + this._increased - this._decreased),
@@ -865,12 +917,6 @@ class ModifyHealEventArgBase extends DamageOrHealEventArg<HealInfo> {
       cancelled: this._cancelled,
       log: this._log,
     };
-  }
-  get healInfo() {
-    return this.damageInfo;
-  }
-  get expectedValue() {
-    return this.healInfo.expectedValue;
   }
 }
 
@@ -900,7 +946,8 @@ export const GenericModifyHealEventArg = mixins(ModifyHealEventArgBase, [
   ModifyHeal1EventArg,
 ]);
 
-export class ModifyDamageEventArgBase extends DamageOrHealEventArg<DamageInfo> {
+export class ModifyDamageEventArgBase extends CharacterEventArg {
+  public readonly sourceWho: 0 | 1;
   protected _newDamageType: Exclude<DamageType, typeof DamageType.Heal> | null =
     null;
   protected _increased = 0;
@@ -909,16 +956,69 @@ export class ModifyDamageEventArgBase extends DamageOrHealEventArg<DamageInfo> {
   protected _decreased = 0;
   protected _log = "";
 
-  override get damageInfo(): DamageInfo {
-    const targetHealth = super.damageInfo.target.variables.health;
-    const type = this._newDamageType ?? super.damageInfo.type;
-    let value = super.damageInfo.value;
+  constructor(
+    state: GameState,
+    private readonly _damageInfo: DamageInfo,
+    public readonly option: DamageOption,
+  ) {
+    super(state, _damageInfo.target);
+    this.sourceWho = getEntityArea(state, _damageInfo.source.id).who;
+  }
+  get targetWho() {
+    return this.who;
+  }
+  get enabledLunarReactions() {
+    return this.option.enabledLunarReactions;
+  }
+  override toString() {
+    return stringifyDamageInfo(this.damageInfo).split("\n")[0];
+  }
+  get source() {
+    return this.damageInfo.source;
+  }
+  get target() {
+    return this.damageInfo.target;
+  }
+  get type() {
+    return this.damageInfo.type;
+  }
+  get value() {
+    return this.damageInfo.value;
+  }
+  get via() {
+    return this.damageInfo.via;
+  }
+  getReaction(): Reaction | null {
+    const { targetAura, type } = this.damageInfo;
+    return getReaction({
+      type,
+      targetAura,
+      enabledLunarReactions: this.enabledLunarReactions,
+    }).reaction;
+  }
+  isReactionRelatedTo(target: DamageType): boolean {
+    return isReactionRelatedTo(this.damageInfo, target);
+  }
+  isSwirl(): SwirlableElement | null {
+    return isReactionSwirl(this.damageInfo);
+  }
+  viaSkillType(skillType: CommonSkillType): boolean {
+    return this.via.definition.skillType === skillType;
+  }
+  get log() {
+    return this.damageInfo.log ?? "";
+  }
+
+  get damageInfo(): DamageInfo {
+    const targetHealth = this._damageInfo.target.variables.health;
+    const type = this._newDamageType ?? this._damageInfo.type;
+    let value = this._damageInfo.value;
     value = value + this._increased; // 加
     const multiplier = (this._multiplied ?? 1) / this._divider;
     value = Math.ceil(value * multiplier); // 乘除
     value = Math.max(0, value - this._decreased); // 减
     return {
-      ...super.damageInfo,
+      ...this._damageInfo,
       type,
       value,
       causeDefeated: value >= targetHealth,
@@ -1090,20 +1190,6 @@ export class DisposeEventArg extends EntityEventArg<EntityState> {
     return `player ${this.who} ${this.reason} card ${stringifyState(
       this.entity,
     )}`;
-  }
-}
-
-export class CharacterEventArg extends EventArg {
-  public readonly who: 0 | 1;
-  constructor(
-    state: GameState,
-    public readonly character: CharacterState,
-  ) {
-    super(state);
-    this.who = getEntityArea(state, character.id).who;
-  }
-  toString() {
-    return stringifyState(this.character);
   }
 }
 

@@ -33,7 +33,7 @@ import {
 import type { MoveEntityM, Mutation } from "../base/mutation";
 import {
   type DamageInfo,
-  DamageOrHealEventArg,
+  DamageEventArg,
   type EventAndRequest,
   type EventAndRequestConstructorArgs,
   type EventAndRequestNames,
@@ -428,7 +428,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     // - 其余类型归类为 otherEvents
     for (const event of this.currentEvents) {
       const [name, arg] = event;
-      if (name === "onDamageOrHeal" && arg.isDamageTypeDamage()) {
+      if (name === "onDamageOrHeal" && arg.isDamage()) {
         if (arg.damageInfo.causeDefeated) {
           // Wrap original EventArg to ZeroHealthEventArg
           const zeroHealthEventArg = new ZeroHealthEventArg(
@@ -499,7 +499,14 @@ export class SkillContext<Meta extends ContextMetaBase> {
             criticalDamageEvents.push(event);
             this.causeDefeated ||= true;
           } else {
-            safeDamageEvents.push(["onDamageOrHeal", zeroHealthEventArg]);
+            safeDamageEvents.push([
+              "onDamageOrHeal",
+              new DamageEventArg(
+                arg.onTimeState,
+                zeroHealthEventArg.damageInfo,
+                arg.option,
+              ),
+            ]);
           }
         } else {
           safeDamageEvents.push(event);
@@ -755,7 +762,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
 
   hasPhaseDamage(
     scope: "my" | "all",
-    filter: (e: DamageOrHealEventArg<DamageInfo>) => boolean = () => true,
+    filter: (e: DamageEventArg) => boolean = () => true,
   ): boolean {
     const damages =
       scope === "my"
@@ -764,12 +771,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
             ...this.getRawPlayer("my").phaseDamageLog,
             ...this.getRawPlayer("opp").phaseDamageLog,
           ];
-    return damages.some(
-      (d) =>
-        d instanceof DamageOrHealEventArg &&
-        d.isDamageTypeDamage() &&
-        filter(d),
-    );
+    return damages.some((d) => d instanceof DamageEventArg && filter(d));
   }
   hasPhaseReaction(
     scope: "my" | "all",
@@ -877,8 +879,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     This extends TypedSkillContext<any>,
   >(
     this: This["rawEventArg"] extends DisposeEventArg ? This : never,
-    extraDmgCond: (e2: DamageOrHealEventArg<DamageInfo>) => boolean = () =>
-      true,
+    extraDmgCond: (e2: DamageEventArg) => boolean = () => true,
   ): boolean {
     const eventArg = this.rawEventArg as DisposeEventArg;
     if (eventArg.from.type !== "characters") {
@@ -1158,9 +1159,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
         damageInfo,
         {
           via: this.skillInfo,
-          callerWho: this.self.who,
-          targetWho: target.who,
-          targetIsActive: target.isActive(),
           enabledLunarReactions: this.getEnabledLunarReactions(target.who),
         },
       );
@@ -1186,9 +1184,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
       const { causeDefeated } = this.callAndEmit("apply", ch.latest(), type, {
         fromDamage: null,
         via: this.skillInfo,
-        callerWho: this.self.who,
-        targetWho: ch.who,
-        targetIsActive: ch.isActive(),
         enabledLunarReactions: this.getEnabledLunarReactions(ch.who),
       });
       this.causeDefeated ||= causeDefeated;

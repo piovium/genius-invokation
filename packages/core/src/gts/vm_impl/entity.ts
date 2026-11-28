@@ -40,8 +40,7 @@ import type {
 import {
   SkillContextOptions,
   type CustomEventEventArg,
-  type DamageInfo,
-  type DamageOrHealEventArg,
+  type DamageEventArg,
   type LooseSkillOperation,
   type ModifyDamage3EventArg,
   type SkillDefinition,
@@ -965,7 +964,7 @@ export class EntityViewModel extends defineViewModel(
           const dealDmgSkill = new TriggeredSkillModel(model, "dealDamage");
           dealDmgSkill.id = model.getSubId();
           dealDmgSkill.userFilters.push(function (c) {
-            const e = c.eventArg as DamageOrHealEventArg<DamageInfo>;
+            const e = c.eventArg as DamageEventArg;
             return (
               ["character", "summon"].includes(e.source.definition.type) &&
               e.isSwirl()
@@ -977,7 +976,7 @@ export class EntityViewModel extends defineViewModel(
             perRound: false,
           });
           dealDmgSkill.action = function (c) {
-            const e = c.eventArg as DamageOrHealEventArg<DamageInfo>;
+            const e = c.eventArg as DamageEventArg;
             c.setVariable("hintIcon", e.isSwirl()!);
           };
           model.skillList.push(dealDmgSkill.buildSkillDefinition());
@@ -987,7 +986,7 @@ export class EntityViewModel extends defineViewModel(
           const onDmgSkill = new TriggeredSkillModel(model, "damaged");
           onDmgSkill.id = model.getSubId();
           onDmgSkill.userFilters.push(function (c) {
-            const e = c.eventArg as DamageOrHealEventArg<DamageInfo>;
+            const e = c.eventArg as DamageEventArg;
             return [
               DamageType.Cryo,
               DamageType.Hydro,
@@ -1001,7 +1000,7 @@ export class EntityViewModel extends defineViewModel(
             perRound: false,
           });
           onDmgSkill.action = function (c) {
-            const e = c.eventArg as DamageOrHealEventArg<DamageInfo>;
+            const e = c.eventArg as DamageEventArg;
             c.setVariable("hintIcon", e.type);
           };
           model.skillList.push(onDmgSkill.buildSkillDefinition());
