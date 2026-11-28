@@ -220,7 +220,7 @@ define card {
       :e.increaseDamage(2);
     };
     on damagedOrHealed {
-      when :( :e.target.isActive() );
+      when :( :e.character.isActive() );
       listenTo samePlayer;
       :variables.justice += 1;
       if (:variables.justice >= 3) {
@@ -298,7 +298,7 @@ define card {
   support place {
     variable forbidden, 0 { range 5; };
     on damagedOrHealed {
-      when :( :e.target.isActive() );
+      when :( :e.character.isActive() );
       :variables.forbidden += 1;
       if (:variables.forbidden >= 5 && :oppPlayer.hands.length > 0) {
         :variables.forbidden -= 5;

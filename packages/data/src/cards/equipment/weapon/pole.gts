@@ -254,7 +254,7 @@ define card {
       :e.increaseDamage(2);
     };
     on damagedOrHealed {
-      when :( :e.target.isActive() );
+      when :( :e.character.isActive() );
       listenTo samePlayer;
       :variables.justice += 1;
       if (:variables.justice >= 4) {

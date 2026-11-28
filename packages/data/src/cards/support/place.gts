@@ -483,7 +483,7 @@ define card {
   support place {
     variable forbidden, 0 { range 6; };
     on damagedOrHealed {
-      when :( :e.target.isActive() );
+      when :( :e.character.isActive() );
       :variables.forbidden += 1;
       if (:variables.forbidden >= 6 && :oppPlayer.hands.length > 0) {
         :variables.forbidden -= 6;

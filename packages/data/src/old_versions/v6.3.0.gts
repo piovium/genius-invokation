@@ -185,7 +185,7 @@ define card {
   support place {
     variable forbidden, 0 { range 4; };
     on damagedOrHealed {
-      when :( :e.target.isActive() );
+      when :( :e.character.isActive() );
       :variables.forbidden += 1;
     };
     on actionPhase {

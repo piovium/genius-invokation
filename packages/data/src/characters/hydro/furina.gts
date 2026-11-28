@@ -155,7 +155,7 @@ define combatStatus {
   id 112114 as UniversalRevelry;
   duration 2;
   on damagedOrHealed {
-    when :( :e.target.isActive() );
+    when :( :e.character.isActive() );
     :combatStatus(Revelry);
   };
 };
