@@ -89,6 +89,7 @@ export {
   SelectCardRequest,
   SelectCardResponse,
   SelectOption,
+  SelectOptionUiType,
   SelectOptionRequest,
   SelectOptionResponse,
   SwitchHandsRequest,
