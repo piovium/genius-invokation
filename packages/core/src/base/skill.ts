@@ -1285,21 +1285,6 @@ export class ZeroHealthEventArg extends ModifyDamage1EventArg {
   }
 }
 
-export class TransformDefinitionEventArg extends EventArg {
-  public readonly who: 0 | 1;
-  public readonly oldDefinition: AnyState["definition"];
-  constructor(
-    state: GameState,
-    public readonly entity: AnyState,
-    public readonly newDefinition: AnyState["definition"],
-  ) {
-    super(state);
-    const area = getEntityArea(state, entity.id);
-    this.who = area.who;
-    this.oldDefinition = entity.definition;
-  }
-}
-
 export class HandCardInsertedEventArg extends PlayerEventArg {
   constructor(
     state: GameState,
@@ -1449,7 +1434,6 @@ export const EVENT_MAP = {
   onSwitchActive: SwitchActiveEventArg,
   onHandCardInserted: HandCardInsertedEventArg,
   onReaction: ReactionEventArg,
-  onTransformDefinition: TransformDefinitionEventArg,
   onGenerateDice: GenerateDiceEventArg,
   modifyChangeVariable: BeforeVariableEventArg,
   onChangeVariable: VariableEventArg,
