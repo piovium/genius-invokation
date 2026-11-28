@@ -58,7 +58,8 @@ import {
   type VariableValueChangeInfo,
   type CoreSkillResult,
   type DamageInfo,
-  DamageOrHealEventArg,
+  DamageEventArg,
+  HealEventArg,
   EnterEventArg,
   type EventAndRequest,
   type EventArgOf,
@@ -164,10 +165,6 @@ export interface SwitchActiveOption {
 export interface DamageOption {
   readonly via: SkillInfo;
   readonly enabledLunarReactions: readonly LunarReaction[];
-  // 以下属性在描述元素反应时有用，需要传入
-  readonly callerWho: 0 | 1;
-  readonly targetWho: 0 | 1;
-  readonly targetIsActive: boolean;
 }
 export interface ApplyOption extends DamageOption {
   readonly fromDamage: DamageInfo | null;
@@ -238,15 +235,13 @@ export class EventList extends Array<EventAndRequest> {
   override push(...items: EventAndRequest[]) {
     for (const item of items) {
       const [event, arg] = item;
-      if (event === "onDamageOrHeal" && arg.isDamageTypeDamage()) {
+      if (event === "onDamageOrHeal" && arg instanceof DamageEventArg) {
         const previousIndex = this.damageEventIndexInResultBasedOnTarget.get(
           arg.target.id,
         );
         if (typeof previousIndex !== "undefined") {
           // combine current event with previous event
-          const previousArg = this[
-            previousIndex
-          ][1] as DamageOrHealEventArg<DamageInfo>;
+          const previousArg = this[previousIndex][1] as DamageEventArg;
           const combinedDamageInfo: DamageInfo = {
             ...previousArg.damageInfo,
             value: previousArg.damageInfo.value + arg.damageInfo.value,
@@ -257,7 +252,7 @@ export class EventList extends Array<EventAndRequest> {
               previousArg.damageInfo.fromReaction ||
               arg.damageInfo.fromReaction,
           };
-          this[previousIndex][1] = new DamageOrHealEventArg(
+          this[previousIndex][1] = new DamageEventArg(
             previousArg.onTimeState,
             combinedDamageInfo,
             previousArg.option,
@@ -784,14 +779,8 @@ export class StateMutator {
       source: opt.via.caller,
       via: opt.via,
       target: targetState,
-      causeDefeated: false,
-      fromReaction: null,
     };
-    const modifier = new GenericModifyHealEventArg(
-      this.state,
-      healInfo,
-      "HEAL",
-    );
+    const modifier = new GenericModifyHealEventArg(this.state, healInfo);
     for (const eventName of ["modifyHeal0", "modifyHeal1"] as const) {
       const inlineResult = this.handleInlineEvent(opt.via, eventName, modifier);
       events.push(...inlineResult.events);
@@ -834,10 +823,7 @@ export class StateMutator {
         },
       ],
     });
-    events.push([
-      "onDamageOrHeal",
-      new DamageOrHealEventArg(this.state, healInfo, "HEAL"),
-    ]);
+    events.push(["onDamageOrHeal", new HealEventArg(this.state, healInfo)]);
     return { events, causeDefeated };
   }
 
@@ -928,7 +914,7 @@ export class StateMutator {
         ],
       });
     }
-    const damageEvent = new DamageOrHealEventArg(this.state, damageInfo, opt);
+    const damageEvent = new DamageEventArg(this.state, damageInfo, opt);
     this.mutate({
       type: "pushPhaseDamageLog",
       damageEvent,

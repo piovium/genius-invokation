@@ -41,8 +41,7 @@ import type { CharacterDefinition } from "./character";
 import { GiTcgCoreInternalError } from "../error";
 import { nextRandom } from "../random";
 import type {
-  DamageInfo,
-  DamageOrHealEventArg,
+  DamageEventArg,
   ReactionEventArg,
 } from "./skill";
 
@@ -234,7 +233,7 @@ export interface ClearRoundLogsM {
 }
 export interface PushPhaseDamageLogM {
   readonly type: "pushPhaseDamageLog";
-  readonly damageEvent: DamageOrHealEventArg<DamageInfo>;
+  readonly damageEvent: DamageEventArg;
 }
 export interface PushPhaseReactionLogM {
   readonly type: "pushPhaseReactionLog";
